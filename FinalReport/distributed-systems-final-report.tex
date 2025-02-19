@@ -5,6 +5,7 @@
 \usepackage{natbib}
 \usepackage{graphicx}
 \usepackage{cleveref} % this must be the last package to be loaded
+\usepackage{bookmark}
 
 \newcommand{\emailaddr}[1]{\href{mailto:#1}{\texttt{#1}}}
 
@@ -159,45 +160,41 @@ be present in the end
 
 \subsection{Architecture}\label{architecture}
 
-\begin{itemize}
-  \item Which architectural style?
-
+  The architecture of the system is a classic MVC where:
   \begin{itemize}
-    \item why?
+    \item Model are the classes that represents players and cards
+    \item View is UI realized with Web components
+    \item Controller is the class that manages the game logic
   \end{itemize}
-\end{itemize}
+  For the communication architecture and the distributed part, we opted for a client-server architecture using also a publish-subscribe pattern. \newline
+  The idea is that the broker manages the communication between the clients and the server, and the server manages the game logic.\newline
+  The server is the one that creates the game; then the clients can join the game publishing their nickname to the broker; every time a new player joins the game, it automatically subscribe to the game topics.\newline
+  All the clients are subscribed to the same topic, so they can receive the messages from the server (eg. moves, game status, etc.).\newline
+
+  We choose this architecture because it is simple and it is suitable for our project. In fact, using a publish-subscribe architecture, clients have not to request the server for the game status, but they receive it automatically when the server publishes it (and so on for the other messages).
 
 \subsection{Infrastructure}\label{infrastructure}
 
-\begin{itemize}
-  \item are there \emph{infrastructural components} that need to be
-  introduced? \emph{how many}?
-
   \begin{itemize}
-    \item e.g.~\emph{clients}, \emph{servers}, \emph{load balancers},
-    \emph{caches}, \emph{databases}, \emph{message brokers},
-    \emph{queues}, \emph{workers}, \emph{proxies}, \emph{firewalls},
-    \emph{CDNs}, \emph{etc.}
-  \end{itemize}
-  \item how do components \emph{distribute} over the network? \emph{where}?
+    \item both players and server are components of the pub-sub model
+    \item there is one server that manages the game logic so is the only one who can publish messages on some specific topics
+    \item there is a broker that manages the communication between the clients and the server
+    \item data aren't store permanently, so there is no need for a database 
+    \item there aren't authentication mechanisms so every one who knows the broker address can join the game
 
-  \begin{itemize}
-    \item e.g.~do servers / brokers / databases / etc. sit on the same
-    machine? on the same network? on the same datacenter? on the same
-    continent?
   \end{itemize}
-  \item how do components \emph{find} each other?
+  Components are distributed over all the network, so they can be on different machines and different networks. For semplicity, we used the same network for all the components and the same machine for server and broker. \newline
+  To find each other, the components use the broker address and the topics to which they have to subscribe or publish; so clients are only required to know the broker address to join the game. \newline
+  Components are named using a nickname (unique) that every body choose when they join the game.
 
-  \begin{itemize}
-    \item how to \emph{name} components?
-    \item e.g.~DNS, \emph{service discovery}, \emph{load balancing},
-    \emph{etc.}
-  \end{itemize}
-\end{itemize}
 
-\begin{quote}
-Component diagrams are welcome here
-\end{quote}
+\begin{figure}[h]
+  \caption{Architecture diagram}
+  \centering
+  \includegraphics[scale=0.5]{figures/pubsubdiagram.png}
+  \end{figure}
+
+  Dotted lines are for subscribe messages, while solid lines are for publish messages. \newline
 
 \subsection{Modelling}\label{modelling}
 
@@ -498,8 +495,8 @@ recall to test corner cases (crashes, errors, etc.)
 
 It should be noted that each student is only responsible for their own
 section
-
 \bibliographystyle{plain}
 \bibliography{references}
+\cite{adams1995hitchhiker} % Example citation to avoid the no citation error
 
 \end{document}
