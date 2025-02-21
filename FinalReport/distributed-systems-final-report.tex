@@ -183,12 +183,12 @@ be present in the end
     \item there aren't authentication mechanisms so every one who knows the broker address can join the game
 
   \end{itemize}
-  Components are distributed over all the network, so they can be on different machines and different networks. For semplicity, we used the same network for all the components and the same machine for server and broker. \newline
+  Components are distributed over all the network, so they can be on different machines and different networks. For semplicity, we used the same network for all the components and the same machine both for server and broker. \newline
   To find each other, the components use the broker address and the topics to which they have to subscribe or publish; so clients are only required to know the broker address to join the game. \newline
   Components are named using a nickname (unique) that every body choose when they join the game.
 
 
-\begin{figure}[h]
+\begin{figure}[!h]
   \caption{Architecture diagram}
   \centering
   \includegraphics[scale=0.5]{figures/pubsubdiagram.png}
@@ -237,14 +237,17 @@ Class diagram are welcome here
 
 \subsection{Interaction}\label{interaction}
 
-\begin{itemize}
-  \item how do components \emph{communicate}? \emph{when}? \emph{what}?
-  \item \emph{which} \textbf{interaction patterns} do they enact?
-\end{itemize}
+Components communicate over the network using the MQTT protocol so using a Message Broker pattern. Using this pattern, publishers can send messages without knowing who is going to receive them, and subscribers can receive messages without knowing who is going to send them. 
+The broker is the one who manages the communication between the clients and the server, so the clients don't have to know the server address, but only the broker address; on the other hand, the server has to know the broker address to publish messages, but it doesn't have to know the clients' addresses. \newline
+This kind of architecture is highly decoupled, so the components can be easily replaced or modified without affecting the others. \newline
+The following subsections will explain the interaction between the components in more detail.
 
-\begin{quote}
-Sequence diagrams are welcome here
-\end{quote}
+\subsubsection{Connection}\label{connection}
+
+\subsubsection{Game Move}\label{game-move}
+
+\subsubsection{End Game}\label{end-game}
+
 
 \subsection{Behaviour}\label{behaviour}
 
@@ -266,30 +269,8 @@ State diagrams are welcome here
 \subsection{Data and Consistency
 Issues}\label{data-and-consistency-issues}
 
-\begin{itemize}
-  \item Is there any data that needs to be stored?
-
-  \begin{itemize}
-    \item \emph{what} data? \emph{where}? \emph{why}?
-  \end{itemize}
-  \item how should \emph{persistent data} be \textbf{stored}?
-
-  \begin{itemize}
-    \item e.g.~relations, documents, key-value, graph, etc.
-    \item why?
-  \end{itemize}
-  \item Which components perform queries on the database?
-
-  \begin{itemize}
-    \item \emph{when}? \emph{which} queries? \emph{why}?
-    \item concurrent read? concurrent write? why?
-  \end{itemize}
-  \item Is there any data that needs to be shared between components?
-
-  \begin{itemize}
-    \item \emph{why}? \emph{what} data?
-  \end{itemize}
-\end{itemize}
+Since we don't need to store data permanently because this is a card game, we don't deal with queries and databases. \newline
+Some datas are shared between components, for example the game status, the players' nicknames, and other crucial information to perform the game. \newline
 
 \subsection{Fault-Tolerance}\label{fault-tolerance}
 
@@ -334,25 +315,8 @@ Issues}\label{data-and-consistency-issues}
 
 \subsection{Security}\label{security}
 
-\begin{itemize}
-  \item Is there any form of \textbf{authentication}?
+There aren't any security mechanisms in our project. \newline
 
-  \begin{itemize}
-    \item \emph{where}? \emph{why}?
-  \end{itemize}
-  \item Is there any form of \textbf{authorization}?
-
-  \begin{itemize}
-    \item which sort of \emph{access control}?
-    \item which sorts of users / \emph{roles}? which \emph{access rights}?
-  \end{itemize}
-  \item Are \textbf{cryptographic schemas} being used?
-
-  \begin{itemize}
-    \item e.g.~token verification,
-    \item e.g.~data encryption, etc.
-  \end{itemize}
-\end{itemize}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
