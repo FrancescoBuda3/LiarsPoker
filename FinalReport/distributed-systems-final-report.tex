@@ -81,6 +81,53 @@
 % This is intended: it is the \LaTeX{} way to separate capoverses.
 
 \section{Concept}\label{concept}
+This project aims to develop a web-based game application for playing Liar's Poker, a fun and engaging card game centered around deception and bluffing. Inspired by traditional poker, Liar's Poker is played with a standard deck of cards and is suitable for two or more players. Our application will provide an online platform where users can enjoy the game with others in real-time, no matter where they are.
+
+\subsection{Game Rules}\label{game-rules}
+Each player starts with one card. A round starts with someone naming a poker combination. With the turn rotating clockwise, each next player has a choice:
+\begin{itemize}
+  \item \textbf{Rise the stakes}\par
+  name a higher poker combination than the one named by the previous player that they belive is present in the combined cards of all players.
+  \item \textbf{Call bullshit} \par
+  the player calls bullshit on the previous player's combination if the player think the previous player is bluffing or mistaken.
+\end{itemize}
+When someone calls bullshit, all players reveal their cards and the presence of the contested poker hand is verified. If the hand is present, the player who called bullshit loses the round; else, the player who named this poker hand loses.\par\noindent
+The loser starts all subsequent rounds with one extra card, and names the first combination in the next round.\par\noindent
+if someone loses when they have 5 cards, they are kicked from the game.
+The last person remaining in the game is the winner.
+
+\subsection{Questions and Answers}\label{questions-and-answers}
+\begin{itemize}
+  \item \textbf{Question:} \emph{How do users interact with the system?}\par
+        \textbf{Answer:} Users can access the application through a web browser.
+  \item \textbf{Question:} \emph{What happens if one player disconnect during the game?}\par
+        \textbf{Answer:} The game will pause until the player reconnects. If the player does not reconnect within a certain time frame, they will be kicked from the game.
+  \item \textbf{Question:} \emph{What happens if the server dies during the game?}\par
+        \textbf{Answer:} The game goes on
+  \item \textbf{Question:} \emph{Does the system need to store player's data?}\par
+        \textbf{Answer:} The system doesn't need to store data, as the player does not need to create an account.
+\end{itemize}
+\subsection{Usage Scenarios}\label{usage-scenarios}
+This section describes the typical usage scenario of a group of friends playing Liar's Poker on our platform.
+\begin{enumerate}
+  \item \textbf{Lobby creation}\par
+  One user creates a new lobby and shares the access code with friends. 
+  \item \textbf{Joining the lobby}\par
+  Other users join the lobby by entering the code. While joining, the players will be asked to choose a unique nickname to use during the game.
+  \item \textbf{Gameplay}\par
+  Each player receive one card and than the game starts (The first player is chosen randomically). The game proceeds as described in the rules. when the player want to rise the stakes, he can choose from the possible combinations (non valid combinations will be disabled), if the combination needs some specific card to be declared, the player will be provided with a list of possible cards to choose from.
+  \item \textbf{Elimination}\par
+  When a player loses, they are eliminated from the game and they can chose to spectate the game or leave the lobby.
+  \item \textbf{End of the game}\par
+  When the game ends the winner is declared and players who are still in the lobby will be asked wether they want to play another game or leave the lobby.
+\end{enumerate}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/useCase1.png}
+    \caption{Use case diagram of the homescreen} 
+    \label{fig:universe}
+\end{figure}
 
 Here you should explain:
 
