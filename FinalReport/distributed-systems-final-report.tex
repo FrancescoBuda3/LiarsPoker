@@ -4,6 +4,7 @@
 \usepackage{url}
 \usepackage{natbib}
 \usepackage{graphicx}
+\usepackage{subfig}
 \usepackage{cleveref} % this must be the last package to be loaded
 \usepackage{bookmark}
 
@@ -122,11 +123,15 @@ This section describes the typical usage scenario of a group of friends playing 
   When the game ends the winner is declared and players who are still in the lobby will be asked wether they want to play another game or leave the lobby.
 \end{enumerate}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/useCase1.png}
-    \caption{Use case diagram of the homescreen} 
-    \label{fig:universe}
+% create a figure with 3 images
+\begin{figure}[!h]
+  \centering
+  \subfloat[Home Screen]{\includegraphics[width=0.5\textwidth]{figures/useCase1.png}}
+  \hfill
+  \subfloat[Match Ended Screen]{\includegraphics[width=0.4\textwidth]{figures/useCase3.png}}
+  \hfill
+  \subfloat[Match]{\includegraphics[width=1\textwidth]{figures/useCase2.png}}
+  \caption{Use Case Diagrams}
 \end{figure}
 
 Here you should explain:
