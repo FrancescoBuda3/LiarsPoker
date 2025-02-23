@@ -4,8 +4,11 @@
 \usepackage{url}
 \usepackage{natbib}
 \usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{verbatim}
 \usepackage{cleveref} % this must be the last package to be loaded
 \usepackage{bookmark}
+
 
 \newcommand{\emailaddr}[1]{\href{mailto:#1}{\texttt{#1}}}
 
@@ -122,13 +125,18 @@ This section describes the typical usage scenario of a group of friends playing 
   When the game ends the winner is declared and players who are still in the lobby will be asked wether they want to play another game or leave the lobby.
 \end{enumerate}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.8\textwidth]{figures/useCase1.png}
-    \caption{Use case diagram of the homescreen} 
-    \label{fig:universe}
+% create a figure with 3 images
+\begin{figure}[!h]
+  \centering
+  \subfloat[Home Screen]{\includegraphics[width=0.5\textwidth]{figures/useCase1.png}}
+  \hfill
+  \subfloat[Match Ended Screen]{\includegraphics[width=0.4\textwidth]{figures/useCase3.png}}
+  \hfill
+  \subfloat[Match]{\includegraphics[width=1\textwidth]{figures/useCase2.png}}
+  \caption{Use Case Diagrams}
 \end{figure}
 
+\begin{comment}
 Here you should explain:
 
 \begin{itemize}
@@ -154,9 +162,73 @@ Here you should explain:
     \item most likely, there will be \emph{multiple} \textbf{roles}
   \end{itemize}
 \end{itemize}
+\end{comment}
 
 \section{Requirements}\label{requirements}
+Starting from the concept, we can identify the following requirements for the application:
+\subsection{Functional Requirements}\label{functional-requirements}
+\begin{enumerate}
+  \item \textbf{Lobby Creation}\par
+  The application must allow users to create a new lobby and share the access code with friends.
+  \item \textbf{Joining the Lobby}\par
+  The application must allow users to join a lobby by entering the access code.
+  \item \textbf{Gameplay}\par
+  The application must allow users to play Liar's Poker following the game rules.
+\end{enumerate}
 
+\subsection{Non-functional Requirements}\label{non-functional-requirements}
+\begin{enumerate}
+  \item \textbf{Scalability}\par
+  The application must be able to handle multiple lobbies and games simultaneously.\par
+  \begin{itemize}
+    \item \textbf{Acceptance Criteria:} The system must be able to handle at least 100 concurrent games.
+  \end{itemize}
+  
+  \item \textbf{Availability and Fault Tollerance}\par
+  The application must be able to handle disconnections and server failures without losing game data. 
+  \begin{itemize}
+    \item \textbf{Acceptance Criteria:} The system must be able to recover from server failures within 5 seconds.
+  \end{itemize}
+  \item \textbf{Consistency}\par
+  The application must ensure that all players see the same game state at all times.
+  \begin{itemize}
+    \item \textbf{Acceptance Criteria:} The system must ensure that all players see the same game state within 1 second from the bullshit call.
+  \end{itemize}
+  \item \textbf{Performance}\par
+  The application must be able to have good response times.
+  \begin{itemize}
+    \item \textbf{Acceptance Criteria:} A new game must be created within 5 seconds.
+  \end{itemize}
+  
+
+\end{enumerate}
+
+\subsection{Glossary of cards combinations}\label{cards-combinations}  
+in this section we list all the possible cards combinations, that can be declared during the game, ordered by increasing value:
+\begin{enumerate}
+  \item \textbf{High Card}\par
+  the player has the highest card in the game
+  \item \textbf{Pair}\par
+  in the combined cards of all players there are two cards with the same value
+  \item \textbf{Two Pair}\par
+  in the combined cards of all players there are two pairs of cards with the same value
+  \item \textbf{Three of a Kind}\par
+  in the combined cards of all players there are three cards with the same value
+  \item \textbf{Flush}\par
+  in the combined cards of all players there are five cards with the same suit
+  \item \textbf{Straight}\par
+  in the combined cards of all players there are five cards with consecutive values
+  \item \textbf{Full House}\par
+  in the combined cards of all players there are three cards with the same value and two cards with the same value
+  \item \textbf{Four of a Kind}\par
+  in the combined cards of all players there are four cards with the same value and one card with a different value
+  \item \textbf{Poker}\par
+  in the combined cards of all players there are four cards with the same value
+  \item \textbf{Straight Flush}\par
+  in the combined cards of all players there are five cards with consecutive values and the same suit
+\end{enumerate}
+
+\begin{comment}
 \begin{itemize}
   \item The requirements must explain \textbf{what} (not how) the software
   being produced should do.
@@ -192,6 +264,7 @@ Here you should explain:
     \item these will be important for the validation phase
   \end{itemize}
 \end{itemize}
+\end{comment}
 
 \section{Design}\label{design}
 
@@ -627,5 +700,7 @@ section
 \bibliographystyle{plain}
 \bibliography{references}
 \cite{adams1995hitchhiker} % Example citation to avoid the no citation error
+
+
 
 \end{document}
