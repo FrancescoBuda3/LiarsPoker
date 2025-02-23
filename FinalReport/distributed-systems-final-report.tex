@@ -244,43 +244,74 @@ be present in the end
   Dotted lines are for subscribe messages, while solid lines are for publish messages. \newline
 
 \subsection{Modelling}\label{modelling}
+% \begin{itemize}
+%   \item which \textbf{domain entities} are there?
 
+%   \begin{itemize}
+%     \item e.g.~\emph{users}, \emph{products}, \emph{orders}, \emph{etc.}
+%   \end{itemize}
+%   \item how do \emph{domain entities} \textbf{map to} \emph{infrastructural
+%   components}?
+
+%   \begin{itemize}
+%     \item e.g.~state of a video game on central server, while
+%     inputs/representations on clients
+%     \item e.g.~where to store messages in an IM app? for how long?
+%   \end{itemize}
+%   \item which \textbf{domain events} are there?
+
+%   \begin{itemize}
+%     \item e.g.~\emph{user registered}, \emph{product added to cart},
+%     \emph{order placed}, \emph{etc.}
+%   \end{itemize}
+%   \item which sorts of \textbf{messages} are exchanged?
+
+%   \begin{itemize}
+%     \item e.g.~\emph{commands}, \emph{events}, \emph{queries}, \emph{etc.}
+%   \end{itemize}
+%   \item what information does the \textbf{state} of the system comprehend
+
+%   \begin{itemize}
+%     \item e.g.~\emph{users' data}, \emph{products' data}, \emph{orders' data},
+%     \emph{etc.}
+%   \end{itemize}
+% \end{itemize}
+
+% \begin{quote}
+% Class diagram are welcome here
+% \end{quote}
+The system is fundamentally composed by the classes shown in \cref{fig:classes}. \newline
+Each component models the real world entities that are needed to play the game:
 \begin{itemize}
-  \item which \textbf{domain entities} are there?
-
-  \begin{itemize}
-    \item e.g.~\emph{users}, \emph{products}, \emph{orders}, \emph{etc.}
-  \end{itemize}
-  \item how do \emph{domain entities} \textbf{map to} \emph{infrastructural
-  components}?
-
-  \begin{itemize}
-    \item e.g.~state of a video game on central server, while
-    inputs/representations on clients
-    \item e.g.~where to store messages in an IM app? for how long?
-  \end{itemize}
-  \item which \textbf{domain events} are there?
-
-  \begin{itemize}
-    \item e.g.~\emph{user registered}, \emph{product added to cart},
-    \emph{order placed}, \emph{etc.}
-  \end{itemize}
-  \item which sorts of \textbf{messages} are exchanged?
-
-  \begin{itemize}
-    \item e.g.~\emph{commands}, \emph{events}, \emph{queries}, \emph{etc.}
-  \end{itemize}
-  \item what information does the \textbf{state} of the system comprehend
-
-  \begin{itemize}
-    \item e.g.~\emph{users' data}, \emph{products' data}, \emph{orders' data},
-    \emph{etc.}
-  \end{itemize}
+  \item Players join and create matches, having each one of them has a nickname and a list of cards.
+  \item The lobbies are the places where the players can join for a match, 
+  waiting for there to be enough people.
+  \item The games have a set of players and a deck of playing cards. 
+  Each game has a start, where the cards are shuffled and given to players, 
+  a playing time when players are given turns to play, and an end when a winner is found.
 \end{itemize}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/classes.png}
+  \caption{Class diagram of the system} 
+  \label{fig:classes}
+\end{figure}
 
-\begin{quote}
-Class diagram are welcome here
-\end{quote}
+At the core of the entire system are messages, these, given the simple nature of the game, are quite 
+simple: containing a single string that represents the move the player wants to make. \newline
+The real difference and context of the message is given by the topic to which it is published: 
+ff a name is passed to the "player" topic it will be interpreted as the player's nickname,
+if it is passed to the "game" topic it will be interpreted as the player's move. \newline
+Most notably these are the main topics:
+\begin{itemize}
+  \item \textbf{player} \par
+  The topic where the players publish their nickname to join the game.
+  \item \textbf{game} \par
+  The topic where the players publish their moves and the server the game status. \newline
+  The name of the topic varies depending on the lobby the player is in.
+  \item \textbf{lobby} \par
+  The topic where the players create and join lobbies.
+\end{itemize}
 
 \subsection{Interaction}\label{interaction}
 
@@ -297,21 +328,88 @@ The following subsections will explain the interaction between the components in
 
 
 \subsection{Behaviour}\label{behaviour}
+% \begin{itemize}
+%   \item how does \emph{each} component \textbf{behave} individually (e.g.~in
+%   \emph{response} to \emph{events} or messages)?
 
+%   \begin{itemize}
+%     \item some components may be \emph{stateful}, others \emph{stateless}
+%   \end{itemize}
+%   \item which components are in charge of updating the \textbf{state} of the
+%   system? \emph{when}? \emph{how}?
+% \end{itemize}
+
+% \begin{quote}
+% State diagrams are welcome here
+% \end{quote}
+Even if for the game to be played are only needed players and a centralized logic,
+more actors are needed to keep the game going and to manage the communication between them. \newline
+The following are all the components actually needed and their behaviours:
 \begin{itemize}
-  \item how does \emph{each} component \textbf{behave} individually (e.g.~in
-  \emph{response} to \emph{events} or messages)?
-
-  \begin{itemize}
-    \item some components may be \emph{stateful}, others \emph{stateless}
-  \end{itemize}
-  \item which components are in charge of updating the \textbf{state} of the
-  system? \emph{when}? \emph{how}?
+  \item
+  \textbf{The client} \cref{fig:clientStates} \par
+  The client first asks the player for their name and the tries to connect him to the broker. 
+  If the connection is successful, the client can choose to join a lobby or create a new one. \newline
+  When the game starts, the client waits for the server to publish the game status and then it can start playing.
+  The client can only send messages to the server when it is his turn, either rising the stakes 
+  or calling bullsh*t. If they player lost the match can only wait for it to finish.
+  The player leaves the lobby only when a winner is found or loses the game. \newline
+  At any point during the connection the player can leave or be disconnected, if the player wants to rejoin
+  the system will try to put him back in a lobby if they where in one.
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/clientStates.png}
+    \caption{State diagram of the client} 
+    \label{fig:clientStates}
+  \end{figure}
+  \item
+  \textbf{The server} \cref{fig:serverStates} \par
+  The server is mainly in charge of connecting new players and creating lobbies, 
+  delegating the game logic to an agent. \newline
+  At any point in time a new player can ask to connect or disconnect himself, causing the need to
+  check wether the player was alone, deleting it if left empty. The players connected can also
+  ask to create or join a new lobby and, in case it's full, it will launch a new game istance.
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/serverStates.png}
+    \caption{State diagram of the server} 
+    \label{fig:serverStates}
+  \end{figure}
+  \item
+  \textbf{The broker} \cref{fig:brokerStates} \par
+  The broker is the central core to all communications between all the components.
+  Always active and using the MQTT standard.
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/brokerStates.png}
+    \caption{State diagram of the broker} 
+    \label{fig:brokerStates}
+  \end{figure}
+  \item 
+  \textbf{The game agent} \cref{fig:gameAgentStates} \par
+  The game agent is an istance of the server that takes on the role of managing the single matches.
+  It is in charge of managing the game state, the players' moves and the game logic. \newline
+  It also preoccupies itself to reconnect the players and resume the game where it left off 
+  in case of disconnection. Only checking each connection every time it's the player's turn to
+  save some resources.
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/gameAgentStates.png}
+    \caption{State diagram of the game agent} 
+    \label{fig:gameAgentStates}
+  \end{figure}
+  \item 
+  \textbf{The backup} \cref{fig:backupStates} \par
+  The backup has to keep a record of every message sent by the broker, keeping a copy of server state. \newline
+  This way if the server or the broker fails it can launch a new istance of whichever failed and resume 
+  the service. 
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/backupStates.png}
+    \caption{State diagram of the backup} 
+    \label{fig:backupStates}
+  \end{figure}
 \end{itemize}
-
-\begin{quote}
-State diagrams are welcome here
-\end{quote}
 
 \subsection{Data and Consistency
 Issues}\label{data-and-consistency-issues}
@@ -320,45 +418,65 @@ Since we don't need to store data permanently because this is a card game, we do
 Some datas are shared between components, for example the game status, the players' nicknames, and other crucial information to perform the game. \newline
 
 \subsection{Fault-Tolerance}\label{fault-tolerance}
+% \begin{itemize}
+%   \item Is there any form of data \textbf{replication} / federation / sharing?
 
+%   \begin{itemize}
+%     \item \emph{why}? \emph{how} does it work?
+%   \end{itemize}
+%   \item Is there any \textbf{heart-beating}, \textbf{timeout}, \textbf{retry
+%   mechanism}?
+
+%   \begin{itemize}
+%     \item \emph{why}? \emph{among} which components? \emph{how} does it work?
+%   \end{itemize}
+%   \item Is there any form of \textbf{error handling}?
+
+%   \begin{itemize}
+%     \item \emph{what} happens when a component fails? \emph{why}? \emph{how}?
+%   \end{itemize}
+% \end{itemize}
+Different types of fault tolerance are implemented in the systems, everything is set up to keep
+the game running even if some components fail. \newline
+The mechanics differ in their scope and purpose:
 \begin{itemize}
-  \item Is there any form of data \textbf{replication} / federation / sharing?
-
-  \begin{itemize}
-    \item \emph{why}? \emph{how} does it work?
-  \end{itemize}
-  \item Is there any \textbf{heart-beating}, \textbf{timeout}, \textbf{retry
-  mechanism}?
-
-  \begin{itemize}
-    \item \emph{why}? \emph{among} which components? \emph{how} does it work?
-  \end{itemize}
-  \item Is there any form of \textbf{error handling}?
-
-  \begin{itemize}
-    \item \emph{what} happens when a component fails? \emph{why}? \emph{how}?
-  \end{itemize}
+  \item
+  \textbf{Server-Side} \par
+  The server and the broker are at the core of the game, if they fail the game is lost. \newline
+  To prevent this from happening, they are costantly monitored (about once per minute) by a backup
+  server. The whole porpouse of the backup is to keep a copy of the game state and to be able to
+  resume the game where it left off, in case of failure it launches a new istance of 
+  whichever failed, setting it up with the saved data.
+  \item
+  \textbf{Network-Side} \par
+  To make sure that no accidental disconnection can ruin the game, the game agent checks the connection
+  of each player every time it's their turn. If a player is disconnected, the game agent will wait for
+  them to reconnect, if they don't in a certain time frame they will be kicked from the game. \newline
+  Furthermore, the client always has the opportunity to try to reconnect, picking where it left
+  off, if anything goes wrong.
 \end{itemize}
 
 \subsection{Availability}\label{availability}
+% \begin{itemize}
+%   \item Is there any \textbf{caching} mechanism?
 
-\begin{itemize}
-  \item Is there any \textbf{caching} mechanism?
+%   \begin{itemize}
+%     \item \emph{where}? \emph{why}?
+%   \end{itemize}
+%   \item Is there any form of \textbf{load balancing}?
 
-  \begin{itemize}
-    \item \emph{where}? \emph{why}?
-  \end{itemize}
-  \item Is there any form of \textbf{load balancing}?
+%   \begin{itemize}
+%     \item \emph{where}? \emph{why}?
+%   \end{itemize}
+%   \item In case of \textbf{network partitioning}, how does the system behave?
 
-  \begin{itemize}
-    \item \emph{where}? \emph{why}?
-  \end{itemize}
-  \item In case of \textbf{network partitioning}, how does the system behave?
-
-  \begin{itemize}
-    \item \emph{why}? \emph{how}?
-  \end{itemize}
-\end{itemize}
+%   \begin{itemize}
+%     \item \emph{why}? \emph{how}?
+%   \end{itemize}
+% \end{itemize}
+At this time we don't really have an availability mechanism. \newline
+The only type of caching we have is the broker that keeps the last message sent in a topic
+and the backup server that keeps a copy of the game state in case of failure.
 
 \subsection{Security}\label{security}
 
