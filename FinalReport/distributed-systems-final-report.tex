@@ -94,7 +94,7 @@
 This project aims to develop a web-based game application for playing Liar's Poker, a fun and engaging card game centered around deception and bluffing. Inspired by traditional poker, Liar's Poker is played with a standard deck of cards and is suitable for two or more players. Our application will provide an online platform where users can enjoy the game with others in real-time, no matter where they are.
 
 \subsection{Game Rules}\label{game-rules}
-Each player starts with one card. A round starts with someone naming a poker combination. With the turn rotating clockwise, each next player has a choice:
+Liar's Poker is a game of deception and bluffing that is played with a standard deck of cards without any joker. Each player starts with one card. A round starts with someone naming a poker combination. With the turn rotating clockwise, each next player has a choice:
 \begin{itemize}
   \item \textbf{Rise the stakes}\par
   name a higher poker combination than the one named by the previous player that they belive is present in the combined cards of all players.
@@ -120,10 +120,12 @@ The last person remaining in the game is the winner.
 \subsection{Usage Scenarios}\label{usage-scenarios}
 This section describes the typical usage scenario of a group of friends playing Liar's Poker on our platform.
 \begin{enumerate}
+  \item \textbf{Name choice}\par
+  The player chooses a unique nickname to use during the game.
   \item \textbf{Lobby creation}\par
-  One user creates a new lobby and shares the access code with friends. 
+  One user creates a new lobby and can decide to share the access code with friends or make the lobby public. 
   \item \textbf{Joining the lobby}\par
-  Other users join the lobby by entering the code. While joining, the players will be asked to choose a unique nickname to use during the game.
+  Other users join the lobby by entering the code or choosing from the public lobbys.
   \item \textbf{Gameplay}\par
   Each player receive one card and than the game starts (The first player is chosen randomically). The game proceeds as described in the rules. when the player want to rise the stakes, he can choose from the possible combinations (non valid combinations will be disabled), if the combination needs some specific card to be declared, the player will be provided with a list of possible cards to choose from.
   \item \textbf{Elimination}\par
@@ -188,13 +190,13 @@ Starting from the concept, we can identify the following requirements for the ap
   \item \textbf{Scalability}\par
   The application must be able to handle multiple lobbies and games simultaneously.\par
   \begin{itemize}
-    \item \textbf{Acceptance Criteria:} The system must be able to handle at least 100 concurrent games.
+    \item \textbf{Acceptance Criteria:} The system must be able to handle at least 5 concurrent games.
   \end{itemize}
   
-  \item \textbf{Availability and Fault Tollerance}\par
+  \item \textbf{Fault Tollerance}\par
   The application must be able to handle disconnections and server failures without losing game data. 
   \begin{itemize}
-    \item \textbf{Acceptance Criteria:} The system must be able to recover from server failures within 5 seconds.
+    \item \textbf{Acceptance Criteria:} The system must be able to recover from server failures within 1 minute.
   \end{itemize}
   \item \textbf{Consistency}\par
   The application must ensure that all players see the same game state at all times.
