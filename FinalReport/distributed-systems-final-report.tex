@@ -8,6 +8,7 @@
 \usepackage{verbatim}
 \usepackage{cleveref} % this must be the last package to be loaded
 \usepackage{bookmark}
+\usepackage{float}
 
 
 \newcommand{\emailaddr}[1]{\href{mailto:#1}{\texttt{#1}}}
@@ -33,6 +34,12 @@
 \begin{abstract}
     Up to $\sim$2000 characters briefly describing the project.
 \end{abstract}
+
+\clearpage
+
+\tableofcontents
+
+\clearpage
 
 % \section*{Disclaimer (if needed)}
 
@@ -126,7 +133,7 @@ This section describes the typical usage scenario of a group of friends playing 
 \end{enumerate}
 
 % create a figure with 3 images
-\begin{figure}[!h]
+\begin{figure}[H]
   \centering
   \subfloat[Home Screen]{\includegraphics[width=0.5\textwidth]{figures/useCase1.png}}
   \hfill
@@ -308,7 +315,7 @@ be present in the end
   Components are named using a nickname (unique) that every body choose when they join the game.
 
 
-\begin{figure}[!h]
+\begin{figure}[H]
   \caption{Architecture diagram}
   \centering
   \includegraphics[scale=0.5]{figures/pubsubdiagram.png}
@@ -394,10 +401,28 @@ This kind of architecture is highly decoupled, so the components can be easily r
 The following subsections will explain the interaction between the components in more detail.
 
 \subsubsection{Connection}\label{connection}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/sequenceConnection.png}
+  \caption{Sequence diagram of the connection phase} 
+  \label{fig:connection}
+\end{figure}
 
 \subsubsection{Game Move}\label{game-move}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/sequenceGameMove.png}
+  \caption{Sequence diagram of a generic game move} 
+  \label{fig:gane-move}
+\end{figure}
 
 \subsubsection{End Game}\label{end-game}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/sequenceEndGame.png}
+  \caption{Use case diagram of end game phase} 
+  \label{fig:end-game}
+\end{figure}
 
 
 \subsection{Behaviour}\label{behaviour}
