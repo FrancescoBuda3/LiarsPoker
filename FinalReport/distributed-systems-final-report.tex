@@ -453,10 +453,11 @@ The following are all the components actually needed and their behaviours:
   When the game starts, the client waits for the server to publish the game status and then it can start playing.
   The client can only send messages to the server when it is his turn, either rising the stakes 
   or calling bullsh*t. If they player lost the match can only wait for it to finish.
-  The player leaves the lobby only when a winner is found or loses the game. \newline
+  The player leaves the lobby only when a winner is found or loses the game. When the game ends the
+  player can rejoin the same lobby and wait for a new game to start or look for a new one. \newline
   At any point during the connection the player can leave or be disconnected, if the player wants to rejoin
   the system will try to put him back in a lobby if they where in one.
-  \begin{figure}
+  \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/clientStates.png}
     \caption{State diagram of the client} 
@@ -467,9 +468,10 @@ The following are all the components actually needed and their behaviours:
   The server is mainly in charge of connecting new players and creating lobbies, 
   delegating the game logic to an agent. \newline
   At any point in time a new player can ask to connect or disconnect himself, causing the need to
-  check wether the player was alone, deleting it if left empty. The players connected can also
-  ask to create or join a new lobby and, in case it's full, it will launch a new game istance.
-  \begin{figure}
+  check wether the player was alone in a lobby, deleting it if left empty. The players connected 
+  can also ask to create or join a new lobby and, in case it's full or closed by a player, 
+  it will launch a new game istance.
+  \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/serverStates.png}
     \caption{State diagram of the server} 
@@ -479,7 +481,7 @@ The following are all the components actually needed and their behaviours:
   \textbf{The broker} \cref{fig:brokerStates} \par
   The broker is the central core to all communications between all the components.
   Always active and using the MQTT standard.
-  \begin{figure}
+  \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/brokerStates.png}
     \caption{State diagram of the broker} 
@@ -492,7 +494,7 @@ The following are all the components actually needed and their behaviours:
   It also preoccupies itself to reconnect the players and resume the game where it left off 
   in case of disconnection. Only checking each connection every time it's the player's turn to
   save some resources.
-  \begin{figure}
+  \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/gameAgentStates.png}
     \caption{State diagram of the game agent} 
@@ -502,8 +504,8 @@ The following are all the components actually needed and their behaviours:
   \textbf{The backup} \cref{fig:backupStates} \par
   The backup has to keep a record of every message sent by the broker, keeping a copy of server state. \newline
   This way if the server or the broker fails it can launch a new istance of whichever failed and resume 
-  the service. 
-  \begin{figure}
+  the service. This is a mechanism of fault tolerance that will be discussed later.
+  \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/backupStates.png}
     \caption{State diagram of the backup} 
