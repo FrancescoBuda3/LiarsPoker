@@ -1,15 +1,8 @@
 from ..game import *
-
-class _Debuggable:
-    def __init__(self, debug: bool = True):
-        self.__debug = debug
-    
-    def _log(self, *args, **kwargs):
-        if self.__debug:
-            print(*args, **kwargs)
+from utils.debug.impl import _Debuggable
 
 
-class GameImpl(game, _Debuggable):
+class GameImpl(Game, _Debuggable):
     def __init__(self, debug: bool = True):
         _Debuggable.__init__(self, debug)
 

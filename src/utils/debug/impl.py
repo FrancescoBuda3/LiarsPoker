@@ -1,4 +1,4 @@
-class Debuggable:
+class _Debuggable:
     def __init__(self, debug: bool = True):
         self.__debug = debug
     

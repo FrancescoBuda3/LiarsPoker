@@ -1,8 +1,7 @@
 from dataclasses import dataclass, replace
-from datetime import datetime, timedeltas
 from typing import Protocol
 
-class game(Protocol):
+class Game(Protocol):
     def start(self) -> None:
         ...
 
