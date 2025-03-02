@@ -362,22 +362,28 @@ be present in the end
 % \begin{quote}
 % Class diagram are welcome here
 % \end{quote}
-The system is fundamentally composed by the classes shown in \cref{fig:classes}. \newline
-Each component models the real world entities that are needed to play the game:
-\begin{itemize}
-  \item Players join and create matches, having each one of them has a nickname and a list of cards.
-  \item The lobbies are the places where the players can join for a match, 
-  waiting for there to be enough people.
-  \item The games have a set of players and a deck of playing cards. 
-  Each game has a start, where the cards are shuffled and given to players, 
-  a playing time when players are given turns to play, and an end when a winner is found.
-\end{itemize}
-\begin{figure}
+The system is foundamentally composed by the classes shown in \cref{fig:classes}. \newline
+Each component models the real world entities that are needed to play the game in a non-distributed
+way, this are the classes that the controller will later use to make the game work.
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{figures/classes.png}
   \caption{Class diagram of the system} 
   \label{fig:classes}
 \end{figure}
+
+The game is the most important entity of the whole model. It has a deck of cards, that can be shuffled,
+and a set of players, each one with a nickname and his given cards. 
+To handle the game logic it keeps in memory the current player and the latest raise. \newline
+It can be asked to:
+\begin{itemize}
+  \item Add or remove a player from the game
+  \item Get a fresh set of shuffled cards for the players
+  \item Raise the stakes and advance the turn
+  \item Check if the latest stake was a lie
+  \item Get the currently playing user
+  \item Get the player that raised the stakes
+\end{itemize}
 
 At the core of the entire system are messages, these, given the simple nature of the game, are quite 
 simple: containing a single string that represents the move the player wants to make. \newline
