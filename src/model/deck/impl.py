@@ -23,8 +23,8 @@ class DeckImpl(Deck):
         return retList
     
     def __generate_deck(self):
-        deck = DeckImpl([])
+        retList = []
         for suit in Suit:
             for rank in range(1, 14):
-                deck.cards.append(Card(suit, rank))
-        return deck
+                retList.append(Card(suit, rank))
+        return retList
