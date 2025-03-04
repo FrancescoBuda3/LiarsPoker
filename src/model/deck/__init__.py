@@ -3,6 +3,7 @@ import random
 from typing import List
 
 from suit import Suit
+from combination import Combination
 
 
 @dataclass
@@ -16,6 +17,14 @@ class Deck():
     cards: List[Card]
 
     def shuffle(self, hands: List[int]):
+        """_summary_
+
+        Args:
+            hands (List[int]): list of number of cards to be distributed to each hand
+
+        Returns:
+            List[int]: list of hands with the number of cards specified in the input
+        """
         random.shuffle(self.cards)
         retList = []
         for hand in hands:
@@ -34,3 +43,9 @@ def generate_deck():
 
 
 print(generate_deck().shuffle([5, 5, 5]))
+
+
+@dataclass
+class Stake:
+    ranks: List[int]
+    combo: Combination
