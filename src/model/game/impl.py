@@ -1,15 +1,15 @@
 from ..game import *
-from utils.debug.impl import _Debuggable
+from src.utils.debug.impl import Debuggable
 
-
-class GameImpl(Game, _Debuggable):
+"""
+class GameImpl(Game, Debuggable):
     def __init__(self, debug: bool = True):
-        _Debuggable.__init__(self, debug)
+        Debuggable.__init__(self, debug)
 
     
     def start(self) -> None:
-        ...
-
+        return "APT APT"
+    
     def playTurn(self) -> None:
         ...
     
@@ -18,5 +18,5 @@ class GameImpl(Game, _Debuggable):
     
     def end(self) -> None:
         ...
-    
+"""
         
