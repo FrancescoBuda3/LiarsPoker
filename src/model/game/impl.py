@@ -27,6 +27,8 @@ class GameImpl(Game, Debuggable):
             for i, hand in enumerate(hands):
                 self.players[i].cards = hand
 
+    def getCurrentPlayer(self):
+        return self.players[self.turn]
     
 
         

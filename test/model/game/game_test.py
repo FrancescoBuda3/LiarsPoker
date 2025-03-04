@@ -18,12 +18,21 @@ class TestGameImpl(unittest.TestCase):
             self.game.startTurn()
         self.assertEqual(str(context.exception), "Cannot start without enough players")
     
-    def test_players_have_one_card_at_the_beginning(self):
+    def addTwoPlayers(self):
         self.game.addPlayer(self.TEST_PLAYER_1)
         self.game.addPlayer(self.TEST_PLAYER_2)
+
+    def test_players_have_one_card_at_the_beginning(self):
+        self.addTwoPlayers()
         self.game.startTurn()
         self.assertEqual(self.game.STARTING_CARDS, self.TEST_PLAYER_1.cardsInHand)
         self.assertEqual(self.game.STARTING_CARDS, self.TEST_PLAYER_2.cardsInHand)
+    
+    def test_first_player_is_the_first_added(self):
+        self.addTwoPlayers()
+        self.game.startTurn()
+        self.assertEqual(self.TEST_PLAYER_1, self.game.getCurrentPlayer())
+
 
 if __name__ == "__main__":
     unittest.main()
