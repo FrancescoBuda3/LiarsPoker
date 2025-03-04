@@ -1,4 +1,6 @@
 import unittest
+from src.model.deck.combination import Combination
+from src.model.deck import Stake
 from src.model.player import Player
 from src.model.game.impl import GameImpl
 
@@ -8,6 +10,7 @@ class TestGameImpl(unittest.TestCase):
     def setUpClass(cls):
         cls.TEST_PLAYER_1 = Player("Bob", [], 0)
         cls.TEST_PLAYER_2 = Player("Lisa", [], 0)
+        cls.TEST_STAKE = Stake([2, 5], Combination.TWO_PAIR)
 
     def setUp(self):
         self.game = GameImpl()
@@ -32,6 +35,14 @@ class TestGameImpl(unittest.TestCase):
         self.addTwoPlayers()
         self.game.startTurn()
         self.assertEqual(self.TEST_PLAYER_1, self.game.getCurrentPlayer())
+    
+    def test_current_player_can_raise_the_stake(self):
+        self.addTwoPlayers()
+        self.game.startTurn()
+        player = self.game.getCurrentPlayer()
+        self.game.raiseStake(self.TEST_STAKE)
+        self.assertEqual(self.TEST_STAKE, self.game.getLatestStake())
+
 
 
 if __name__ == "__main__":

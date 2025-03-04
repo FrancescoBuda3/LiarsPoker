@@ -5,7 +5,7 @@ from src.model.player import Player
 
 
 class GameImpl(Game, Debuggable):
-    STARTING_TURN = 0
+    STARTING_PLAYER_INDEX = 0
     STARTING_CARDS = 1
     MINIMUM_PLAYERS = 2
 
@@ -13,7 +13,8 @@ class GameImpl(Game, Debuggable):
         Debuggable.__init__(self, debug)
         self.players = []
         self.deck = DeckImpl()
-        self.turn = self.STARTING_TURN
+        self.currentPlayerIndex = self.STARTING_PLAYER_INDEX
+        self.lastestStake = None
 
     def addPlayer(self, player:Player):
        player.cardsInHand = self.STARTING_CARDS
@@ -27,8 +28,12 @@ class GameImpl(Game, Debuggable):
             for i, hand in enumerate(hands):
                 self.players[i].cards = hand
 
-    def getCurrentPlayer(self):
-        return self.players[self.turn]
+    def getCurrentPlayer(self): return self.players[self.currentPlayerIndex]
+    
+    def raiseStake(self, stake) : self.lastestStake = stake
+    
+    def getLatestStake(self): return self.lastestStake
+        
     
 
         

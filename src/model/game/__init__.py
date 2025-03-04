@@ -16,7 +16,7 @@ class Game(Protocol):
     def getCurrentPlayer(self) -> Player:
         ...
 
-    def getLatestStake() -> Stake:
+    def getLatestStake(self) -> Stake:
         ...
     
     def addPlayer(self, player:Player) -> None:
