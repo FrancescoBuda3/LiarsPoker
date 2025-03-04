@@ -1,15 +1,20 @@
-from dataclasses import dataclass, replace
 from typing import Protocol
+from model.deck import Stake
+from model.player import Player
+
 
 class Game(Protocol):
-    def start(self) -> None:
+    def startTurn(self) -> None:
         ...
 
-    def playTurn(self) -> None:
+    def raiseStake(self, stake) -> None:
         ...
     
-    def checkLiar(self) -> None:
+    def checkLiar(self) -> bool:
         ...
     
-    def end(self) -> None:
+    def getCurrentPlayer(self) -> Player:
+        ...
+
+    def getLatestStake() -> Stake:
         ...
