@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from model.deck import Card
+from src.model.deck import Card
 
 @dataclass
 class Player():

@@ -2,8 +2,8 @@ from dataclasses import dataclass
 import random
 from typing import List
 
-from suit import Suit
-from combination import Combination
+from src.model.deck.suit import Suit
+from src.model.deck.combination import Combination
 
 
 @dataclass

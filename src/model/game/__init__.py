@@ -1,13 +1,13 @@
 from typing import Protocol
-from model.deck import Stake
-from model.player import Player
+from src.model.deck import Stake
+from src.model.player import Player
 
 
 class Game(Protocol):
     def startTurn(self) -> None:
         ...
 
-    def raiseStake(self, stake) -> None:
+    def raiseStake(self, stake:Stake) -> None:
         ...
     
     def checkLiar(self) -> bool:
@@ -17,4 +17,7 @@ class Game(Protocol):
         ...
 
     def getLatestStake() -> Stake:
+        ...
+    
+    def addPlayer(self, player:Player) -> None:
         ...
