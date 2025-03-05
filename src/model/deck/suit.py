@@ -4,5 +4,5 @@ class Suit(Enum):
     SPADES = "spades"
     HEARTS = "hearts"
     DIAMONDS = "diamonds"
-    CLUB = "club"
+    CLUBS = "clubs"
     
