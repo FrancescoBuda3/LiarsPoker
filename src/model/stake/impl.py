@@ -1,4 +1,5 @@
-from ..stake import *
+from src.model.deck import Card
+from ..stake import StakeHandler, Stake
 
 
 class StakeHandlerImpl(StakeHandler):
@@ -7,17 +8,17 @@ class StakeHandlerImpl(StakeHandler):
     keeps a called stake and checks if a given set of cards is valid for the stake.
     """
     _stake: Stake
-    
+
     def __init__(self):
         self._stake = None
-        
+
     def get_stake(self) -> Stake:
         if (self._stake == None):
             raise ValueError("No stake has been set")
         return self._stake
-    
+
     def set_stake(self, stake: Stake) -> None:
         self._stake = stake
-    
-    def check_cards(self, cards) -> bool:
+
+    def check_cards(self, cards: list[Card]) -> bool:
         return True
