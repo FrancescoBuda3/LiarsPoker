@@ -1,3 +1,4 @@
+from src.model.stake import StakeHandler
 from ..game import *
 from src.model.deck.impl import DeckImpl
 from src.model.player import Player
@@ -12,7 +13,7 @@ class GameImpl(Game):
         self.players = []
         self.deck = DeckImpl()
         self.currentPlayerIndex = self.STARTING_PLAYER_INDEX
-        self.lastestStake = None
+        self.stakeHandler = StakeHandler()
 
     def addPlayer(self, player:Player):
        player.cardsInHand = self.STARTING_CARDS
@@ -28,9 +29,9 @@ class GameImpl(Game):
 
     def getCurrentPlayer(self): return self.players[self.currentPlayerIndex]
     
-    def raiseStake(self, stake) : self.lastestStake = stake
+    def raiseStake(self, stake) : self.stakeHandler.set_stake(stake)
     
-    def getLatestStake(self): return self.lastestStake
+    def getLatestStake(self): return self.stakeHandler.get_stake()
         
     
 
