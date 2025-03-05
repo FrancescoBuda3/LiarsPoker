@@ -36,7 +36,7 @@ class StakeHandler(Protocol):
 
     def check_cards(self, cards: list[Card]) -> bool:
         """
-        Checks if the given cards are valid for the current stake.
+        Checks if the given cards contain the valid combination for the current stake.
         Args:
             cards (list[Card]): the cards to check
 

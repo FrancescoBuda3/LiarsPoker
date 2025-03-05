@@ -10,9 +10,9 @@ class Combination(Enum):
     PAIR = 2
     TWO_PAIR = 3
     THREE_OF_A_KIND = 4
-    FLUSH = 5
-    STRAIGHT = 6
+    STRAIGHT = 5
+    FLUSH = 6
     FULL_HOUSE = 7
     FOUR_OF_A_KIND = 8
-    POKER = 9
-    STRAIGHT_POKER = 10
+    STRAIGHT_FLUSH = 9
+    ROYAL_FLUSH = 10
