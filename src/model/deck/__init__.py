@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 from src.model.deck.suit import Suit
 
@@ -10,16 +9,19 @@ class Card():
     rank: int
 
 
-@dataclass
 class Deck():
     
-    def shuffle(self, hands: List[int]):
-        """_summary_
-
+    def shuffle(self, hands: list[int]):
+        """
         Args:
-            hands (List[int]): list of number of cards to be distributed to each hand
+            hands (list[int]): list of number of cards to be distributed to each hand
 
         Returns:
-            List[int]: list of hands with the number of cards specified in the input
+            list[int]: list of hands with the number of cards specified in the input
         """
         pass
+
+@dataclass
+class Stake:
+    ranks: list[int]
+    combo: Combination
