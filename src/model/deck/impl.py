@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 import random
-from typing import List
 
 from src.model.deck import Deck, Card
 from src.model.deck.suit import Suit
@@ -9,7 +8,7 @@ from src.model.deck.suit import Suit
 @dataclass
 class DeckImpl(Deck):
     
-    cards: List[Card]
+    cards: list[Card]
     
     def __init__(self):
         self.cards = self.__generate_deck()
