@@ -1,6 +1,6 @@
 from typing import Protocol
-from src.model.deck import Stake
 from src.model.player import Player
+from src.model.stake import Stake
 
 
 class Game(Protocol):

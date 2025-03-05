@@ -1,7 +1,7 @@
-from src.model.stake import StakeHandler
 from ..game import *
 from src.model.deck.impl import DeckImpl
 from src.model.player import Player
+from src.model.stake.impl import StakeHandlerImpl
 
 
 class GameImpl(Game):
@@ -13,7 +13,7 @@ class GameImpl(Game):
         self.players = []
         self.deck = DeckImpl()
         self.currentPlayerIndex = self.STARTING_PLAYER_INDEX
-        self.stakeHandler = StakeHandler()
+        self.stakeHandler = StakeHandlerImpl()
 
     def addPlayer(self, player:Player):
        player.cardsInHand = self.STARTING_CARDS
@@ -29,9 +29,16 @@ class GameImpl(Game):
 
     def getCurrentPlayer(self): return self.players[self.currentPlayerIndex]
     
-    def raiseStake(self, stake) : self.stakeHandler.set_stake(stake)
+    def raiseStake(self, stake) :
+        self.stakeHandler.set_stake(stake)
+        self.currentPlayerIndex = (self.currentPlayerIndex + 1) % len(self.players)
     
     def getLatestStake(self): return self.stakeHandler.get_stake()
+
+    def checkLiar(self):
+        hands = [player.cards for player in self.players]
+        cards = [card for hand in hands for card in hand]
+        return self.stakeHandler.check_cards(cards)
         
     
 
