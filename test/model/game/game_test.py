@@ -1,6 +1,6 @@
 import unittest
-from src.model.deck.combination import Combination
-from src.model.deck import Stake
+from src.model.stake import Combination
+from src.model.stake import Stake
 from src.model.player import Player
 from src.model.game.impl import GameImpl
 

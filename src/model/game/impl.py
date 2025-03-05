@@ -1,16 +1,14 @@
 from ..game import *
-from src.utils.debug.impl import Debuggable
 from src.model.deck.impl import DeckImpl
 from src.model.player import Player
 
 
-class GameImpl(Game, Debuggable):
+class GameImpl(Game):
     STARTING_PLAYER_INDEX = 0
     STARTING_CARDS = 1
     MINIMUM_PLAYERS = 2
 
-    def __init__(self, debug: bool = True):
-        Debuggable.__init__(self, debug)
+    def __init__(self):
         self.players = []
         self.deck = DeckImpl()
         self.currentPlayerIndex = self.STARTING_PLAYER_INDEX

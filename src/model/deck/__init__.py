@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import List
 
 from src.model.deck.suit import Suit
-from src.model.deck.combination import Combination
 
 
 @dataclass
@@ -24,8 +23,3 @@ class Deck():
             List[int]: list of hands with the number of cards specified in the input
         """
         pass
-
-@dataclass
-class Stake:
-    ranks: List[int]
-    combo: Combination
