@@ -4,7 +4,13 @@ from src.model.stake import Stake
 
 
 class Game(Protocol):
-    def startTurn(self) -> None:
+    def addPlayer(self, player:Player) -> None:
+        ...
+        
+    def startGame(self) -> None:
+        ...
+
+    def startRound(self) -> None:
         ...
 
     def raiseStake(self, stake:Stake) -> None:
@@ -13,11 +19,13 @@ class Game(Protocol):
     def checkLiar(self) -> bool:
         ...
     
+    def getPlayers(self) -> list[Player]:
+        ...
+    
     def getCurrentPlayer(self) -> Player:
         ...
 
     def getLatestStake(self) -> Stake:
         ...
     
-    def addPlayer(self, player:Player) -> None:
-        ...
+    

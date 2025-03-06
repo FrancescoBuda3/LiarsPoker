@@ -4,10 +4,10 @@ from src.model.deck.suit import Suit
 from src.model.stake import Combination
 from src.model.stake import Stake
 from src.model.player import Player
-from src.model.game.impl import GameImpl
+from src.model.game.impl import GameCore
 
 
-class TestGameImpl(unittest.TestCase):
+class TestGameCore(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.TEST_PLAYER_1 = Player("Bob", [], 0)
@@ -17,12 +17,12 @@ class TestGameImpl(unittest.TestCase):
         cls.TEST_STAKES = [Stake([2, 5], Combination.TWO_PAIR), Stake([], Combination.THREE_OF_A_KIND), Stake([], Combination.FULL_HOUSE), Stake([], Combination.FOUR_OF_A_KIND)]
 
     def setUp(self):
-        self.game = GameImpl()
+        self.game = GameCore()
     
     def test_cannot_start_without_enough_players(self):
         self.game.addPlayer(self.TEST_PLAYER_1)
         with self.assertRaises(ValueError) as context:
-            self.game.startTurn()
+            self.game.startGame()
         self.assertEqual(str(context.exception), "Cannot start without enough players")
     
     def addTwoPlayers(self):
@@ -31,18 +31,18 @@ class TestGameImpl(unittest.TestCase):
 
     def test_players_have_one_card_at_the_beginning(self):
         self.addTwoPlayers()
-        self.game.startTurn()
+        self.game.startRound()
         self.assertEqual(self.game.STARTING_CARDS, self.TEST_PLAYER_1.cardsInHand)
         self.assertEqual(self.game.STARTING_CARDS, self.TEST_PLAYER_2.cardsInHand)
     
     def test_first_player_is_the_first_added(self):
         self.addTwoPlayers()
-        self.game.startTurn()
+        self.game.startRound()
         self.assertEqual(self.TEST_PLAYER_1, self.game.getCurrentPlayer())
     
     def test_current_player_can_raise_the_stake(self):
         self.addTwoPlayers()
-        self.game.startTurn()
+        self.game.startRound()
         self.game.raiseStake(self.TEST_STAKE)
         self.assertEqual(self.TEST_STAKE, self.game.getLatestStake())
     
@@ -55,7 +55,7 @@ class TestGameImpl(unittest.TestCase):
     def test_cycle_of_players_in_the_turn(self):
         for player in self.TEST_PLAYERS:
             self.game.addPlayer(player)
-        self.game.startTurn()
+        self.game.startRound()
         for i in range(len(self.TEST_PLAYERS)):
             self.game.raiseStake(self.TEST_STAKES[i])
         self.assertEqual(self.TEST_PLAYERS[0], self.game.getCurrentPlayer())
@@ -69,13 +69,6 @@ class TestGameImpl(unittest.TestCase):
         self.game.raiseStake(Stake([], Combination.FLUSH))
         self.game.checkLiar()
         self.assertEqual(player2, self.game.getCurrentPlayer())
-    
-    def test_player_is_eliminated_after_losing_six_times(self):
-        self.addTwoPlayers()
-        self.TEST_PLAYER_1.cardsInHand = 5
-        self.game.raiseStake(self.TEST_STAKE)
-        self.game.checkLiar()
-        self.assertNotIn(self.TEST_PLAYER_1, self.game.players)
 
 
 

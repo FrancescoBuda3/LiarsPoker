@@ -4,7 +4,9 @@ from src.model.player import Player
 from src.model.stake.impl import StakeHandlerImpl
 
 
-class GameImpl(Game):
+
+
+class GameCore(Game):
     STARTING_PLAYER_INDEX = 0
     STARTING_CARDS = 1
     MINIMUM_PLAYERS = 2
@@ -16,29 +18,31 @@ class GameImpl(Game):
         self.currentPlayerIndex = self.STARTING_PLAYER_INDEX
         self.stakeHandler = StakeHandlerImpl()
 
+    def startGame(self):
+        if len(self.players) < self.MINIMUM_PLAYERS:
+            raise ValueError("Cannot start without enough players")
+        self.startRound()
+
     def addPlayer(self, player:Player):
-       player.cardsInHand = self.STARTING_CARDS
-       self.players.append(player)
+        player.cardsInHand = self.STARTING_CARDS
+        self.players.append(player)
 
     def removePlayer(self, player:Player):
-        if player != self.getCurrentPlayer():
-            raise ValueError("Cannot remove a player that is not the current player")
         self.currentPlayerIndex = self.__next_player_index()
         self.players.remove(player)
 
-    def startTurn(self) -> None:
-        if len(self.players) < self.MINIMUM_PLAYERS:
-            raise ValueError("Cannot start without enough players")
-        else :
-            hands = self.deck.shuffle(player.cardsInHand for player in self.players)
-            for i, hand in enumerate(hands):
-                self.players[i].cards = hand
+    def startRound(self) -> None:
+        hands = self.deck.shuffle(player.cardsInHand for player in self.players)
+        for i, hand in enumerate(hands):
+            self.players[i].cards = hand
 
     def __next_player_index(self): return (self.currentPlayerIndex + 1) % len(self.players)
 
     def __previous_player_index(self): return (self.currentPlayerIndex + len(self.players) - 1) % len(self.players)
 
     def getCurrentPlayer(self): return self.players[self.currentPlayerIndex]
+
+    def getPlayers(self): return self.players
     
     def raiseStake(self, stake) :
         self.stakeHandler.set_stake(stake)
@@ -53,8 +57,6 @@ class GameImpl(Game):
         loser_index = self.__previous_player_index() if isLiar else self.currentPlayerIndex
         self.currentPlayerIndex = loser_index
         self.players[loser_index].cardsInHand += 1
-        if self.players[loser_index].cardsInHand == self.MAX_CARDS + 1:
-            self.removePlayer(self.players[loser_index])
         return isLiar
 
         

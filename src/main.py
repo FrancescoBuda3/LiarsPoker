@@ -1,5 +1,5 @@
-from model.game.impl import GameImpl
+from model.game.impl import GameCore
 
 
-game = GameImpl()
+game = GameCore()
 game.start()
