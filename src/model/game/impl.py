@@ -21,15 +21,12 @@ class GameCore(Game):
     def startGame(self):
         if len(self.players) < self.MINIMUM_PLAYERS:
             raise ValueError("Cannot start without enough players")
-        self.startRound()
 
     def addPlayer(self, player:Player):
         player.cardsInHand = self.STARTING_CARDS
         self.players.append(player)
 
-    def removePlayer(self, player:Player):
-        self.currentPlayerIndex = self.__next_player_index()
-        self.players.remove(player)
+    def removePlayer(self, player:Player): self.players.remove(player)
 
     def startRound(self) -> None:
         hands = self.deck.shuffle(player.cardsInHand for player in self.players)

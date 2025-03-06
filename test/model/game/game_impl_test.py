@@ -1,4 +1,75 @@
 import unittest
+from src.model.game.GImpl import GameImpl, GamePhase
+from src.model.player import Player
 
 class TestGameImpl(unittest.TestCase):
-    ...
+    
+    @classmethod
+    def setUpClass(cls):
+        cls.TEST_PLAYERS = [Player("Alice", [], 0), Player("Bob", [], 0), Player("Charlie", [], 0), Player("David", [], 0)]
+    
+    def setUp(self):
+        self.game = GameImpl()
+    
+    def add_players(self):
+        for player in self.TEST_PLAYERS:
+            self.game.addPlayer(player)
+    
+    def test_can_add_player_while_waiting_for_players(self):
+        self.add_players()
+        self.assertEqual(len(self.TEST_PLAYERS), len(self.game.getPlayers()))
+    
+    def test_cannot_add_player_while_game_running(self):
+        self.add_players()
+        self.game.startGame()
+        with self.assertRaises(ValueError):
+            self.game.addPlayer(Player("Bob", [], 0))
+    
+    def test_cannot_start_round_before_game_started(self):
+        with self.assertRaises(ValueError):
+            self.game.startRound()
+    
+    def test_cannot_rise_stake_before_round_started(self):
+        self.add_players()
+        self.game.startGame()
+        with self.assertRaises(ValueError):
+            self.game.raiseStake(1)
+    
+    def test_cannot_check_liar_before_round_started(self):
+        self.add_players()
+        self.game.startGame()
+        with self.assertRaises(ValueError):
+            self.game.checkLiar()
+    
+    def test_can_remove_player_while_waiting_for_players(self):
+        self.add_players()
+        self.game.removePlayer(self.TEST_PLAYERS[0])
+        self.assertEqual(len(self.TEST_PLAYERS) - 1, len(self.game.getPlayers()))
+    
+    def test_cannot_remove_player_while_it_is_not_their_turn(self):
+        self.add_players()
+        self.game.startGame()
+        with self.assertRaises(ValueError):
+            self.game.removePlayer(self.TEST_PLAYERS[0])
+    
+    def test_can_remove_player_while_it_is_their_turn(self):
+        self.add_players()
+        self.game.startGame()
+        self.game.startRound()
+        self.game.removePlayer(self.TEST_PLAYERS[0])
+        self.assertEqual(len(self.TEST_PLAYERS) - 1, len(self.game.getPlayers()))
+    
+    def test_game_over_when_only_one_player_left(self):
+        self.add_players()
+        self.game.startGame()
+        for i in range(len(self.TEST_PLAYERS) - 1):
+            self.game.startRound()
+            self.game.removePlayer(self.TEST_PLAYERS[i])
+        self.assertEqual(1, len(self.game.getPlayers()))
+        self.assertEqual(GamePhase.GAME_OVER, self.game.phase)
+        
+    
+
+
+if __name__ == "__main__":
+    unittest.main()

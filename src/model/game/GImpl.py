@@ -22,11 +22,13 @@ class GameImpl(Game):
         self.core.addPlayer(player)
     
     def removePlayer(self, player):
-        if self.phase != GamePhase.PLAYERS_TURN or self.getCurrentPlayer() != player:
+        if (self.phase != GamePhase.WAITING_FOR_PLAYERS and self.phase != GamePhase.PLAYERS_TURN) or self.core.getCurrentPlayer() != player:
             raise ValueError("Cannot remove player while it is not their turn")
         self.core.removePlayer(player)
         if len(self.core.getPlayers()) == 1:
             self.phase = GamePhase.GAME_OVER
+        else:
+            self.phase = GamePhase.PLAYING
 
     def startGame(self):
         if self.phase != GamePhase.WAITING_FOR_PLAYERS:
@@ -36,7 +38,7 @@ class GameImpl(Game):
 
     def startRound(self):
         if self.phase != GamePhase.PLAYING:
-            raise ValueError("Cannot start round while game is not running")
+            raise ValueError("Cannot start round in this phase")
         self.core.startRound()
         self.phase = GamePhase.PLAYERS_TURN
 
@@ -67,6 +69,9 @@ class GameImpl(Game):
         if self.phase != GamePhase.PLAYERS_TURN:
             raise ValueError("Cannot get latest stake while it is not the player's turn")
         return self.core.getLatestStake()
+
+    def getPhase(self):
+        return self.phase
     
 
     
