@@ -46,11 +46,11 @@ class TestGameImpl(unittest.TestCase):
         self.game.raiseStake(self.TEST_STAKE)
         self.assertEqual(self.TEST_STAKE, self.game.getLatestStake())
     
-    def test_check_liar_is_false(self):
+    def test_check_liar(self):
         self.game.addPlayer(Player("Pippo", [Card(Suit.HEARTS, 1), Card(Suit.SPADES, 1), Card(Suit.HEARTS, 5)], 3))
         self.game.addPlayer(Player("Laura", [Card(Suit.CLUBS, 6), Card(Suit.DIAMONDS, 1)], 2))
         self.game.raiseStake(self.TEST_STAKE)
-        self.assertFalse(self.game.checkLiar())
+        self.assertTrue(self.game.checkLiar())
     
     def test_cycle_of_players_in_the_turn(self):
         for player in self.TEST_PLAYERS:
@@ -59,6 +59,17 @@ class TestGameImpl(unittest.TestCase):
         for i in range(len(self.TEST_PLAYERS)):
             self.game.raiseStake(self.TEST_STAKES[i])
         self.assertEqual(self.TEST_PLAYERS[0], self.game.getCurrentPlayer())
+
+    def test_loser_is_the_first_in_next_turn(self):
+        player1 = Player("Pippo", [Card(Suit.HEARTS, 1), Card(Suit.SPADES, 1), Card(Suit.HEARTS, 5)], 3)
+        player2 = Player("Laura", [Card(Suit.CLUBS, 6), Card(Suit.DIAMONDS, 1)], 2)
+        self.game.addPlayer(player1)
+        self.game.addPlayer(player2)
+        self.game.raiseStake(Stake([1], Combination.HIGH_CARD))
+        self.game.raiseStake(Stake([], Combination.FLUSH))
+        self.game.checkLiar()
+        self.assertEqual(player2, self.game.getCurrentPlayer())
+
 
 
 
