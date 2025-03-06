@@ -6,6 +6,9 @@ from src.model.stake import Stake
 class Game(Protocol):
     def addPlayer(self, player:Player) -> None:
         ...
+    
+    def removePlayer(self, player:Player) -> None:
+        ...
         
     def startGame(self) -> None:
         ...
@@ -16,7 +19,7 @@ class Game(Protocol):
     def raiseStake(self, stake:Stake) -> None:
         ...
     
-    def checkLiar(self) -> bool:
+    def checkLiar(self) -> Player:
         ...
     
     def getPlayers(self) -> list[Player]:

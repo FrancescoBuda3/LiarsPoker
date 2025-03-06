@@ -57,7 +57,7 @@ class GameCore(Game):
         loser_index = self.__previous_player_index() if isLiar else self.currentPlayerIndex
         self.currentPlayerIndex = loser_index
         self.players[loser_index].cardsInHand += 1
-        return isLiar
+        return self.players[loser_index]
 
         
     
