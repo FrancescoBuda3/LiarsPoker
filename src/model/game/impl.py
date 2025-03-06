@@ -8,6 +8,7 @@ class GameImpl(Game):
     STARTING_PLAYER_INDEX = 0
     STARTING_CARDS = 1
     MINIMUM_PLAYERS = 2
+    MAX_CARDS = 5
 
     def __init__(self):
         self.players = []
@@ -18,6 +19,12 @@ class GameImpl(Game):
     def addPlayer(self, player:Player):
        player.cardsInHand = self.STARTING_CARDS
        self.players.append(player)
+
+    def removePlayer(self, player:Player):
+        if player != self.getCurrentPlayer():
+            raise ValueError("Cannot remove a player that is not the current player")
+        self.currentPlayerIndex = self.__next_player_index()
+        self.players.remove(player)
 
     def startTurn(self) -> None:
         if len(self.players) < self.MINIMUM_PLAYERS:
@@ -46,6 +53,8 @@ class GameImpl(Game):
         loser_index = self.__previous_player_index() if isLiar else self.currentPlayerIndex
         self.currentPlayerIndex = loser_index
         self.players[loser_index].cardsInHand += 1
+        if self.players[loser_index].cardsInHand == self.MAX_CARDS + 1:
+            self.removePlayer(self.players[loser_index])
         return isLiar
 
         

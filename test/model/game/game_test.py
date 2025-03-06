@@ -69,6 +69,13 @@ class TestGameImpl(unittest.TestCase):
         self.game.raiseStake(Stake([], Combination.FLUSH))
         self.game.checkLiar()
         self.assertEqual(player2, self.game.getCurrentPlayer())
+    
+    def test_player_is_eliminated_after_losing_six_times(self):
+        self.addTwoPlayers()
+        self.TEST_PLAYER_1.cardsInHand = 5
+        self.game.raiseStake(self.TEST_STAKE)
+        self.game.checkLiar()
+        self.assertNotIn(self.TEST_PLAYER_1, self.game.players)
 
 
 
