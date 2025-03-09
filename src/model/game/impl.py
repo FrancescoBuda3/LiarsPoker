@@ -13,48 +13,48 @@ class GameCore(Game):
     MAX_CARDS = 5
 
     def __init__(self):
-        self.players = []
-        self.deck = DeckImpl()
-        self.currentPlayerIndex = self.STARTING_PLAYER_INDEX
-        self.stakeHandler = StakeHandlerImpl()
+        self.__players = []
+        self.__deck = DeckImpl()
+        self.__current_player_index = self.STARTING_PLAYER_INDEX
+        self.__stake_handler = StakeHandlerImpl()
 
     def start_game(self):
-        if len(self.players) < self.MINIMUM_PLAYERS:
+        if len(self.__players) < self.MINIMUM_PLAYERS:
             raise ValueError("Cannot start without enough players")
 
     def add_player(self, player:Player):
         player.cardsInHand = self.STARTING_CARDS
-        self.players.append(player)
+        self.__players.append(player)
 
-    def remove_player(self, player:Player): self.players.remove(player)
+    def remove_player(self, player:Player): self.__players.remove(player)
 
     def start_round(self) -> None:
-        hands = self.deck.shuffle(player.cardsInHand for player in self.players)
+        hands = self.__deck.shuffle(player.cardsInHand for player in self.__players)
         for i, hand in enumerate(hands):
-            self.players[i].cards = hand
+            self.__players[i].cards = hand
 
-    def __next_player_index(self): return (self.currentPlayerIndex + 1) % len(self.players)
+    def __next_player_index(self): return (self.__current_player_index + 1) % len(self.__players)
 
-    def __previous_player_index(self): return (self.currentPlayerIndex + len(self.players) - 1) % len(self.players)
+    def __previous_player_index(self): return (self.__current_player_index + len(self.__players) - 1) % len(self.__players)
 
-    def get_current_player(self): return self.players[self.currentPlayerIndex]
+    def get_current_player(self): return self.__players[self.__current_player_index]
 
-    def get_players(self): return self.players
+    def get_players(self): return self.__players
     
     def raise_stake(self, stake) :
-        self.stakeHandler.set_stake(stake)
-        self.currentPlayerIndex = self.__next_player_index()
+        self.__stake_handler.set_stake(stake)
+        self.__current_player_index = self.__next_player_index()
     
-    def get_latest_stake(self): return self.stakeHandler.get_stake()
+    def get_latest_stake(self): return self.__stake_handler.get_stake()
 
     def check_liar(self):
-        hands = [player.cards for player in self.players]
+        hands = [player.cards for player in self.__players]
         cards = [card for hand in hands for card in hand]
-        isLiar = not self.stakeHandler.check_cards(cards)
-        loser_index = self.__previous_player_index() if isLiar else self.currentPlayerIndex
-        self.currentPlayerIndex = loser_index
-        self.players[loser_index].cardsInHand += 1
-        return self.players[loser_index]
+        isLiar = not self.__stake_handler.check_cards(cards)
+        loser_index = self.__previous_player_index() if isLiar else self.__current_player_index
+        self.__current_player_index = loser_index
+        self.__players[loser_index].cardsInHand += 1
+        return self.__players[loser_index]
 
         
     

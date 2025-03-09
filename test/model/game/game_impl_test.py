@@ -66,7 +66,7 @@ class TestGameImpl(unittest.TestCase):
             self.game.start_round()
             self.game.remove_player(self.TEST_PLAYERS[i])
         self.assertEqual(1, len(self.game.get_players()))
-        self.assertEqual(GamePhase.GAME_OVER, self.game.phase)
+        self.assertEqual(GamePhase.GAME_OVER, self.game.get_phase())
         
     
 
