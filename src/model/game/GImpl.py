@@ -16,59 +16,59 @@ class GameImpl(Game):
         self.phase = GamePhase.WAITING_FOR_PLAYERS
         self.core = GameCore()
     
-    def addPlayer(self, player):
+    def add_player(self, player):
         if self.phase != GamePhase.WAITING_FOR_PLAYERS:
             raise ValueError("Cannot add player while game is running")
-        self.core.addPlayer(player)
+        self.core.add_player(player)
     
-    def removePlayer(self, player):
-        if (self.phase != GamePhase.WAITING_FOR_PLAYERS and self.phase != GamePhase.PLAYERS_TURN) or self.core.getCurrentPlayer() != player:
+    def remove_player(self, player):
+        if (self.phase != GamePhase.WAITING_FOR_PLAYERS and self.phase != GamePhase.PLAYERS_TURN) or self.core.get_current_player() != player:
             raise ValueError("Cannot remove player while it is not their turn")
-        self.core.removePlayer(player)
-        if len(self.core.getPlayers()) == 1:
+        self.core.remove_player(player)
+        if len(self.core.get_players()) == 1:
             self.phase = GamePhase.GAME_OVER
         else:
             self.phase = GamePhase.PLAYING
 
-    def startGame(self):
+    def start_game(self):
         if self.phase != GamePhase.WAITING_FOR_PLAYERS:
             raise ValueError("Cannot start game while game is running")
-        self.core.startGame()
+        self.core.start_game()
         self.phase = GamePhase.PLAYING
 
-    def startRound(self):
+    def start_round(self):
         if self.phase != GamePhase.PLAYING:
             raise ValueError("Cannot start round in this phase")
-        self.core.startRound()
+        self.core.start_round()
         self.phase = GamePhase.PLAYERS_TURN
 
-    def raiseStake(self, stake):
+    def raise_stake(self, stake):
         if self.phase != GamePhase.PLAYERS_TURN:
             raise ValueError("Cannot raise stake while it is not the player's turn")
-        self.core.raiseStake(stake)
+        self.core.raise_stake(stake)
         
-    def checkLiar(self):
+    def check_liar(self):
         if self.phase != GamePhase.PLAYERS_TURN:
             raise ValueError("Cannot check liar while it is not the player's turn")
-        loser = self.core.checkLiar()
+        loser = self.core.check_liar()
         if not loser.cardsInHand > GameCore.MAX_CARDS:
             self.phase = GamePhase.PLAYING
         else:
-            self.removePlayer(loser)
+            self.remove_player(loser)
         return loser
     
-    def getPlayers(self):
-        return self.core.getPlayers()
+    def get_players(self):
+        return self.core.get_players()
     
-    def getCurrentPlayer(self):
+    def get_current_player(self):
         if self.phase != GamePhase.PLAYERS_TURN:
             raise ValueError("Cannot get current player while it is not the player's turn")
-        return self.core.getCurrentPlayer()
+        return self.core.get_current_player()
     
-    def getLatestStake(self):
+    def get_latest_stake(self):
         if self.phase != GamePhase.PLAYERS_TURN:
             raise ValueError("Cannot get latest stake while it is not the player's turn")
-        return self.core.getLatestStake()
+        return self.core.get_latest_stake()
 
     def getPhase(self):
         return self.phase

@@ -4,31 +4,31 @@ from src.model.stake import Stake
 
 
 class Game(Protocol):
-    def addPlayer(self, player:Player) -> None:
+    def add_player(self, player:Player) -> None:
         ...
     
-    def removePlayer(self, player:Player) -> None:
+    def remove_player(self, player:Player) -> None:
         ...
         
-    def startGame(self) -> None:
+    def start_game(self) -> None:
         ...
 
-    def startRound(self) -> None:
+    def start_round(self) -> None:
         ...
 
-    def raiseStake(self, stake:Stake) -> None:
+    def raise_stake(self, stake:Stake) -> None:
         ...
     
-    def checkLiar(self) -> Player:
+    def check_liar(self) -> Player:
         ...
     
-    def getPlayers(self) -> list[Player]:
+    def get_players(self) -> list[Player]:
         ...
     
-    def getCurrentPlayer(self) -> Player:
+    def get_current_player(self) -> Player:
         ...
 
-    def getLatestStake(self) -> Stake:
+    def get_latest_stake(self) -> Stake:
         ...
     
     
