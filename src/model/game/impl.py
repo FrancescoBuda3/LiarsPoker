@@ -23,13 +23,13 @@ class GameCore(Game):
             raise ValueError("Cannot start without enough players")
 
     def add_player(self, player:Player):
-        player.cardsInHand = self.STARTING_CARDS
+        player.cards_in_hand = self.STARTING_CARDS
         self.__players.append(player)
 
     def remove_player(self, player:Player): self.__players.remove(player)
 
     def start_round(self) -> None:
-        hands = self.__deck.shuffle(player.cardsInHand for player in self.__players)
+        hands = self.__deck.shuffle(player.cards_in_hand for player in self.__players)
         for i, hand in enumerate(hands):
             self.__players[i].cards = hand
 
@@ -53,7 +53,7 @@ class GameCore(Game):
         isLiar = not self.__stake_handler.check_cards(cards)
         loser_index = self.__previous_player_index() if isLiar else self.__current_player_index
         self.__current_player_index = loser_index
-        self.__players[loser_index].cardsInHand += 1
+        self.__players[loser_index].cards_in_hand += 1
         return self.__players[loser_index]
 
         

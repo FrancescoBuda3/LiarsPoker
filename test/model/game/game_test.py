@@ -10,9 +10,9 @@ from src.model.game.impl import GameCore
 class TestGameCore(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.TEST_PLAYER_1 = Player("Bob", [], 0)
-        cls.TEST_PLAYER_2 = Player("Lisa", [], 0)
-        cls.TEST_PLAYERS = [Player("Bob", [], 0), Player("Lisa", [], 0), Player("John", [], 0)]
+        cls.TEST_PLAYER_1 = Player("Bob")
+        cls.TEST_PLAYER_2 = Player("Lisa")
+        cls.TEST_PLAYERS = [Player("Bob"), Player("Lisa"), Player("John")]
         cls.TEST_STAKE = Stake([2, 5], Combination.TWO_PAIR)
         cls.TEST_STAKES = [Stake([2, 5], Combination.TWO_PAIR), Stake([], Combination.THREE_OF_A_KIND), Stake([], Combination.FULL_HOUSE), Stake([], Combination.FOUR_OF_A_KIND)]
 
@@ -32,8 +32,8 @@ class TestGameCore(unittest.TestCase):
     def test_players_have_one_card_at_the_beginning(self):
         self.addTwoPlayers()
         self.game.start_round()
-        self.assertEqual(self.game.STARTING_CARDS, self.TEST_PLAYER_1.cardsInHand)
-        self.assertEqual(self.game.STARTING_CARDS, self.TEST_PLAYER_2.cardsInHand)
+        self.assertEqual(self.game.STARTING_CARDS, self.TEST_PLAYER_1.cards_in_hand)
+        self.assertEqual(self.game.STARTING_CARDS, self.TEST_PLAYER_2.cards_in_hand)
     
     def test_first_player_is_the_first_added(self):
         self.addTwoPlayers()
@@ -47,8 +47,14 @@ class TestGameCore(unittest.TestCase):
         self.assertEqual(self.TEST_STAKE, self.game.get_latest_stake())
     
     def test_check_liar(self):
-        self.game.add_player(Player("Pippo", [Card(Suit.HEARTS, 1), Card(Suit.SPADES, 1), Card(Suit.HEARTS, 5)], 3))
-        self.game.add_player(Player("Laura", [Card(Suit.CLUBS, 6), Card(Suit.DIAMONDS, 1)], 2))
+        p1 = Player("Pippo")
+        p1.cards = [Card(Suit.HEARTS, 1), Card(Suit.SPADES, 1), Card(Suit.HEARTS, 5)]
+        p1.cards_in_hand = 3
+        p2 = Player("Laura")
+        p2.cards = [Card(Suit.CLUBS, 6), Card(Suit.DIAMONDS, 1)]
+        p2.cards_in_hand = 2
+        self.game.add_player(p1)
+        self.game.add_player(p2)
         self.game.raise_stake(self.TEST_STAKE)
         self.assertTrue(self.game.check_liar())
     
@@ -61,14 +67,18 @@ class TestGameCore(unittest.TestCase):
         self.assertEqual(self.TEST_PLAYERS[0], self.game.get_current_player())
 
     def test_loser_is_the_first_in_next_turn(self):
-        player1 = Player("Pippo", [Card(Suit.HEARTS, 1), Card(Suit.SPADES, 1), Card(Suit.HEARTS, 5)], 3)
-        player2 = Player("Laura", [Card(Suit.CLUBS, 6), Card(Suit.DIAMONDS, 1)], 2)
-        self.game.add_player(player1)
-        self.game.add_player(player2)
+        p1 = Player("Pippo")
+        p1.cards = [Card(Suit.HEARTS, 1), Card(Suit.SPADES, 1), Card(Suit.HEARTS, 5)]
+        p1.cards_in_hand = 3
+        p2 = Player("Laura")
+        p2.cards = [Card(Suit.CLUBS, 6), Card(Suit.DIAMONDS, 1)]
+        p2.cards_in_hand = 2
+        self.game.add_player(p1)
+        self.game.add_player(p2)
         self.game.raise_stake(Stake([1], Combination.HIGH_CARD))
         self.game.raise_stake(Stake([], Combination.FLUSH))
         self.game.check_liar()
-        self.assertEqual(player2, self.game.get_current_player())
+        self.assertEqual(p2, self.game.get_current_player())
 
 
 
