@@ -54,3 +54,23 @@ class IServer():
             bool: True if lobby successfully deleted, False otherwise
         """
         pass
+    
+    def new_player(self, player) -> bool:
+        """
+        Args:
+            player (Player): player to add
+
+        Returns:
+            bool: True if player successfully added, False otherwise
+        """
+        pass
+    
+    def disconnect_player(self, player) -> bool:
+        """
+        Args:
+            player (Player): player to disconnect
+
+        Returns:
+            bool: True if player successfully disconnected, False otherwise
+        """
+        pass

@@ -1,40 +1,65 @@
+from random import Random
 from paho.mqtt import client as mqtt
 
 from src.controller import IServer
+from src.model.player import Player
 
 
 broker = 'broker.emqx.io'
 broker_address = "127.0.0.1"
 port = 1883
-topics = ["new_lobby", "new_player", "new_game", "join_lobby", "disconnect_player"]
+topics = ["new_lobby", "new_player", "new_game",
+    "join_lobby", "disconnect_player", "leave_lobby", "delete_lobby"]
 client_id = f'SERVER'
 
 
-
 class ServerImpl(IServer):
+
+    players = []
+    lobby = {}
+    random = Random(1234)
+
     def __init__(self):
         client = self.connect_mqtt()
         self.client = client
-        
+
     # Callback che gestisce la ricezione di un messaggio
     def on_message(self, client, userdata, msg):
         print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+        message = msg.payload.decode()
+        print(message)
         match msg.topic:
             case "new_lobby":
-                # TODO: Call method to create a new lobby
-                print("New lobby created")
+                id = self.create_lobby(msg.player, msg.name)
+                print(f"New lobby created. ID: {id}")
             case "new_player":
-                # TODO: Call method to add a new player
-                print("New player joined")
+                if self.new_player(msg.player):
+                    print("New player added")
+                else:
+                    print("Player already exists")
             case "new_game":
                 # TODO: Call method to start a new game
                 print("New game started")
             case "join_lobby":
-                # Call method to join a lobby
-                print("Player joined lobby")
+                if self.join_lobby(msg.player, msg.lobby):
+                    print("Player joined lobby")
+                else:
+                    print("Player couldn't join lobby")
+            case "leave_lobby":
+                if self.leave_lobby(msg.player, msg.lobby):
+                    print("Player left lobby")
+                else:
+                    print("Player couldn't leave lobby")
             case "disconnect_player":
-                # Call method to disconnect a player
-                print("Player disconnected")
+                if self.disconnect_player(msg.player):
+                    print("Player disconnected")
+                else:
+                    print("Player not found")
+            case "delete_lobby":
+                if self.delete_lobby(msg.player, msg.lobby):
+                    print("Lobby deleted")
+                else:
+                    print("Lobby not found")
             case _:
                 print("Unknown topic")
         
@@ -65,8 +90,55 @@ class ServerImpl(IServer):
         client.loop_start()
         return client
     
+    def __generate_id(self) -> int:
+        if self.random.randint(0, 1000) not in self.lobby.keys():
+            return self.random.randint(0, 1000)
+        else:
+            return self.__generate_id()
+    
     def create_lobby(self, player, name) -> int:
-        return self.client._protocol
+        id = self.__generate_id()
+        self.lobby[id] = {"name": name, "players": [player]}
+        return id
+    
+    def join_lobby(self, player, lobby):
+        if lobby in self.lobby.keys() and player not in self.lobby[lobby]["players"] and len(self.lobby[lobby]["players"]) < 10:
+            self.lobby[lobby]["players"].append(player)
+            return True
+        else:
+            return False
+        
+    def leave_lobby(self, player, lobby):
+        if lobby in self.lobby.keys() and player in self.lobby[lobby]["players"]:
+            self.lobby[lobby]["players"].remove(player)
+            return True
+        else:
+            return False
+        
+    def new_player(self, player):
+        if player not in self.players:
+            self.players.append(player)
+            return True
+        else:
+            return False
+        
+    def disconnect_player(self, player):
+        if player in self.players:
+            self.players.remove(player)
+            if player in [player for lobby in self.lobby.values() for player in lobby["players"]]:
+                for lobby in self.lobby.values():
+                    if player in lobby["players"]:
+                        lobby["players"].remove(player)
+            return True
+        else:
+            return False
+        
+    def delete_lobby(self, player, lobby):
+        if lobby in self.lobby.keys() and player in self.lobby[lobby]["players"]:
+            del self.lobby[lobby]
+            return True
+        else:
+            return False
     
     
     
