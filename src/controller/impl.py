@@ -31,6 +31,7 @@ class ServerImpl(IServer):
         match msg.topic:
             case "new_lobby":
                 id = self.create_lobby(msg.player, msg.name)
+                self.client.subscribe(f"lobby/{id}")
                 print(f"New lobby created. ID: {id}")
             case "new_player":
                 if self.new_player(msg.player):
