@@ -39,6 +39,10 @@ class Stake:
     def suit(self) -> Suit:
         return next(iter(self.suits), None)
     
+    @suit.setter
+    def suit(self, suit: Suit):
+        self.suits = [suit]
+    
 class LowestStake(Enum):
     """
     Enum class that represents the possible lowest combinations of cards in a poker game.
