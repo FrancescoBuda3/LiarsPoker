@@ -6,7 +6,7 @@ class TestGameImpl(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        cls.TEST_PLAYERS = [Player("Alice", [], 0), Player("Bob", [], 0), Player("Charlie", [], 0), Player("David", [], 0)]
+        cls.TEST_PLAYERS = [Player("Alice"), Player("Bob"), Player("Charlie"), Player("David")]
     
     def setUp(self):
         self.game = GameImpl()
@@ -23,7 +23,7 @@ class TestGameImpl(unittest.TestCase):
         self.add_players()
         self.game.start_game()
         with self.assertRaises(ValueError):
-            self.game.add_player(Player("Bob", [], 0))
+            self.game.add_player(Player("Bob"))
     
     def test_cannot_start_round_before_game_started(self):
         with self.assertRaises(ValueError):

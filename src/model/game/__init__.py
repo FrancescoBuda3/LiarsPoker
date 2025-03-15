@@ -16,7 +16,7 @@ class Game(Protocol):
     def start_round(self) -> None:
         ...
 
-    def raise_stake(self, stake:Stake) -> None:
+    def raise_stake(self, stake:Stake) -> Stake:
         ...
     
     def check_liar(self) -> Player:
