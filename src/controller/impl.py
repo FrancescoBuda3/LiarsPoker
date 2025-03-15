@@ -1,10 +1,6 @@
 from random import Random
 from paho.mqtt import client as mqtt
 
-from src.controller import IServer
-from src.model.player import Player
-
-
 broker = 'broker.emqx.io'
 broker_address = "127.0.0.1"
 port = 1883
@@ -13,7 +9,7 @@ topics = ["new_lobby", "new_player", "new_game",
 client_id = f'SERVER'
 
 
-class ServerImpl(IServer):
+class Server():
 
     players = []
     lobby = {}
@@ -30,11 +26,11 @@ class ServerImpl(IServer):
         print(message)
         match msg.topic:
             case "new_lobby":
-                id = self.create_lobby(msg.player, msg.name)
+                id = self.__create_lobby(msg.player, msg.name)
                 self.client.subscribe(f"lobby/{id}")
                 print(f"New lobby created. ID: {id}")
             case "new_player":
-                if self.new_player(msg.player):
+                if self.__new_player(msg.player):
                     print("New player added")
                 else:
                     print("Player already exists")
@@ -42,22 +38,22 @@ class ServerImpl(IServer):
                 # TODO: Call method to start a new game
                 print("New game started")
             case "join_lobby":
-                if self.join_lobby(msg.player, msg.lobby):
+                if self.__join_lobby(msg.player, msg.lobby):
                     print("Player joined lobby")
                 else:
                     print("Player couldn't join lobby")
             case "leave_lobby":
-                if self.leave_lobby(msg.player, msg.lobby):
+                if self.__leave_lobby(msg.player, msg.lobby):
                     print("Player left lobby")
                 else:
                     print("Player couldn't leave lobby")
             case "disconnect_player":
-                if self.disconnect_player(msg.player):
+                if self.__disconnect_player(msg.player):
                     print("Player disconnected")
                 else:
                     print("Player not found")
             case "delete_lobby":
-                if self.delete_lobby(msg.player, msg.lobby):
+                if self.__delete_lobby(msg.player, msg.lobby):
                     print("Lobby deleted")
                 else:
                     print("Lobby not found")
@@ -97,33 +93,33 @@ class ServerImpl(IServer):
         else:
             return self.__generate_id()
     
-    def create_lobby(self, player, name) -> int:
+    def __create_lobby(self, player, name) -> int:
         id = self.__generate_id()
         self.lobby[id] = {"name": name, "players": [player]}
         return id
     
-    def join_lobby(self, player, lobby):
+    def __join_lobby(self, player, lobby):
         if lobby in self.lobby.keys() and player not in self.lobby[lobby]["players"] and len(self.lobby[lobby]["players"]) < 10:
             self.lobby[lobby]["players"].append(player)
             return True
         else:
             return False
         
-    def leave_lobby(self, player, lobby):
+    def __leave_lobby(self, player, lobby):
         if lobby in self.lobby.keys() and player in self.lobby[lobby]["players"]:
             self.lobby[lobby]["players"].remove(player)
             return True
         else:
             return False
         
-    def new_player(self, player):
+    def __new_player(self, player):
         if player not in self.players:
             self.players.append(player)
             return True
         else:
             return False
         
-    def disconnect_player(self, player):
+    def __disconnect_player(self, player):
         if player in self.players:
             self.players.remove(player)
             if player in [player for lobby in self.lobby.values() for player in lobby["players"]]:
@@ -134,7 +130,7 @@ class ServerImpl(IServer):
         else:
             return False
         
-    def delete_lobby(self, player, lobby):
+    def __delete_lobby(self, player, lobby):
         if lobby in self.lobby.keys() and player in self.lobby[lobby]["players"]:
             del self.lobby[lobby]
             return True
@@ -143,6 +139,6 @@ class ServerImpl(IServer):
     
     
     
-server = ServerImpl()
+server = Server()
 while True:
     pass
