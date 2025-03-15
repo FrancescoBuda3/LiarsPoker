@@ -14,7 +14,7 @@ class TestGameCore(unittest.TestCase):
         cls.TEST_PLAYER_2 = Player("Lisa")
         cls.TEST_PLAYERS = [Player("Bob"), Player("Lisa"), Player("John")]
         cls.TEST_STAKE = Stake(Combination.TWO_PAIR, [2, 5])
-        cls.TEST_STAKES = [Stake(Combination.TWO_PAIR, [2, 5]), Stake(Combination.THREE_OF_A_KIND), Stake(Combination.FULL_HOUSE, [], [Suit.DIAMONDS]), Stake(Combination.FOUR_OF_A_KIND)]
+        cls.TEST_STAKES = [Stake(Combination.TWO_PAIR, [2, 5]), Stake(Combination.THREE_OF_A_KIND, [3]), Stake(Combination.FULL_HOUSE, [1,3], []), Stake(Combination.FOUR_OF_A_KIND, [5])]
 
     def setUp(self):
         self.game = GameCore()
