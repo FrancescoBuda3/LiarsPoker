@@ -12,12 +12,12 @@ class _SuitsHandler:
     combo: Combination
 
     def __init__(self):
-        self.suits = [Suit.SPADES, Suit.HEARTS, Suit.DIAMONDS, Suit.CLUBS]
+        self.suits = {Suit.SPADES, Suit.HEARTS, Suit.DIAMONDS, Suit.CLUBS}
         self.combo = None
 
     @property
     def flush_combos(self) -> set[Combination]:
-        return [Combination.FLUSH, Combination.STRAIGHT_FLUSH, Combination.ROYAL_FLUSH]
+        return {Combination.FLUSH, Combination.STRAIGHT_FLUSH, Combination.ROYAL_FLUSH}
 
 
 class StakeHandlerImpl(StakeHandler):

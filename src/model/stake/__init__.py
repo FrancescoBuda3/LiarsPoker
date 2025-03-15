@@ -10,16 +10,16 @@ from .combination import Combination
 
 @dataclass
 class Stake:
-    ranks: set[int]
+    ranks: list[int]
     suits: set[Suit]
     combo: Combination
     
-    def __init__(self, combo: Combination, ranks: set[int] = None, suits = None):
+    def __init__(self, combo: Combination, ranks: list[int] = None, suits = None):
         """
         Models the stake that a player calls when playing.
         Args:
             combo (Combination): the combination of the stake
-            ranks (set[int], optional): the ranks of the cards in the stake. Defaults to None.
+            ranks (list[int], optional): the ranks of the cards in the stake. Defaults to None.
             suits (Suit or set[Suit], optional): the suit or suits of the stake. Defaults to None.
         """
         self.combo = combo
@@ -27,7 +27,7 @@ class Stake:
         if suits is None:
             self.suits = set()
         elif isinstance(suits, Suit):
-            self.suits = [suits]
+            self.suits = {suits}
         else:
             self.suits = set(suits)
     
@@ -41,7 +41,7 @@ class Stake:
     
     @suit.setter
     def suit(self, suit: Suit):
-        self.suits = [suit]
+        self.suits = {suit}
     
 class LowestStake(Enum):
     """
