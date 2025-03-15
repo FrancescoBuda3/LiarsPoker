@@ -13,8 +13,8 @@ class TestGameCore(unittest.TestCase):
         cls.TEST_PLAYER_1 = Player("Bob")
         cls.TEST_PLAYER_2 = Player("Lisa")
         cls.TEST_PLAYERS = [Player("Bob"), Player("Lisa"), Player("John")]
-        cls.TEST_STAKE = Stake([2, 5], Combination.TWO_PAIR)
-        cls.TEST_STAKES = [Stake([2, 5], Combination.TWO_PAIR), Stake([], Combination.THREE_OF_A_KIND), Stake([], Combination.FULL_HOUSE), Stake([], Combination.FOUR_OF_A_KIND)]
+        cls.TEST_STAKE = Stake(Combination.TWO_PAIR, [2, 5])
+        cls.TEST_STAKES = [Stake(Combination.TWO_PAIR, [2, 5]), Stake(Combination.THREE_OF_A_KIND, [3]), Stake(Combination.FULL_HOUSE, [1,3], []), Stake(Combination.FOUR_OF_A_KIND, [5])]
 
     def setUp(self):
         self.game = GameCore()
@@ -75,8 +75,8 @@ class TestGameCore(unittest.TestCase):
         p2.cards_in_hand = 2
         self.game.add_player(p1)
         self.game.add_player(p2)
-        self.game.raise_stake(Stake([1], Combination.HIGH_CARD))
-        self.game.raise_stake(Stake([], Combination.FLUSH))
+        self.game.raise_stake(Stake(Combination.HIGH_CARD, [1]))
+        self.game.raise_stake(Stake(Combination.FLUSH))
         self.game.check_liar()
         self.assertEqual(p2, self.game.get_current_player())
 

@@ -4,7 +4,7 @@ from src.model.deck import Card
 @dataclass
 class Player():
     username: str
-    cards: list[Card]
+    cards: set[Card]
     cards_in_hand: int
 
     def __init__(self, username:str):

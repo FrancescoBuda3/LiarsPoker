@@ -29,6 +29,7 @@ class GameCore(Game):
     def remove_player(self, player:Player): self.__players.remove(player)
 
     def start_round(self) -> None:
+        self.__stake_handler.reset_stake()
         hands = self.__deck.shuffle(player.cards_in_hand for player in self.__players)
         for i, hand in enumerate(hands):
             self.__players[i].cards = hand
@@ -42,10 +43,11 @@ class GameCore(Game):
     def get_players(self): return self.__players
     
     def raise_stake(self, stake) :
-        self.__stake_handler.set_stake(stake)
+        self.__stake_handler.stake = stake
         self.__current_player_index = self.__next_player_index()
+        return self.__stake_handler.get_lowest_next_stake()
     
-    def get_latest_stake(self): return self.__stake_handler.get_stake()
+    def get_latest_stake(self): return self.__stake_handler.stake
 
     def check_liar(self):
         hands = [player.cards for player in self.__players]

@@ -45,7 +45,7 @@ class GameImpl(Game):
     def raise_stake(self, stake):
         if self.__phase != GamePhase.PLAYERS_TURN:
             raise ValueError("Cannot raise stake while it is not the player's turn")
-        self.__core.raise_stake(stake)
+        return self.__core.raise_stake(stake)
         
     def check_liar(self):
         if self.__phase != GamePhase.PLAYERS_TURN:
