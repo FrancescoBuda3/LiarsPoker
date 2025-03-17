@@ -116,7 +116,7 @@ class StakeHandlerImpl(StakeHandler):
         return cards_by_suit
 
     def get_lowest_next_stake(self) -> Stake:
-        lowest_stake = LowestStake.HIGH_CARD
+        lowest_stake = LowestStake.HIGH_CARD.value
         if self._stake != None:
             current_combo = self.stake.combo
             max_rank = max(self.stake.ranks, key=lambda r: r.value) if len(
@@ -126,7 +126,7 @@ class StakeHandlerImpl(StakeHandler):
             lowest_next_stake = None
             for stake in LowestStake:
                 if stake.value.combo == current_combo.next():
-                    lowest_next_stake = stake
+                    lowest_next_stake = stake.value
             match current_combo:
                 case (
                     Combination.HIGH_CARD

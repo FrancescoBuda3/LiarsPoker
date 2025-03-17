@@ -13,22 +13,39 @@ class TestStakeHandlerImpl(unittest.TestCase):
         cls.TEST_STAKE = Stake(Combination.HIGH_CARD, [Rank.ONE])
         cls.TEST_NEXT_STAKE = Stake(Combination.HIGH_CARD, [Rank.TWO])
         cls.TEST_TWO_PAIR = Stake(Combination.TWO_PAIR, [Rank.FIVE, Rank.TWO])
-        cls.TEST_NEXT_TWO_PAIR = Stake(
-            Combination.TWO_PAIR, [Rank.FIVE, Rank.THREE])
-        cls.TEST_TWO_PAIR_CARDS = [Card(Suit.SPADES, Rank.TWO), Card(
-            Suit.HEARTS, Rank.TWO), Card(Suit.SPADES, Rank.FIVE), Card(Suit.HEARTS, Rank.FIVE)]
+        cls.TEST_NEXT_TWO_PAIR = Stake(Combination.TWO_PAIR, [Rank.FIVE, Rank.THREE])
+        cls.TEST_TWO_PAIR_CARDS = [
+            Card(Suit.SPADES, Rank.TWO), 
+            Card(Suit.HEARTS, Rank.TWO), 
+            Card(Suit.SPADES, Rank.FIVE), 
+            Card(Suit.HEARTS, Rank.FIVE)]
         cls.TEST_INVALID_TWO_PAIR_CARDS = [
-            Card(Suit.SPADES, Rank.TWO), Card(Suit.HEARTS, Rank.FIVE), Card(Suit.SPADES, Rank.FIVE)]
-        cls.TEST_ROYAL_FLUSH = Stake(
-            Combination.ROYAL_FLUSH, suits=Suit.SPADES)
-        cls.TEST_ROYAL_FLUSH_CARDS = [Card(Suit.SPADES, Rank.TEN), Card(Suit.SPADES, Rank.JACK), Card(
-            Suit.SPADES, Rank.QUEEN), Card(Suit.SPADES, Rank.KING), Card(Suit.SPADES, Rank.ACE)]
-        cls.TEST_INVALID_ROYAL_FLUSH_CARDS = [Card(Suit.SPADES, Rank.TEN), Card(
-            Suit.SPADES, Rank.JACK), Card(Suit.SPADES, Rank.QUEEN), Card(Suit.SPADES, Rank.KING), Card(Suit.SPADES, Rank.TWO)]
+            Card(Suit.SPADES, Rank.TWO), 
+            Card(Suit.HEARTS, Rank.FIVE), 
+            Card(Suit.SPADES, Rank.FIVE)]
+        cls.TEST_ROYAL_FLUSH = Stake(Combination.ROYAL_FLUSH, suits=Suit.SPADES)
+        cls.TEST_ROYAL_FLUSH_CARDS = [
+            Card(Suit.SPADES, Rank.TEN), 
+            Card(Suit.SPADES, Rank.JACK), 
+            Card(Suit.SPADES, Rank.QUEEN), 
+            Card(Suit.SPADES, Rank.KING), 
+            Card(Suit.SPADES, Rank.ACE)]
+        cls.TEST_INVALID_ROYAL_FLUSH_CARDS = [
+            Card(Suit.SPADES, Rank.TEN), 
+            Card(Suit.SPADES, Rank.JACK), 
+            Card(Suit.SPADES, Rank.QUEEN), 
+            Card(Suit.SPADES, Rank.KING), 
+            Card(Suit.SPADES, Rank.TWO)]
         cls.TEST_STRAIGHT_FLUSH_SPADES = Stake(
-            Combination.STRAIGHT_FLUSH, [Rank.ONE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE], Suit.SPADES)
+            Combination.STRAIGHT_FLUSH, 
+            [Rank.ONE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE], 
+            Suit.SPADES)
         cls.TEST_STRAIGHT_FLUSH_HEARTS = Stake(
-            Combination.STRAIGHT_FLUSH, [Rank.ONE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE], Suit.HEARTS)
+            Combination.STRAIGHT_FLUSH, 
+            [Rank.ONE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE], 
+            Suit.HEARTS)
+        cls.TEST_HIGHEST_CARD = Stake(Combination.HIGH_CARD, [Rank.ACE])
+        cls.TEST_LOWEST_PAIR = Stake(Combination.PAIR, [Rank.ONE])
 
     def setUp(self):
         self.stakeHandler = StakeHandlerImpl()
@@ -101,6 +118,11 @@ class TestStakeHandlerImpl(unittest.TestCase):
         self.stakeHandler.stake = self.stakeHandler.get_lowest_next_stake()
         self.assertEqual(
             self.stakeHandler.get_lowest_next_stake(), None)
+        
+    def test_highest_card(self):
+        self.stakeHandler.stake = self.TEST_HIGHEST_CARD
+        self.assertEqual(
+            self.stakeHandler.get_lowest_next_stake(), self.TEST_LOWEST_PAIR)
 
 
 if __name__ == "__main__":
