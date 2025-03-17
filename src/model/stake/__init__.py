@@ -2,24 +2,25 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Protocol
 
-from src.model.deck import Card
-from src.model.deck.suit import Suit
+from src.model.card import Card
+from src.model.card.rank import Rank
+from src.model.card.suit import Suit
 
 from .combination import Combination
 
 
 @dataclass
 class Stake:
-    ranks: list[int]
+    ranks: list[Rank]
     suits: set[Suit]
     combo: Combination
     
-    def __init__(self, combo: Combination, ranks: list[int] = None, suits = None):
+    def __init__(self, combo: Combination, ranks: list[Rank] = None, suits = None):
         """
         Models the stake that a player calls when playing.
         Args:
             combo (Combination): the combination of the stake
-            ranks (list[int], optional): the ranks of the cards in the stake. Defaults to None.
+            ranks (list[Rank], optional): the ranks of the cards in the stake. Defaults to None.
             suits (Suit or set[Suit], optional): the suit or suits of the stake. Defaults to None.
         """
         self.combo = combo
@@ -48,16 +49,16 @@ class LowestStake(Enum):
     Enum class that represents the possible lowest combinations of cards in a poker game.
     Each value is mapped to the lowest stake that represent the lowest combination.
     """
-    HIGH_CARD = Stake(Combination.HIGH_CARD, [1])
-    PAIR = Stake(Combination.PAIR, [1])
-    TWO_PAIR = Stake(Combination.TWO_PAIR, [1, 1])
-    THREE_OF_A_KIND = Stake(Combination.THREE_OF_A_KIND, [1])
-    STRAIGHT = Stake(Combination.STRAIGHT, [1, 2, 3, 4, 5])
+    HIGH_CARD = Stake(Combination.HIGH_CARD, [Rank.ONE])
+    PAIR = Stake(Combination.PAIR, [Rank.ONE])
+    TWO_PAIR = Stake(Combination.TWO_PAIR, [Rank.ONE, Rank.ONE])
+    THREE_OF_A_KIND = Stake(Combination.THREE_OF_A_KIND, [Rank.ONE])
+    STRAIGHT = Stake(Combination.STRAIGHT, [Rank.ONE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE])
     FLUSH = Stake(Combination.FLUSH)
-    FULL_HOUSE = Stake(Combination.FULL_HOUSE, [1, 2])
-    FOUR_OF_A_KIND = Stake(Combination.FOUR_OF_A_KIND, [1])
-    STRAIGHT_FLUSH = Stake(Combination.STRAIGHT_FLUSH, [1, 2, 3, 4, 5])
-    ROYAL_FLUSH = Stake(Combination.ROYAL_FLUSH, [10, 11, 12, 13, 14])
+    FULL_HOUSE = Stake(Combination.FULL_HOUSE, [Rank.ONE, Rank.TWO])
+    FOUR_OF_A_KIND = Stake(Combination.FOUR_OF_A_KIND, [Rank.ONE])
+    STRAIGHT_FLUSH = Stake(Combination.STRAIGHT_FLUSH, [Rank.ONE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE])
+    ROYAL_FLUSH = Stake(Combination.ROYAL_FLUSH, [Rank.TEN, Rank.JACK, Rank.QUEEN, Rank.KING, Rank.ACE])
 
 
 class StakeHandler(Protocol):

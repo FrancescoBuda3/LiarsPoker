@@ -1,11 +1,11 @@
-from src.model.deck import Card
-from src.model.deck.suit import Suit
-from ..stake import LowestStake, StakeHandler, Stake, Combination
+from src.model.card import *
+from src.model.card.suit import Suit
+from ..stake import *
 
 
 class _SuitsHandler:
     """
-    A simple helper class that models an object that keeps track of the suits 
+    A simple helper class that models an object that keeps track of the suits
     that have been used in the current flush stake.
     """
     suits: set[Suit]
@@ -86,17 +86,22 @@ class StakeHandlerImpl(StakeHandler):
                 check = card_ranks.count(self.stake.ranks[0]) >= 4
             case Combination.STRAIGHT_FLUSH:
                 cards_by_suit = self.__group_suits(cards)
-                if len(cards_by_suit[self.stake.suit]) >= 5 and self.__check_straight(cards_by_suit[self.stake.suit]):
-                    check = True
+                check = len(cards_by_suit[self.stake.suit]) >= 5 and self.__check_straight(
+                    cards_by_suit[self.stake.suit])
             case Combination.ROYAL_FLUSH:
                 cards_by_suit = self.__group_suits(cards)
-                if len(cards_by_suit[self.stake.suit]) >= 5 and min(cards_by_suit[self.stake.suit]) == 10 and + \
-                        max(cards_by_suit[self.stake.suit]) == 14 and self.__check_straight(cards_by_suit[self.stake.suit]):
-                    check = True
+                cards = cards_by_suit[self.stake.suit]
+                has_five_or_more = len(cards) >= 5
+                min_rank = min(cards, key=lambda r: r.value)
+                max_rank = max(cards, key=lambda r: r.value)
+                is_min_ten = min_rank == Rank.TEN
+                is_max_ace = max_rank == Rank.ACE
+                is_straight = self.__check_straight(cards)
+                check = has_five_or_more and is_min_ten and is_max_ace and is_straight
         return check
 
-    def __check_straight(self, ranks: set[int]) -> bool:
-        ranks = sorted(set(ranks))
+    def __check_straight(self, ranks: set[Rank]) -> bool:
+        ranks = sorted([rank.value for rank in ranks])
         for i in range(len(ranks) - 4):
             if all(ranks[i + j] == ranks[i] + j for j in range(5)):
                 return True
@@ -114,31 +119,39 @@ class StakeHandlerImpl(StakeHandler):
         lowest_stake = LowestStake.HIGH_CARD
         if self._stake != None:
             current_combo = self.stake.combo
+            max_rank = max(self.stake.ranks, key=lambda r: r.value) if len(
+                self.stake.ranks) > 0 else None
+            min_rank = min(self.stake.ranks, key=lambda r: r.value) if len(
+                self.stake.ranks) > 0 else None
             lowest_next_stake = None
             for stake in LowestStake:
-                if stake.value.combo.value == current_combo.value+1:
+                if stake.value.combo == current_combo.next():
                     lowest_next_stake = stake
             match current_combo:
-                case Combination.HIGH_CARD | Combination.PAIR | Combination.THREE_OF_A_KIND | Combination.FOUR_OF_A_KIND:
+                case (
+                    Combination.HIGH_CARD
+                    | Combination.PAIR
+                    | Combination.THREE_OF_A_KIND
+                    | Combination.FOUR_OF_A_KIND
+                ):
                     lowest_stake = Stake(
-                        current_combo, [self.stake.ranks[0]+1])
-                    lowest_stake = lowest_stake if self.stake.ranks[0] + \
-                        1 <= 14 else lowest_next_stake
+                        current_combo, [self.stake.ranks[0].next()])
+                    lowest_stake = lowest_stake if self.stake.ranks[0].next(
+                    ) else lowest_next_stake
                 case Combination.TWO_PAIR:
-                    biggest_value = max(self.stake.ranks)
-                    lowest_value = min(self.stake.ranks)
                     lowest_stake = Stake(
-                        current_combo, [biggest_value, lowest_value+1])
-                    lowest_stake = lowest_stake if lowest_value+1 <= 14 else lowest_next_stake
+                        current_combo, [max_rank, min_rank.next()])
+                    lowest_stake = lowest_stake if min_rank else lowest_next_stake
                 case Combination.STRAIGHT | Combination.STRAIGHT_FLUSH:
-                    biggest_value = max(self.stake.ranks)
-                    lowest_value = min(self.stake.ranks)
                     if len(self.__suits_handler.suits) <= 0:
-                        biggest_value = biggest_value+1
-                        lowest_value = lowest_value+1
-                    ranks = [i for i in range(lowest_value, biggest_value+1)]
-                    lowest_stake = Stake(current_combo, ranks, self.__suits_handler.suits)
-                    lowest_stake = lowest_stake if biggest_value <= 14 else lowest_next_stake
+                        max_rank = max_rank.next()
+                        min_rank = min_rank.next()
+                    ranks = [min_rank]
+                    for i in range(max_rank.value - min_rank.value):
+                        ranks.append(ranks[i].next())
+                    lowest_stake = Stake(
+                        current_combo, ranks, self.__suits_handler.suits)
+                    lowest_stake = lowest_stake if max_rank else lowest_next_stake
                 case Combination.FLUSH | Combination.ROYAL_FLUSH:
                     if len(self.__suits_handler.suits) > 0:
                         lowest_stake = Stake(
@@ -148,13 +161,13 @@ class StakeHandlerImpl(StakeHandler):
                 case Combination.FULL_HOUSE:
                     tris = self.stake.ranks[0]
                     bis = self.stake.ranks[1]
-                    if bis < tris:
-                        bis = bis + 2
+                    if bis.value < tris.value:
+                        bis = bis.next().next()
                         lowest_stake = Stake(current_combo, [tris, bis])
-                        lowest_stake = lowest_stake if bis <= 13 else lowest_next_stake
+                        lowest_stake = lowest_stake if bis else lowest_next_stake
                     else:
-                        tris = tris + 1
-                        bis = bis - 1
+                        tris = tris.next()
+                        bis = bis.previous()
                         lowest_stake = Stake(current_combo, [tris, bis])
-                        lowest_stake = lowest_stake if tris <= 14 else lowest_next_stake
+                        lowest_stake = lowest_stake if tris else lowest_next_stake
         return lowest_stake
