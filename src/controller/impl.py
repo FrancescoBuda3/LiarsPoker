@@ -140,5 +140,7 @@ class Server():
     
     
 server = Server()
-while True:
-    pass
+if __name__ == "__main__":
+    server = Server()
+    while True:
+        pass
