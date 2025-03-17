@@ -1,11 +1,11 @@
-from dataclasses import dataclass
 import random
 
-from src.model.deck import Deck, Card
-from src.model.deck.suit import Suit
+from src.model.card.rank import Rank
+from src.model.deck import Deck
+from src.model.card import Card
+from src.model.card.suit import Suit
 
 
-@dataclass
 class DeckImpl(Deck):
     
     cards: list[Card]
@@ -24,6 +24,6 @@ class DeckImpl(Deck):
     def __generate_deck(self):
         retList = []
         for suit in Suit:
-            for rank in range(1, 14):
+            for rank in range(Rank.ONE.value, Rank.ACE.value):
                 retList.append(Card(suit, rank))
         return retList

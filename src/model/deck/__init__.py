@@ -1,15 +1,3 @@
-from dataclasses import dataclass
-
-from src.model.deck.suit import Suit
-#from src.model.stake.combination import Combination
-
-
-@dataclass
-class Card():
-    suit: Suit
-    rank: int
-
-
 class Deck():
     
     def shuffle(self, hands: list[int]):

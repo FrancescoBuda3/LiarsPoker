@@ -16,3 +16,16 @@ class Combination(Enum):
     FOUR_OF_A_KIND = 8
     STRAIGHT_FLUSH = 9
     ROYAL_FLUSH = 10
+    
+    def __str__(self):
+        return self.name
+    
+    def next(self):
+        """
+        Get the next combination in the sequence
+        Returns:
+            Combination: the next combination in the sequence, None if it's the highest
+        """
+        ranks = list(self.__class__)
+        idx = ranks.index(self)
+        return ranks[idx + 1] if idx + 1 < len(ranks) else None
