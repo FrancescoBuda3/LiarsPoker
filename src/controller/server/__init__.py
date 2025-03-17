@@ -139,7 +139,6 @@ class Server():
     
     
     
-server = Server()
 if __name__ == "__main__":
     server = Server()
     while True:
