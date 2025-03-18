@@ -23,5 +23,4 @@ class DeserializeTest(unittest.TestCase):
     
     def test_deserialize(self):
         self.assertEqual(self.deserializer.deserialize(self.test_string_1), Message(self.test_header_1, self.test_obj_1))
-        print(self.deserializer.deserialize(self.test_string_2))
         self.assertEqual(self.deserializer.deserialize(self.test_string_2), self.test_obj_2)
