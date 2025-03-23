@@ -36,7 +36,7 @@ class Serializer(SeriliazerInterface):
     def _message_to_ast(self, request: Message):
         return {
             'header': self._to_ast(request.header),
-            'body': self._to_ast(request.header),
+            'body': self._to_ast(request.body),
         }
         
     def _header_to_ast(self, header: Header):
