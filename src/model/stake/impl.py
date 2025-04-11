@@ -61,7 +61,7 @@ class StakeHandlerImpl(StakeHandler):
         self._stake = None
         self.__suits_handler = _SuitsHandler()
 
-    def check_cards(self, cards: set[Card]) -> bool:
+    def check_cards(self, cards: list[Card]) -> bool:
         card_ranks = [card.rank for card in cards]
         card_suits = [card.suit for card in cards]
         check = False
@@ -107,7 +107,7 @@ class StakeHandlerImpl(StakeHandler):
                 return True
         return False
 
-    def __group_suits(self, cards: set[Card]) -> dict:
+    def __group_suits(self, cards: list[Card]) -> dict:
         cards_by_suit = {}
         for card in cards:
             if card.suit not in cards_by_suit:
