@@ -6,7 +6,7 @@ from src.model.card.suit import Suit
 from src.model.player import Player
 from src.model.stake import Stake
 from src.model.stake.combination import Combination
-from src.services.message import Message
+from src.services.message import Header, Message
 
 #class MessageType(Enum):
 #    SART_GAME = "start_game"
@@ -45,22 +45,37 @@ class Deserializer:
         )
     
     def _ast_to_player(self, data) -> Player:
-        return Player(
+        p = Player(
             username = data["username"],
         )
+        p.cards = self._ast_to_obj(data["cards"])
+        p.cards_in_hand = data["cards_in_hand"]
+        return p
     
     def _ast_to_card(self, data) -> Card:
         return Card(
-            rank = self._ast_to_obj(Rank.__members__[data["rank"]]),
-            suit = self._ast_to_obj(Rank.__members__[data["suit"]])
+            rank = self._ast_to_obj(data["rank"]),
+            suit = self._ast_to_obj(data["suit"])
         )
 
     def _ast_to_stake(self, data) -> Stake:
         return Stake(
-            combo = self._ast_to_obj(Combination.__members__[data["combo"]]),
-            ranks = self._list_to_enum(data["ranks"], Rank),
-            suits = self._list_to_enum(data["suits"], Suit)
+            combo = self._ast_to_obj(data["combo"]),
+            ranks = self._ast_to_obj(data["ranks"]),
+            suits = self._ast_to_obj(data["suits"])
         )
-        
-    def _list_to_enum(self, data, enum):
-        return [self._ast_to_obj(enum.__members__[item]) for item in data]
+    
+    def _ast_to_rank(self, data) -> Rank:
+        return Rank[data["name"]]
+    
+    def _ast_to_suit(self, data) -> Suit:
+        return Suit[data["name"]]
+    
+    def _ast_to_header(self, data) -> Header:
+        return Header[data["name"]]
+    
+    def _ast_to_combination(self, data) -> Combination:
+        return Combination[data["name"]]
+
+    
+    

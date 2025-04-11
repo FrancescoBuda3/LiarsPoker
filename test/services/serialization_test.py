@@ -7,9 +7,9 @@ from src.model.card.suit import Suit
 from src.model.player import Player
 from src.model.stake import Stake
 from src.model.stake.combination import Combination
-from src.services.serialize.impl import Serializer
+from src.services.deserialize.impl import Deserializer
 from src.services.message import Header, Message
-
+from src.services.serialize.impl import Serializer
 
 class SerializeTest(unittest.TestCase):
     @classmethod
@@ -103,8 +103,20 @@ class SerializeTest(unittest.TestCase):
 
     def setUp(self):
         self.serializer = Serializer()
+        self.deserializer = Deserializer()
 
     def test_serialize(self):
         actual = json.loads(self.serializer.serialize(self.TEST_MESSAGE))
         expected = json.loads(self.TEST_SERIALIZED_MESSAGE)
         self.assertEqual(actual, expected)
+    
+    def test_deserialize(self):
+        actual = self.deserializer.deserialize(self.TEST_SERIALIZED_MESSAGE)
+        expected = self.TEST_MESSAGE
+        self.assertEqual(actual, expected)
+        
+    def test_serialize_deserialize(self):
+        serialized = self.serializer.serialize(self.TEST_MESSAGE)
+        deserialized = self.deserializer.deserialize(serialized)
+        self.assertEqual(self.TEST_MESSAGE, deserialized)
+        
