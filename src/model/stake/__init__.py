@@ -69,11 +69,11 @@ class StakeHandler(Protocol):
         """
         ...
 
-    def check_cards(self, cards: set[Card]) -> bool:
+    def check_cards(self, cards: list[Card]) -> bool:
         """
         Checks if the given cards contain the valid combination for the current stake.
         Args:
-            cards (set[Card]): the cards to check
+            cards (list[Card]): the cards to check
 
         Returns:
             bool: true if the cards are valid, false otherwise
