@@ -78,3 +78,23 @@ class MessageFactoryInterface(Protocol):
             str: serialized message
         """
         ...
+        
+    def create_raise_stake_message(self, stake: Stake) -> str:
+        """
+        Create a message to raise the stake.
+
+        Args:
+            stake (Stake): new stake
+
+        Returns:
+            str: serialized message
+        """
+        ...
+    
+    def create_check_liar_message(self) -> str:
+        """
+        Create a message to check if the last stake is a lie.
+        
+        Returns:
+            str: serialized message
+        """

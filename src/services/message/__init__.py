@@ -8,6 +8,8 @@ class Header(Enum):
     ROUND_LOSER = "round_loser"
     ELIMINATION = "elimination"
     GAME_OVER = "game_over"
+    RAISE_STAKE = "raise_stake"
+    CHECK_LIAR = "check_liar"
 
 @dataclass
 class Message:

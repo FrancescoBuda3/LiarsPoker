@@ -33,3 +33,9 @@ class MessageFactory(MessageFactoryInterface):
     def create_game_over_message(self, player: Player) -> str:
         return self._serializer.serialize(Message(Header.GAME_OVER, player))
     
+    def create_raise_stake_message(self, stake: Stake) -> str:
+        return self._serializer.serialize(Message(Header.RAISE_STAKE, stake))
+    
+    def create_check_liar_message(self) -> str:
+        return self._serializer.serialize(Message(Header.CHECK_LIAR, None))
+    
