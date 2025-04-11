@@ -6,12 +6,12 @@ from src.model.stake import Stake
 
 
 class MessageFactoryInterface(Protocol):
-    def create_show_cards_message(self, cards: set[Card]) -> str:
+    def create_show_cards_message(self, cards: list[Card]) -> str:
         """
         Create a message to show the cards currently in game.
 
         Args:
-            cards (set[Card]): set of cards to be shown
+            cards (list[Card]): list of cards to be shown
 
         Returns:
             str: serialized message
