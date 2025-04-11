@@ -15,5 +15,5 @@ class Message:
     A container for a request to the server. 
     """
 
-    header: str
+    header: Header
     body: object
