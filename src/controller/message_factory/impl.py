@@ -21,7 +21,7 @@ class MessageFactory(MessageFactoryInterface):
             "minimum_stake": minimum_stake
         }))
         
-    def cerate_start_round_message(self, players: list[Player]) -> str:
+    def create_start_round_message(self, players: list[Player]) -> str:
         return self._serializer(Message(Header.START_ROUND, players))
     
     def create_round_loser_message(self, player: Player) -> str:

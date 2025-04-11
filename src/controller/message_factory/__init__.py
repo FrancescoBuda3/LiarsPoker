@@ -31,7 +31,7 @@ class MessageFactoryInterface(Protocol):
         """
         ...
 
-    def cerate_start_round_message(self, players: list[Player]) -> str:
+    def create_start_round_message(self, players: list[Player]) -> str:
         """
         Create a message to start a round.
 

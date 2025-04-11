@@ -4,6 +4,7 @@ from src.model.player import Player
 from src.model.stake import Stake
 from src.model.stake.combination import Combination
 from src.services.connectionHandler.impl import ConnectionHandlerImpl
+from src.services.deserialize.impl import Deserializer
 
 
 def game_loop(players: list[Player], id: str):
@@ -21,7 +22,7 @@ def game_loop(players: list[Player], id: str):
             connection_handler.send_message(message_factory.create_start_turn_message(game.get_current_player(), None))
             
         msg = connection_handler.wait_message()
-        de
+        
         stake = Stake([int(msg)], Combination.HIGH_CARD)
         if int(msg) == 0:
             loser = game.checkLiar()
