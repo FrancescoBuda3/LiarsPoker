@@ -1,3 +1,4 @@
+from email.header import Header
 from src.controller.message_factory.impl import MessageFactory
 from src.model.game.GImpl import GameImpl, GamePhase
 from src.model.player import Player
@@ -23,10 +24,12 @@ def game_loop(players: list[Player], id: str):
             
         msg = connection_handler.wait_message()
         
-        stake = Stake([int(msg)], Combination.HIGH_CARD)
-        if int(msg) == 0:
-            loser = game.checkLiar()
-            print(f"Loser is: {loser}")
-        else:
-            game.raiseStake(stake)
-    print("Winner is: " + game.getPlayers()[0].username)
+        match msg.header :
+            case Header.RaiseStake:
+                game.raise_stake(msg.body)
+                connection_handler.send_message(message_factory.create_raise_stake_message(msg.body))
+                
+            case Header.CheckLiar:
+                loser_player = game.check_liar()
+                connection_handler.send_message(message_factory.create_check_liar_message())
+                
