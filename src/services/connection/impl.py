@@ -2,8 +2,8 @@ import queue
 import uuid
 from paho.mqtt import client as mqtt
 
-from src.services.connectionHandler import ConnectionHandlerInterface
-from src.services.connectionHandler.topic import Topic
+from src.services.connection import ConnectionHandlerInterface
+from src.services.connection.topic import Topic
 from src.services.deserialize.impl import Deserializer
 from src.services.message import Message
 from src.services.serialize.impl import Serializer

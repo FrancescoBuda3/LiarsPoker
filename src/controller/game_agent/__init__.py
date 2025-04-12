@@ -3,7 +3,7 @@ from src.model.game.GImpl import GameImpl, GamePhase
 from src.model.player import Player
 from src.model.stake import Stake
 from src.model.stake.combination import Combination
-from src.services.connectionHandler.impl import ConnectionHandlerImpl
+from src.services.connection.impl import ConnectionHandlerImpl
 
 
 def game_loop(players: list[Player], id: str):

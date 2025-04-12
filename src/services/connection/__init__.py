@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from src.services.connectionHandler.topic import Topic
+from src.services.connection.topic import Topic
 from src.services.message import Message
 
 
