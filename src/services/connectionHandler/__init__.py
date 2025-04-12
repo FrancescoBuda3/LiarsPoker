@@ -1,36 +1,33 @@
-from dataclasses import dataclass
-from enum import Enum
+from typing import Protocol
 
-class MessageType(Enum):
-    CARDS = "cards"
-    PLAYER_TURN = "player_turn"
-    STAKE = "stake"
-    LIE = "lie"
-    LOSER = "loser"
-    WINNER = "winner"
+from src.services.connectionHandler.topic import Topic
+from src.services.message import Message
 
 
-@dataclass
-class Message():
-    message_type: MessageType
-    body: str
+class ConnectionHandlerInterface(Protocol):
+    """
+    Class for handling the connection for sending and receiving messages.
+    One or more topics can be subscribed to.
+    """
 
-
-class ConnectionHandler():
-    def send_message(self, message: Message):
+    def send_message(self, message: Message, topic: Topic):
         """
-        sends a message to all the listeners
+        Sends a message to all the listeners subcribed to the topic
+
         Args:
             message (Message): message to send
+            topic (Topic): topic to send the message to
         """
-        pass
-    
-    def wait_message(self, timeout=None) -> Message:
+        ...
+
+    def wait_message(self, topic: Topic, timeout=None) -> Message:
         """
-        waits for a message to be received
+        Waits for a message to be received on the topic.
+
         Args:
+            topic (Topic): topic to listen to
             timeout (int): maximum time to wait for a message, if none waits indefinitely
         Returns:
             Message: message received
         """
-        pass
+        ...
