@@ -1,5 +1,8 @@
 from random import Random
+from threading import Thread
 from paho.mqtt import client as mqtt
+
+from src.controller.game_agent import game_loop
 
 broker = 'broker.emqx.io'
 broker_address = "127.0.0.1"
@@ -35,7 +38,8 @@ class Server():
                 else:
                     print("Player already exists")
             case "new_game":
-                # TODO: Call method to start a new game
+                thread = Thread(target = game_loop, args = (self.players, msg.lobby))
+                thread.start()
                 print("New game started")
             case "join_lobby":
                 if self.__join_lobby(msg.player, msg.lobby):
@@ -54,6 +58,7 @@ class Server():
                     print("Player not found")
             case "delete_lobby":
                 if self.__delete_lobby(msg.player, msg.lobby):
+                    thread.join()
                     print("Lobby deleted")
                 else:
                     print("Lobby not found")
