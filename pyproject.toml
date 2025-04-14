@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "liars-poker"
+version = "0.1.0"
+description = ""
+authors = ["Francesco Buda <francesco.buda3@studio.unibo.it>",
+        "Emanuele Sanchi <emanuele.sanchi@studio.unibo.it>",
+        "Tommaso Severi <tommaso.severi2@studio.unibo.it>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+paho-mqtt = "^2.1.0"
+nicegui = "^2.12.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
