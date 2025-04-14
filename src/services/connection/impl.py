@@ -66,7 +66,7 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
             except queue.Empty:
                 return None
     
-    def try_get_any_message(self) -> (Topic, Message):
+    def try_get_any_message(self) -> tuple[Topic, Message]:
         for topic, q in self._topic_queues.items():
             try:
                 message = q.get_nowait()
