@@ -16,7 +16,7 @@ port = 1883
 
 
 class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
-    def __init__(self, name: str, topics: list[Topic], debug: bool = True):
+    def __init__(self, name: str, topics: list[str], debug: bool = True):
         Debuggable.__init__(self, debug)
         self._client_id = f'CONN_HANDLER_{name}_{uuid.uuid4()}'
         self._topic_queues = {topic: queue.Queue() for topic in topics}
@@ -49,7 +49,7 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
         deserialized_message = self._deserializer.deserialize(message)
         self._topic_queues[msg.topic].put(deserialized_message)
 
-    def send_message(self, message: Message, topic: Topic):
+    def send_message(self, message: Message, topic: str):
         serialized_message = self._serializer.serialize(message)
         result = self._client.publish(topic, serialized_message)
         status = result[0]
@@ -59,14 +59,14 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
         else:
             self._log(f"Failed to send message to topic '{topic}'")
 
-    def wait_message(self, topic: Topic, timeout=None) -> Message:
+    def wait_message(self, topic: str, timeout=None) -> Message:
         if topic in self._topic_queues:
             try:
                 return self._topic_queues[topic].get(timeout=timeout)
             except queue.Empty:
                 return None
     
-    def try_get_any_message(self) -> tuple[Topic, Message]:
+    def try_get_any_message(self) -> tuple[str, Message]:
         for topic, q in self._topic_queues.items():
             try:
                 message = q.get_nowait()
