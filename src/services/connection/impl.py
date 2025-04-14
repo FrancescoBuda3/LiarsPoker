@@ -28,7 +28,7 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
             self._client.subscribe(topic)
 
     def __connect_mqtt(self, client_id: str):
-        client = mqtt.Client(client_id)
+        client = mqtt.Client(client_id=client_id)
 
         client.on_connect = self.__on_connect
         client.on_message = self.__on_message
