@@ -19,19 +19,19 @@ def game_loop(players: list[Player], id: str):
     while game.getPhase() != GamePhase.GAME_OVER:
         if (game.getPhase() == GamePhase.PLAYING):
             game.startRound()
-            connection_handler.send_message(message_factory.create_start_round_message(game.get_players()))
-            connection_handler.send_message(message_factory.create_start_turn_message(game.get_current_player(), None))
+            connection_handler.send_message(message_factory.create_start_round_message(game.get_players()), lobby_topic)
+            connection_handler.send_message(message_factory.create_start_turn_message(game.get_current_player(), None), lobby_topic)
             
         msg: Message = connection_handler.wait_message(lobby_topic)
         
         match msg.header :
             case Header.RAISE_STAKE:
                 next_min_stake = game.raise_stake(msg.body)
-                connection_handler.send_message(message_factory.create_start_turn_message(game.get_current_player(), next_min_stake))
+                connection_handler.send_message(message_factory.create_start_turn_message(game.get_current_player(), next_min_stake), lobby_topic)
                 
             case Header.CHECK_LIAR:
                 loser_player: Player = game.check_liar()
-                connection_handler.send_message(message_factory.create_round_loser_message(loser_player))
+                connection_handler.send_message(message_factory.create_round_loser_message(loser_player), lobby_topic)
                 if not loser_player in game.get_players():
-                    connection_handler.send_message(message_factory.create_elimination_message(loser_player))
+                    connection_handler.send_message(message_factory.create_elimination_message(loser_player), lobby_topic)
                 
