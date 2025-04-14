@@ -16,9 +16,9 @@ port = 1883
 
 
 class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
-    def __init__(self, topics: list[Topic], debug: bool = True):
+    def __init__(self, name: str, topics: list[Topic], debug: bool = True):
         Debuggable.__init__(self, debug)
-        self._client_id = f'CONN_HANDLER_{uuid.uuid4()}'
+        self._client_id = f'CONN_HANDLER_{name}_{uuid.uuid4()}'
         self._topic_queues = {topic: queue.Queue() for topic in topics}
         self._serializer = Serializer()
         self._deserializer = Deserializer()
@@ -65,3 +65,12 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
                 return self._topic_queues[topic].get(timeout=timeout)
             except queue.Empty:
                 return None
+    
+    def try_get_any_message(self) -> (Topic, Message):
+        for topic, q in self._topic_queues.items():
+            try:
+                message = q.get_nowait()
+                return topic, message
+            except queue.Empty:
+                continue
+        return None, None

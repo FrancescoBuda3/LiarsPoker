@@ -31,3 +31,11 @@ class ConnectionHandlerInterface(Protocol):
             Message: message received
         """
         ...
+    
+    def try_get_any_message(self) -> (Topic, Message):
+        """
+        Try to get a message if present on any topic
+        
+        Returns:
+            (Topic, Message): the topic and message, None if message isn't present
+        """
