@@ -23,7 +23,10 @@ class Server(Debuggable):
         self._connection = ConnectionHandler(
             "Server", [t for t in Topic], debug=debug)
 
-    def start(self, msg: Message, topic: str):
+    def start(self):
+        topic, msg = self._connection.try_get_any_message()
+        if msg is None:
+            return
         self._log(f"Received `{msg.body()}` from `{topic}` topic")
         match topic:
             case Topic.NEW_LOBBY:
