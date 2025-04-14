@@ -15,7 +15,7 @@ class MessageFactoryInterface(Protocol):
             cards (list[Card]): list of cards to be shown
 
         Returns:
-            Message: the conMessageucted message
+            Message: the constructed message
         """
         ...
 
@@ -28,15 +28,11 @@ class MessageFactoryInterface(Protocol):
             minimum_stake (Stake): minimum stake to play
 
         Returns:
-            Message: the conMessageucted message
+            Message: the constructed message
         """
         ...
 
-<<<<<<< HEAD
-    def create_start_round_message(self, players: list[Player]) -> str:
-=======
-    def cerate_start_round_message(self, players: list[Player]) -> Message:
->>>>>>> develop
+    def create_start_round_message(self, players: list[Player]) -> Message:
         """
         Create a message to start a round.
 
@@ -44,7 +40,7 @@ class MessageFactoryInterface(Protocol):
             players (list[Player]): list of players in the round
 
         Returns:
-            Message: the conMessageucted message
+            Message: the constructed message
         """
         ...
 
@@ -56,7 +52,7 @@ class MessageFactoryInterface(Protocol):
             player (Player): player who lost the round
 
         Returns:
-            Message: the conMessageucted message
+            Message: the constructed message
         """
         ...
 
@@ -68,7 +64,7 @@ class MessageFactoryInterface(Protocol):
             player (Player): player who was eliminated
 
         Returns:
-            Message: the conMessageucted message
+            Message: the constructed message
         """
         ...
 
@@ -80,7 +76,7 @@ class MessageFactoryInterface(Protocol):
             player (Player): player who won the game
 
         Returns:
-            Message: the conMessageucted message
+            Message: the constructed message
         """
         ...
 
@@ -92,7 +88,7 @@ class MessageFactoryInterface(Protocol):
             stake (Stake): new stake
 
         Returns:
-            Message: the conMessageucted message
+            Message: the constructed message
         """
         ...
 
@@ -101,5 +97,5 @@ class MessageFactoryInterface(Protocol):
         Create a message to check if the last stake is a lie.
 
         Returns:
-            Message: the conMessageucted message
+            Message: the constructed message
         """
