@@ -6,7 +6,7 @@ from src.model.card.suit import Suit
 from src.model.player import Player
 from src.model.stake import Stake
 from src.model.stake.combination import Combination
-from src.services.message import Header, Message
+from src.services.message import Message
 from src.services.serialize import SeriliazerInterface
 
 
@@ -35,12 +35,8 @@ class Serializer(SeriliazerInterface):
     
     def _message_to_ast(self, request: Message):
         return {
-            'header': self._to_ast(request.header),
             'body': self._to_ast(request.body),
         }
-        
-    def _header_to_ast(self, header: Header):
-        return {'name': header.name}
 
     def _player_to_ast(self, player: Player):
         return {
