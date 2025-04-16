@@ -8,7 +8,7 @@ from src.model.player import Player
 from src.model.stake import Stake
 from src.model.stake.combination import Combination
 from src.services.deserialize.impl import Deserializer
-from src.services.message import Header, Message
+from src.services.message import Message
 from src.services.serialize.impl import Serializer
 
 class SerializeTest(unittest.TestCase):
@@ -21,7 +21,6 @@ class SerializeTest(unittest.TestCase):
         test_player2 = Player("Player2")
         test_player2.cards_in_hand = 2
         cls.TEST_MESSAGE = Message(
-            Header.START_ROUND,
             {
                 "players": [test_player1, test_player2],
                 "stake": Stake(
@@ -31,10 +30,6 @@ class SerializeTest(unittest.TestCase):
             })
         cls.TEST_SERIALIZED_MESSAGE = """
         {
-            "header": {
-                "name": "START_ROUND",
-                "$type": "Header"
-            },
             "body": {
                 "players": [
                 {
@@ -63,39 +58,39 @@ class SerializeTest(unittest.TestCase):
                 }
                 ],
                 "stake": {
-                "ranks": [
-                    {
-                    "name": "ONE",
-                    "$type": "Rank"
+                    "ranks": [
+                        {
+                        "name": "ONE",
+                        "$type": "Rank"
+                        },
+                        {
+                        "name": "TWO",
+                        "$type": "Rank"
+                        },
+                        {
+                        "name": "THREE",
+                        "$type": "Rank"
+                        },
+                        {
+                        "name": "FOUR",
+                        "$type": "Rank"
+                        },
+                        {
+                        "name": "FIVE",
+                        "$type": "Rank"
+                        }
+                    ],
+                    "suits": [
+                        {
+                        "name": "SPADES",
+                        "$type": "Suit"
+                        }
+                    ],
+                    "combo": {
+                        "name": "STRAIGHT_FLUSH",
+                        "$type": "Combination"
                     },
-                    {
-                    "name": "TWO",
-                    "$type": "Rank"
-                    },
-                    {
-                    "name": "THREE",
-                    "$type": "Rank"
-                    },
-                    {
-                    "name": "FOUR",
-                    "$type": "Rank"
-                    },
-                    {
-                    "name": "FIVE",
-                    "$type": "Rank"
-                    }
-                ],
-                "suits": [
-                    {
-                    "name": "SPADES",
-                    "$type": "Suit"
-                    }
-                ],
-                "combo": {
-                    "name": "STRAIGHT_FLUSH",
-                    "$type": "Combination"
-                },
-                "$type": "Stake"
+                    "$type": "Stake"
                 }
             },
             "$type": "Message"

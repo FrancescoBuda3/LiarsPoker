@@ -1,4 +1,3 @@
-from enum import Enum
 import json
 from src.model.card import Card
 from src.model.card.rank import Rank
@@ -6,16 +5,7 @@ from src.model.card.suit import Suit
 from src.model.player import Player
 from src.model.stake import Stake
 from src.model.stake.combination import Combination
-from src.services.message import Header, Message
-
-#class MessageType(Enum):
-#    SART_GAME = "start_game"
-#    START_ROUND = "start_round"
-#    START_TURN = "start_turn"
-#    ROUNT_LOSER = "round_loser"
-#    SHOW_CARDS = "show_cards"
-#    ELIMINATION = "elimination"
-#    GAME_OVER = "game_over"
+from src.services.message import Message
 
 class Deserializer:
     def deserialize(self, string):
@@ -40,7 +30,6 @@ class Deserializer:
     
     def _ast_to_message(self, data):
         return Message(
-            header = self._ast_to_obj(data["header"]),
             body = self._ast_to_obj(data["body"])
         )
     
@@ -70,9 +59,6 @@ class Deserializer:
     
     def _ast_to_suit(self, data) -> Suit:
         return Suit[data["name"]]
-    
-    def _ast_to_header(self, data) -> Header:
-        return Header[data["name"]]
     
     def _ast_to_combination(self, data) -> Combination:
         return Combination[data["name"]]
