@@ -36,6 +36,8 @@ def game_loop(players: list[Player], id: str):
                 lobby_topic + Topic.START_TURN)
 
         (topic, msg) = connection_handler.try_get_any_message()
+        if msg is None:
+            continue
 
         match topic:
             case Topic.RAISE_STAKE:
