@@ -47,7 +47,9 @@ class Serializer(SeriliazerInterface):
         }
         
     def _uuid_to_ast(self, uuid):
-        return str(uuid)
+        return {
+            'id': str(uuid),
+        }
 
     def _card_to_ast(self, card: Card):
         return {
