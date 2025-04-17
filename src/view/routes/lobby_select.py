@@ -11,14 +11,15 @@ def setup():
             with ui.card():
                 ui.label('Lobby Selection')
                 ui.label(f'User state: {user_state}')
-                lobby = ui.input(label='Lobby Name')
+                lobby = ui.input(label='Lobby ID')
 
                 def create_lobby():
-                    user_state.selected_lobby = lobby.value
+                    user_state.selected_lobby = 1234
                     ui.navigate.to('/lobby')
 
                 def join_lobby():
-                    create_lobby()
+                    user_state.selected_lobby = lobby.value
+                    ui.navigate.to('/lobby')
 
                 ui.button('Create Lobby', on_click=create_lobby)
                 ui.button('Join Lobby', on_click=join_lobby)
