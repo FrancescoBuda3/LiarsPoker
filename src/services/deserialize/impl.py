@@ -1,4 +1,5 @@
 import json
+import uuid
 from src.model.card import Card
 from src.model.card.rank import Rank
 from src.model.card.suit import Suit
@@ -36,10 +37,14 @@ class Deserializer:
     def _ast_to_player(self, data) -> Player:
         p = Player(
             username = data["username"],
+            id = self._ast_to_obj(data["id"]),
         )
         p.cards = self._ast_to_obj(data["cards"])
         p.cards_in_hand = data["cards_in_hand"]
         return p
+    
+    def _ast_to_uuid(self, data):
+        return uuid.UUID(data)
     
     def _ast_to_card(self, data) -> Card:
         return Card(
