@@ -44,7 +44,7 @@ class Deserializer:
         return p
     
     def _ast_to_uuid(self, data):
-        return uuid.UUID(data)
+        return uuid.UUID(data["id"])
     
     def _ast_to_card(self, data) -> Card:
         return Card(
