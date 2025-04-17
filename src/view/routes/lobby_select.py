@@ -21,9 +21,9 @@ def setup():
                 def create_lobby():
                     ui.spinner(type='oval')
                     connection_handler.send_message(
-                        message_factory.create_new_lobby_message(user_state.user_id), Topic.NEW_LOBBY)
+                        message_factory.create_new_lobby_message(user_state.id), Topic.NEW_LOBBY)
                     message = connection_handler.wait_message(Topic.NEW_LOBBY)
-                    while message.body["id"] != user_state.user_id:
+                    while message.body["player_id"] != user_state.id:
                         message = connection_handler.wait_message(
                             Topic.NEW_LOBBY)
                     user_state.selected_lobby = message.body["lobby_id"]
@@ -32,9 +32,9 @@ def setup():
                 def join_lobby():
                     ui.spinner(type='oval')
                     connection_handler.send_message(
-                        message_factory.create_join_lobby_message(user_state.user_id), Topic.JOIN_LOBBY)
+                        message_factory.create_join_lobby_message(user_state.id), Topic.JOIN_LOBBY)
                     message = connection_handler.wait_message(Topic.JOIN_LOBBY)
-                    while message.body["id"] != user_state.user_id:
+                    while message.body["player_id"] != user_state.id:
                         message = connection_handler.wait_message(
                             lobby.value, Topic.NEW_LOBBY)
                     if message.body["status"] == "error":

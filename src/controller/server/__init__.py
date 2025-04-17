@@ -3,17 +3,16 @@ from threading import Thread
 from typing import Dict
 
 from src.controller.game_agent import game_loop
+from src.controller.message_factory.impl import MessageFactory
 from src.model.player import Player
 from src.services.connection.impl import ConnectionHandler
 from src.utils.debug import Debuggable
 from src.services.connection.topic import Topic
 
-__LOBBY_SIZE = 10
-__MAX_LOBBIES = 1000
-
-
 class Server(Debuggable):
-
+    
+    _LOBBY_SIZE = 10
+    _MAX_LOBBIES = 1000
     _players: list[Player] = []
     _lobby: Dict[int, list[Player]] = {}
     _random = Random()
@@ -23,18 +22,22 @@ class Server(Debuggable):
         Debuggable.__init__(self, debug)
         self._connection = ConnectionHandler(
             "Server", [t for t in Topic], debug=debug)
+        self._message_factory = MessageFactory()
 
     def run(self):
         topic, msg = self._connection.try_get_any_message()
         if msg is None:
             return
-        self._log(f"Received `{msg.body()}` from `{topic}` topic")
+        self._log(f"Received `{msg.body}` from `{topic}` topic")
         try:
             match topic:
                 case Topic.NEW_LOBBY:
-                    id = self.__create_lobby(msg.body["player"])
+                    player = next((p for p in self._players if p.id == msg.body["player_id"]), None)
+                    lobby_id = self.__create_lobby(player)
                     # self.client.subscribe(f"lobby/{id}")
-                    self._log(f"New lobby created. ID: {id}")
+                    self._log(f"New lobby created. ID: {lobby_id}")
+                    self._connection.send_message(
+                        self._message_factory.create_new_lobby_message(player.id, lobby_id), Topic.NEW_LOBBY)
                 case Topic.NEW_PLAYER:
                     self.__new_player(msg.body["player"])
                 case Topic.NEW_GAME:
@@ -70,8 +73,9 @@ class Server(Debuggable):
             self._log(f"Unexpected message: {e}")
 
     def __generate_id(self) -> int:
-        if self._random.randint(0, __MAX_LOBBIES) not in self._lobby.keys():
-            return self._random.randint(0, __MAX_LOBBIES)
+        id = self._random.randint(0, self._MAX_LOBBIES)
+        if id not in self._lobby.keys():
+            return id
         else:
             return self.__generate_id()
 
@@ -81,7 +85,7 @@ class Server(Debuggable):
         return id
 
     def __join_lobby(self, player, lobby):
-        if lobby in self._lobby.keys() and player not in self._lobby[lobby] and len(self._lobby[lobby]) < __LOBBY_SIZE:
+        if lobby in self._lobby.keys() and player not in self._lobby[lobby] and len(self._lobby[lobby]) < self._LOBBY_SIZE:
             self._lobby[lobby].append(player)
             return True
         else:

@@ -52,9 +52,10 @@ class MessageFactory(MessageFactoryInterface):
             "player": Player(player, id)
         })
         
-    def create_new_lobby_message(self, id: UUID) -> Message:
+    def create_new_lobby_message(self, player_id: UUID, lobby_id: int = 0) -> Message:
         return Message({
-            "player_id": id
+            "player_id": player_id,
+            "lobby_id": lobby_id
         })
 
     def create_join_lobby_message(self, player_id: UUID, lobby_id: int) -> Message:
