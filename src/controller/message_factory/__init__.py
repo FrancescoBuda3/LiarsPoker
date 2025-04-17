@@ -1,4 +1,5 @@
 from typing import Protocol
+from uuid import UUID
 
 from src.model.card import Card
 from src.model.player import Player
@@ -99,3 +100,28 @@ class MessageFactoryInterface(Protocol):
         Returns:
             Message: the constructed message
         """
+        
+    def create_new_player_message(self, player: str, id: UUID) -> Message:
+        """
+        Create a message to create a new player.
+
+        Args:
+            player (Player): new player
+
+        Returns:
+            Message: the constructed message
+        """
+        ...
+        
+    def create_join_lobby_message(self, player_id: UUID, lobby_id: int) -> Message:
+        """
+        Create a message to join a lobby.
+
+        Args:
+            player_id (UUID): ID of the player
+            lobby_id (int): ID of the lobby
+
+        Returns:
+            Message: the constructed message
+        """
+        ...

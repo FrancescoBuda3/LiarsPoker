@@ -36,10 +36,7 @@ class Server(Debuggable):
                     # self.client.subscribe(f"lobby/{id}")
                     self._log(f"New lobby created. ID: {id}")
                 case Topic.NEW_PLAYER:
-                    if self.__new_player(msg.body["player"]):
-                        self._log("New player added")
-                    else:
-                        self._log("Player already exists")
+                    self.__new_player(msg.body["player"])
                 case Topic.NEW_GAME:
                     thread = Thread(target=game_loop, args=(
                         self._players, msg.body["lobby"]))
@@ -98,11 +95,7 @@ class Server(Debuggable):
             return False
 
     def __new_player(self, player):
-        if player not in self._players:
-            self._players.append(player)
-            return True
-        else:
-            return False
+        self._players.append(player)
 
     def __disconnect_player(self, player):
         if player in self._players:

@@ -1,3 +1,4 @@
+from uuid import UUID
 from src.controller.message_factory import MessageFactoryInterface
 from src.model.card import Card
 from src.model.player import Player
@@ -45,3 +46,19 @@ class MessageFactory(MessageFactoryInterface):
 
     def create_check_liar_message(self) -> Message:
         return Message({})
+
+    def create_new_player_message(self, player: str, id: UUID) -> Message:
+        return Message({
+            "player": Player(player, id)
+        })
+        
+    def create_new_lobby_message(self, id: UUID) -> Message:
+        return Message({
+            "player_id": id
+        })
+
+    def create_join_lobby_message(self, player_id: UUID, lobby_id: int) -> Message:
+        return Message({
+            "player_id": player_id,
+            "lobby_id": lobby_id
+        })
