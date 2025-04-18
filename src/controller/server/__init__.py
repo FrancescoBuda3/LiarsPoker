@@ -33,11 +33,12 @@ class Server(Debuggable):
             match topic:
                 case Topic.NEW_LOBBY:
                     player = next((p for p in self._players if p.id == msg.body["player_id"]), None)
-                    lobby_id = self.__create_lobby(player)
-                    # self.client.subscribe(f"lobby/{id}")
-                    self._log(f"New lobby created. ID: {lobby_id}")
-                    self._connection.send_message(
-                        self._message_factory.create_new_lobby_message(player.id, lobby_id), Topic.NEW_LOBBY)
+                    if msg.body["lobby_id"] not in self._lobby.keys():
+                        lobby_id = self.__create_lobby(player)
+                        # self.client.subscribe(f"lobby/{id}")
+                        self._log(f"New lobby created. ID: {lobby_id}")
+                        self._connection.send_message(
+                            self._message_factory.create_new_lobby_message(player.id, lobby_id), Topic.NEW_LOBBY)
                 case Topic.NEW_PLAYER:
                     self.__new_player(msg.body["player"])
                 case Topic.NEW_GAME:

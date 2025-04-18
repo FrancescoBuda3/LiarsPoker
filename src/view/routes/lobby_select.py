@@ -32,11 +32,11 @@ def setup():
                 def join_lobby():
                     ui.spinner(type='oval')
                     connection_handler.send_message(
-                        message_factory.create_join_lobby_message(user_state.id), Topic.JOIN_LOBBY)
+                        message_factory.create_join_lobby_message(user_state.id, int(lobby.value)), Topic.JOIN_LOBBY)
                     message = connection_handler.wait_message(Topic.JOIN_LOBBY)
-                    while message.body["player_id"] != user_state.id:
+                    while message == None or message.body["player_id"] != user_state.id:
                         message = connection_handler.wait_message(
-                            lobby.value, Topic.NEW_LOBBY)
+                            lobby.value, Topic.JOIN_LOBBY)
                     if message.body["status"] == "error":
                         ui.notify("Error joining lobby", color='red')
                         return
