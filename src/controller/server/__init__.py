@@ -48,7 +48,10 @@ class Server(Debuggable):
                     thread.start()
                     self._log("New game started")
                 case Topic.JOIN_LOBBY:
-                    if self.__join_lobby(msg.body["player"], msg.body["lobby"]):
+                    if self.__join_lobby(msg.body["player_id"], msg.body["lobby_id"]):
+                        self._connection.send_message(
+                            self._message_factory.create_join_lobby_message(msg.body["player_id"], msg.body["lobby_id"]), Topic.JOIN_LOBBY
+                        )
                         self._log("Player joined lobby")
                     else:
                         self._log("Player couldn't join lobby")
