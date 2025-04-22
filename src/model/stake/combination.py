@@ -18,7 +18,7 @@ class Combination(Enum):
     ROYAL_FLUSH = 10
     
     def __str__(self):
-        return self.name
+        return self.name.replace('_', ' ').title()
     
     def next(self):
         """
