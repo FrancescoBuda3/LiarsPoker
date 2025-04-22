@@ -20,9 +20,6 @@ class Rank(Enum):
     QUEEN = 12
     KING = 13
     ACE = 14
-
-    def __str__(self):
-        return str(self.value)
     
     def next(self):
         """
@@ -43,3 +40,12 @@ class Rank(Enum):
         ranks = list(self.__class__)
         idx = ranks.index(self)
         return ranks[idx - 1] if idx - 1 >= 0 else None
+    
+    def __str__(self):
+        res = str(self.value)
+        match self.value:
+            case 11: res = "jack"
+            case 12: res = "queen"
+            case 13: res = "king"
+            case 14: res = "ace"
+        return res
