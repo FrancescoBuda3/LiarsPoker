@@ -1,116 +1,94 @@
-from nicegui import binding, ui
+from nicegui import ui
 from src.model.card import Card
 from src.model.card.rank import Rank
 from src.model.card.suit import Suit
-from src.model.stake import Stake
-from src.model.stake.combination import Combination
+from src.model.player import Player
 from utils.state import user_state
 
 
 def setup():
     from src.view.utils.layout import centered_layout
+    from src.view.components.dialogs import cards_picker, combination_picker
+    
+    __player_colors = [
+        'red', 'blue', 'green', 'yellow',
+        'purple', 'orange', 'pink', 'brown',
+        'cyan', 'lime'
+    ]
 
     @ui.page('/game')
     def game_page():
         def content():
-            players = [('Alice', 'blue', 6), ('Bob', 'red', 6),
-                       ('Charlie', 'green', 6), ('Diana', 'purple', 6),
-                       ('Donna', 'orange', 6), ('Ernesto', 'pink', 6),
-                       ('Francesco', 'brown', 6), ('Giorgio', 'cyan', 6),
-                       ('Hannah', 'lime', 6)
-                       ]  # Example player names and colors
-            cards_in_hand = [Card(Suit.SPADES, Rank.JACK),
-                             Card(Suit.HEARTS, Rank.QUEEN),
-                             Card(Suit.DIAMONDS, Rank.KING),
-                             Card(Suit.CLUBS, Rank.ACE),
-                             ]
-            player_move = {}
-
-            with ui.dialog() as combination_dialog, ui.card():
-                with ui.column().classes('q-pa-sm'):
-                    ui.label('Select Combination').classes('text-lg')
-                    for combo in Combination:
-                        ui.button(
-                            str(combo),
-                            on_click=lambda c=combo: combination_dialog.submit(
-                                str(c)),
-                            color='primary'
-                        ).style('width: 100%').classes('q-mt-xs')
-
-            with ui.dialog() as cards_dialog, ui.card():
-                cards_selected = []
-                boxes = []
-                ui.label('Select cards').classes('text-lg')
-                for suit in Suit:
-                    with ui.row().classes('q-mt-xs'):
-                        for rank in Rank:
-                            card = Card(suit, rank)
-                            with ui.column().classes('items-center'):
-                                ui.image(
-                                    f"static/{card.rank}_of_{card.suit}.png"
-                                ).style(
-                                    'width: 80px; height: auto'
-                                )
-                                boxes.append(ui.checkbox(
-                                    on_change=lambda c=card:
-                                        cards_selected.append(
-                                            c) if c not in cards_selected else cards_selected.remove(c),
-                                ))
-                ui.button(
-                    'Submit',
-                    on_click=lambda: (
-                        cards_dialog.submit(cards_selected.copy()),
-                        cards_selected.clear(),
-                        boxes.clear()
-                        )
-                )
+            players: list[Player] = [
+                Player("Alice", 0), Player("Bob", 0),
+                Player("Charlie", 0), Player("Dave", 0),
+                Player("Eve", 0), Player("Frank", 0),
+                Player("Grace", 0), Player("Heidi", 0),
+                Player("Ivan", 0),
+            ]
+            for player in players:
+                player.cards_in_hand = 6
+                
+            cards_in_hand: list[Card] = [
+                Card(Suit.SPADES, Rank.JACK),
+                Card(Suit.HEARTS, Rank.QUEEN),
+                Card(Suit.DIAMONDS, Rank.KING),
+                Card(Suit.CLUBS, Rank.ACE),
+            ]
 
             async def show_stake_dialog():
-                combo = await combination_dialog
-                cards = await cards_dialog
+                combo = await combination_picker()
+                cards = await cards_picker()
                 ui.notify(f'You chose {combo} with cards {cards}')
+                
+            players_moves = {}
+                
+            def show_player_move(player, text):
+                players_moves[player].set_text(f'"{text}"')
+
+            with ui.row().classes('justify-center'):
+                for i in range(len(players)):
+                    player: Player = players[i]
+                    with ui.column().classes('col-2 items-center'):
+                        ui.icon('circle', color=__player_colors[i], size='1.5rem')
+                        ui.label(player.username).classes('text-lg')
+                        with ui.row():
+                            for _ in range(player.cards_in_hand):
+                                ui.image('static/back.png'
+                                    ).style('width: 0.7rem; height: auto')
+                        move = ui.label(''
+                            ).classes('text-lg text-gray-600'
+                            ).style('min-height: 1.5rem')
+                        players_moves[player.username] = move
 
             with ui.row():
-                for name, color, cards in players:
-                    with ui.column().classes('items-center q-mx-xl'):
-                        ui.icon('circle', color=color, size='2.5rem')
-                        ui.label(name).classes('text-lg')
-                        rows = [min(cards, 3), max(0, cards - 3)]
+                ui.image('static/back.png'
+                    ).style('width: 6rem; height: auto'
+                    ).classes('q-mr-xl')
+                ui.image('static/blank.png'
+                    ).style('width: 6rem; height: auto'
+                    ).classes('q-ml-xl')
 
-                        with ui.column():
-                            for num_in_row in rows:
-                                if num_in_row > 0:
-                                    with ui.row():
-                                        for _ in range(num_in_row):
-                                            ui.image(
-                                                'static/back.png').style('width: 0.7rem; height: auto')
-
-                        phrase = ui.label('').classes(
-                            'text-lg text-gray-600').style('min-height: 1.5rem')
-                        player_move[name] = phrase
-
-            with ui.row().classes('q-gutter-md q-mt-xl'):
-                ui.image(
-                    'static/back.png').style('width: 100px; height: auto').classes('q-mr-xl')
-                ui.image(
-                    'static/blank.png').style('width: 100px; height: auto').classes('q-ml-xl')
-
-            with ui.row().classes('q-gutter-md q-mt-xl'):
+            with ui.row():
                 ui.button(
-                    'Bullsh*t', on_click=lambda: ui.notify("Bullsh*t!"), color='red').style('width: 10rem; height: auto')
-                ui.button('Raise', on_click=lambda: show_stake_dialog(),
-                          color='green').style('width: 10rem; height: auto')
+                    'Bullsh*t', 
+                    on_click=lambda: ui.notify("Bullsh*t!"), 
+                    color='red'
+                    ).style('width: 10rem; height: auto')
+                ui.button(
+                    'Raise', 
+                    on_click=lambda: show_stake_dialog(),
+                    color='green'
+                    ).style('width: 10rem; height: auto')
 
-            with ui.row().classes('q-mt-xs'):
+            with ui.row():
                 for card in cards_in_hand:
-                    ui.image(f"static/{card.rank}_of_{card.suit}.png").style(
-                        'width: 120px; height: auto').classes('q-mx-sm')
+                    ui.image(f"static/{card.rank}_of_{card.suit}.png"
+                        ).style('width: 6.5rem; height: auto'
+                        ).classes('q-mx-sm')
 
             with ui.row():
                 ui.label(user_state.username).classes('text-lg')
-
-            def show_player_move(player, text):
-                player_move[player].set_text(f'"{text}"')
 
             # Example: after 2 seconds, Alice says "Bullsh*t"
             ui.timer(2.0, lambda: show_player_move(

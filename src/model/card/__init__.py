@@ -4,7 +4,7 @@ from src.model.card.rank import Rank
 from src.model.card.suit import Suit
 
 
-@dataclass
+@dataclass(frozen=True)
 class Card():
     suit: Suit
     rank: Rank
