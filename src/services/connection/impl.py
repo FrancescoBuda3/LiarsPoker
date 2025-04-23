@@ -24,11 +24,13 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
         self._deserializer = Deserializer()
         self._client = self.__connect_mqtt(self._client_id)
         self._topics = topics
+        props = mqtt.Properties(mqtt.PacketTypes.SUBSCRIBE)
+        props.SubscriptionIdentifier = 1
         for topic in self._topics:
-            self._client.subscribe(topic)
+            self._client.subscribe(topic, options=mqtt.SubscribeOptions(noLocal=True), properties=props)
 
     def __connect_mqtt(self, client_id: str):
-        client = mqtt.Client(client_id=client_id)
+        client = mqtt.Client(client_id=client_id, protocol=mqtt.MQTTv5)
 
         client.on_connect = self.__on_connect
         client.on_message = self.__on_message
@@ -37,7 +39,7 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
         client.loop_start()
         return client
 
-    def __on_connect(self, client, userdata, flags, rc):
+    def __on_connect(self, client, userdata, flags, rc, properties):
         if rc == 0:
             self._log("Connected to MQTT Broker!")
         else:
@@ -45,7 +47,7 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
 
     def __on_message(self, client, userdata, msg: mqtt.MQTTMessage):
         message = msg.payload.decode()
-        self._log(f"Received `{message}` from `{msg.topic}` topic")
+        self._log(f"Received `{message}` from `{msg.topic}` topic\n\n")
         deserialized_message = self._deserializer.deserialize(message)
         self._topic_queues[msg.topic].put(deserialized_message)
 
