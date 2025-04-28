@@ -61,13 +61,9 @@ def setup():
                             ).style('min-height: 1.5rem')
                         players_moves[player.username] = move
 
-            with ui.row():
-                ui.image('static/back.png'
-                    ).style('width: 6rem; height: auto'
-                    ).classes('q-mr-xl')
-                ui.image('static/blank.png'
-                    ).style('width: 6rem; height: auto'
-                    ).classes('q-ml-xl')
+            ui.image('static/back.png'
+                ).style('width: 6rem; height: auto'
+                ).classes('q-mr-xl')
 
             with ui.row():
                 ui.button(
