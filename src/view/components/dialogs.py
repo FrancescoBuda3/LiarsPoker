@@ -11,9 +11,10 @@ def combination_picker(minimum_combo: Combination = Combination.HIGH_CARD) -> ui
         with ui.column().classes('q-pa-sm'):
             ui.label('Select Combination').classes('text-lg')
             for combo in Combination:
+                bt_title = str(combo)
                 bt = ui.button(
-                    str(combo),
-                    on_click=lambda c=combo: combination_dialog.submit(str(c)),
+                    bt_title,
+                    on_click=lambda c=combo: combination_dialog.submit(c),
                     color='primary'
                 ).style('width: 100%').classes('q-mt-xs')
                 if combo.value < minimum_combo.value:

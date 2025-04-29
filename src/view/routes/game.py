@@ -3,6 +3,8 @@ from src.model.card import Card
 from src.model.card.rank import Rank
 from src.model.card.suit import Suit
 from src.model.player import Player
+from src.model.stake import Stake
+from src.model.stake.combination import Combination
 from utils.state import user_state
 
 
@@ -36,9 +38,23 @@ def setup():
                 Card(Suit.CLUBS, Rank.ACE),
             ]
 
-            async def show_stake_dialog():
-                combo = await combination_picker()
-                cards = await cards_picker()
+            async def show_stake_dialog(min_stake: Stake):
+                combo = await combination_picker(min_stake.combo)
+                max_cards = 5
+                match combo:
+                    case (
+                        Combination.HIGH_CARD
+                        | Combination.PAIR
+                        | Combination.THREE_OF_A_KIND
+                        | Combination.FOUR_OF_A_KIND
+                    ):
+                        max_cards = 1
+                    case (
+                        Combination.TWO_PAIR
+                        | Combination.FULL_HOUSE
+                    ):
+                        max_cards = 2                       
+                cards = await cards_picker(max_cards=max_cards)
                 ui.notify(f'You chose {combo} with cards {cards}')
                 
             players_moves = {}
@@ -73,7 +89,7 @@ def setup():
                     ).style('width: 10rem; height: auto')
                 ui.button(
                     'Raise', 
-                    on_click=lambda: show_stake_dialog(),
+                    on_click=lambda: show_stake_dialog(Stake(Combination.HIGH_CARD, 1)),
                     color='green'
                     ).style('width: 10rem; height: auto')
 
