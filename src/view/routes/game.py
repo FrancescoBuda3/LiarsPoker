@@ -55,7 +55,49 @@ def setup():
                     ):
                         max_cards = 2                       
                 cards = await cards_picker(max_cards=max_cards)
-                ui.notify(f'You chose {combo} with cards {cards}')
+                if check_input(cards, combo):
+                    ui.notify(f'You chose {combo} with cards {cards}')
+                else:
+                    ui.notify('Invalid input!')
+                    
+            def check_input(cards: list[Card], combo: Combination) -> bool:
+                if combo == Combination.STRAIGHT:
+                    cards.sort(key=lambda x: x.rank.value)
+                    return all(
+                        cards[i].rank.value == cards[i + 1].rank.value - 1
+                        for i in range(len(cards) - 1)
+                    )
+                elif combo == Combination.FLUSH:
+                    return all(
+                        cards[i].suit == cards[i + 1].suit
+                        for i in range(len(cards) - 1)
+                    )
+                elif combo == Combination.STRAIGHT_FLUSH:
+                    cards.sort(key=lambda x: x.rank.value)
+                    return all(
+                        cards[i].suit == cards[i + 1].suit
+                        for i in range(len(cards) - 1)
+                    ) and all(
+                        cards[i].rank.value == cards[i + 1].rank.value - 1
+                        for i in range(len(cards) - 1)
+                    )
+                elif combo == Combination.ROYAL_FLUSH:
+                    cards.sort(key=lambda x: x.rank.value)
+                    if cards[0].rank != Rank.ONE or cards[0].suit != cards[1].suit:
+                        return False
+                    cards.remove(cards[0])
+                    cards.append(Card(cards[0].suit, Rank.ACE))
+                    return all(
+                        cards[i].suit == cards[i + 1].suit
+                        for i in range(len(cards) - 1)
+                    ) and all(
+                        cards[i].rank.value == Rank(i + 10).value
+                        for i in range(len(cards))
+                    )
+                elif combo == Combination.HIGH_CARD or combo == Combination.PAIR or combo == Combination.THREE_OF_A_KIND or combo == Combination.FOUR_OF_A_KIND or combo == Combination.TWO_PAIR or combo == Combination.FULL_HOUSE:
+                    return True
+                    
+                
                 
             players_moves = {}
                 
