@@ -83,10 +83,6 @@ def setup():
                     )
                 elif combo == Combination.ROYAL_FLUSH:
                     cards.sort(key=lambda x: x.rank.value)
-                    if cards[0].rank != Rank.ONE or cards[0].suit != cards[1].suit:
-                        return False
-                    cards.remove(cards[0])
-                    cards.append(Card(cards[0].suit, Rank.ACE))
                     return all(
                         cards[i].suit == cards[i + 1].suit
                         for i in range(len(cards) - 1)

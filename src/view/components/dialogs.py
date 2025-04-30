@@ -53,7 +53,7 @@ def cards_picker(max_cards: int = 5,
             ui.label('Select cards').classes('text-lg')
             for suit in suits:
                 with ui.row():
-                    for i in range(min_rank.value, len(Rank)):
+                    for i in range(min_rank.value, len(Rank) + 1):
                         rank = Rank(i)
                         card = Card(suit, rank)
                         with ui.column().classes('items-center'):
