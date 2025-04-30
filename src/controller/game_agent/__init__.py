@@ -3,23 +3,14 @@ from src.model.game.GImpl import GameImpl, GamePhase
 from src.model.player import Player
 from src.services.connection.impl import ConnectionHandler
 from src.services.connection.topic import Topic
-
-__game_topics = [
-    Topic.SHOW_CARDS,
-    Topic.START_TURN,
-    Topic.START_ROUND,
-    Topic.ROUND_LOSER,
-    Topic.ELIMINATION,
-    Topic.RAISE_STAKE,
-    Topic.CHECK_LIAR
-]
+from src.services.connection.topic import game_topics
 
 
 def game_loop(players: list[Player], id: str):
     game = GameImpl()
     lobby_topic = Topic.LOBBY + id
     connection_handler = ConnectionHandler(
-        id, [lobby_topic + t for t in __game_topics]
+        id, [lobby_topic + t for t in game_topics]
     )
     message_factory = MessageFactory()
     for p in players:
