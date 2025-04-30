@@ -32,3 +32,13 @@ class Topic(str, Enum):
             str: "other/topic"
         """
         return f"{other}/{self.value}"
+    
+game_topics = [
+    Topic.SHOW_CARDS,
+    Topic.START_TURN,
+    Topic.START_ROUND,
+    Topic.ROUND_LOSER,
+    Topic.ELIMINATION,
+    Topic.RAISE_STAKE,
+    Topic.CHECK_LIAR
+]

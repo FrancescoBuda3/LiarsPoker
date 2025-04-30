@@ -84,3 +84,22 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
             except queue.Empty:
                 return None
         return None
+    
+    def subscribe(self, topic: str):
+        if topic not in self._topics:
+            self._client.subscribe(topic)
+            self._topics.append(topic)
+            self._topic_queues[topic] = queue.Queue()
+            self._log(f"Subscribed to topic '{topic}'")
+        else:
+            self._log(f"Already subscribed to topic '{topic}'")
+            
+    def unsubscribe(self, topic: str):
+        if topic in self._topics:
+            self._client.unsubscribe(topic)
+            self._topics.remove(topic)
+            del self._topic_queues[topic]
+            self._log(f"Unsubscribed from topic '{topic}'")
+        else:
+            self._log(f"Not subscribed to topic '{topic}'")
+    

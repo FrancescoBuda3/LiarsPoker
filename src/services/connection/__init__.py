@@ -9,6 +9,24 @@ class ConnectionHandlerInterface(Protocol):
     Class for handling the connection for sending and receiving messages.
     One or more topics can be subscribed to.
     """
+    
+    def subscribe(self, topic: Topic):
+        """
+        Subscribe to a topic to receive messages.
+
+        Args:
+            topic (Topic): topic to subscribe to
+        """
+        ...
+        
+    def unsubscribe(self, topic: Topic):
+        """
+        Unsubscribe from a topic to stop receiving messages.
+
+        Args:
+            topic (Topic): topic to unsubscribe from
+        """
+        ...
 
     def send_message(self, message: Message, topic: Topic):
         """
@@ -47,3 +65,4 @@ class ConnectionHandlerInterface(Protocol):
         Returns:
             Message: message received
         """
+        ...
