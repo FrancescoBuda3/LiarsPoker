@@ -35,9 +35,8 @@ def setup():
                         message_factory.create_join_lobby_message(user_state.id, int(lobby.value)), Topic.JOIN_LOBBY)
                     message = connection_handler.wait_message(Topic.JOIN_LOBBY)
                     while message == None or message.body["player_id"] != user_state.id:
-                        message = connection_handler.wait_message(
-                            lobby.value, Topic.JOIN_LOBBY)
-                    if message.body["status"] == "error":
+                        message = connection_handler.wait_message(Topic.JOIN_LOBBY)
+                    if not message.body["status"]:
                         ui.notify("Error joining lobby", color='red')
                         return
                     user_state.selected_lobby = message.body["lobby_id"]

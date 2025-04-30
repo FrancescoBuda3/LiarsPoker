@@ -28,17 +28,17 @@ class Server(Debuggable):
         topic, msg = self._connection.try_get_any_message()
         if msg is None:
             return
-        self._log(f"Received `{msg.body}` from `{topic}` topic")
+        #self._log(f"Received `{msg.body}` from `{topic}` topic")
         try:
             match topic:
                 case Topic.NEW_LOBBY:
                     player = next((p for p in self._players if p.id == msg.body["player_id"]), None)
-                    if msg.body["lobby_id"] not in self._lobby.keys():
-                        lobby_id = self.__create_lobby(player)
-                        # self.client.subscribe(f"lobby/{id}")
-                        self._log(f"New lobby created. ID: {lobby_id}")
-                        self._connection.send_message(
-                            self._message_factory.create_new_lobby_message(player.id, lobby_id), Topic.NEW_LOBBY)
+                    #if msg.body["lobby_id"] not in self._lobby.keys():
+                    lobby_id = self.__create_lobby(player)
+                    # self.client.subscribe(f"lobby/{id}")
+                    self._log(f"New lobby created. ID: {lobby_id}")
+                    self._connection.send_message(
+                        self._message_factory.create_new_lobby_message(player.id, lobby_id), Topic.NEW_LOBBY)
                 case Topic.NEW_PLAYER:
                     self.__new_player(msg.body["player"])
                 case Topic.NEW_GAME:
@@ -48,13 +48,13 @@ class Server(Debuggable):
                     thread.start()
                     self._log("New game started")
                 case Topic.JOIN_LOBBY:
-                    if self.__join_lobby(msg.body["player_id"], msg.body["lobby_id"]):
-                        self._connection.send_message(
-                            self._message_factory.create_join_lobby_message(msg.body["player_id"], msg.body["lobby_id"]), Topic.JOIN_LOBBY
-                        )
-                        self._log("Player joined lobby")
-                    else:
-                        self._log("Player couldn't join lobby")
+                    player = next((p for p in self._players if p.id == msg.body["player_id"]), None)
+                    status = self.__join_lobby(player.id, msg.body["lobby_id"])
+                    self._connection.send_message(
+                        self._message_factory.create_join_lobby_message(player.id, msg.body["lobby_id"], status), Topic.JOIN_LOBBY
+                    )
+                    self._log(f"Player joined lobby: {status}")
+
                 case Topic.LEAVE_LOBBY:
                     if self.__leave_lobby(msg.body["player"], msg.body["lobby"]):
                         self._log("Player left lobby")
