@@ -27,6 +27,7 @@ def setup():
                         message = connection_handler.wait_message(
                             Topic.NEW_LOBBY)
                     user_state.selected_lobby = message.body["lobby_id"]
+                    user_state.host = True
                     ui.navigate.to('/lobby')
 
                 def join_lobby():

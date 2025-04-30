@@ -43,8 +43,8 @@ class Server(Debuggable):
                     self.__new_player(msg.body["player"])
                 case Topic.NEW_GAME:
                     thread = Thread(target=game_loop, args=(
-                        self._players, msg.body["lobby"]))
-                    self._lobby_threads[msg.body["lobby"]] = thread
+                        self._players, msg.body["lobby_id"]))
+                    self._lobby_threads[msg.body["lobby_id"]] = thread
                     thread.start()
                     self._log("New game started")
                 case Topic.JOIN_LOBBY:

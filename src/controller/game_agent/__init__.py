@@ -19,14 +19,15 @@ def game_loop(players: list[Player], id: str):
     game = GameImpl()
     lobby_topic = Topic.LOBBY + id
     connection_handler = ConnectionHandler(
-        id, __game_topics.map(lambda t: lobby_topic + t))
+        id, [lobby_topic + t for t in __game_topics]
+    )
     message_factory = MessageFactory()
     for p in players:
-        game.addPlayer(p)
-    game.startGame()
-    while game.getPhase() != GamePhase.GAME_OVER:
-        if (game.getPhase() == GamePhase.PLAYING):
-            game.startRound()
+        game.add_player(p)
+    game.start_game()
+    while game.get_phase() != GamePhase.GAME_OVER:
+        if (game.get_phase() == GamePhase.PLAYING):
+            game.start_round()
             connection_handler.send_message(
                 message_factory.create_start_round_message(game.get_players()),
                 lobby_topic + Topic.START_ROUND)
@@ -51,7 +52,7 @@ def game_loop(players: list[Player], id: str):
                 connection_handler.send_message(
                     message_factory.create_round_loser_message(loser_player),
                     lobby_topic + Topic.ROUND_LOSER)
-                cards_in_game = game.get_players().map(lambda p: p.cards)
+                cards_in_game = [p.cards for p in game.get_players()]
                 connection_handler.send_message(
                     message_factory.create_show_cards_message(cards_in_game),
                     lobby_topic + Topic.SHOW_CARDS)
@@ -60,7 +61,7 @@ def game_loop(players: list[Player], id: str):
                         message_factory.create_elimination_message(
                             loser_player),
                         lobby_topic + Topic.ELIMINATION)
-    
+
     connection_handler.send_message(
-        message_factory.create_game_over_message(game.get_winner()),
+        message_factory.create_game_over_message(game.get_players()[0]),
         lobby_topic + Topic.GAME_OVER)

@@ -64,3 +64,8 @@ class MessageFactory(MessageFactoryInterface):
             "lobby_id": lobby_id,
             "status": status
         })
+        
+    def create_new_game_message(self, lobby_id):
+        return Message({
+            "lobby_id": lobby_id
+        })

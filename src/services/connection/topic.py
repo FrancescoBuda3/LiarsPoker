@@ -25,3 +25,10 @@ class Topic(str, Enum):
             str: "topic/other"
         """
         return f"{self.value}/{other}"
+    
+    def __radd__(self, other: str) -> str:
+        """
+        Returns:
+            str: "other/topic"
+        """
+        return f"{other}/{self.value}"

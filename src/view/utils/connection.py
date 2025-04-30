@@ -1,4 +1,3 @@
-import os
 from src.services.connection.impl import ConnectionHandler
 from src.services.connection.topic import Topic
 

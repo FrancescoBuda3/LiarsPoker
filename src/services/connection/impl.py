@@ -76,3 +76,11 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
             except queue.Empty:
                 continue
         return None, None
+    
+    def no_wait_message(self, topic) -> Message:
+        if topic in self._topic_queues:
+            try:
+                return self._topic_queues[topic].get_nowait()
+            except queue.Empty:
+                return None
+        return None

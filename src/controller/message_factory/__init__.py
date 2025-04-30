@@ -139,3 +139,15 @@ class MessageFactoryInterface(Protocol):
             Message: the constructed message
         """
         ...
+
+    def create_new_game_message(self, lobby_id: int) -> Message:
+        """
+        Create a message to start a new game.
+
+        Args:
+            lobby_id (int): ID of the lobby
+
+        Returns:
+            Message: the constructed message
+        """
+        ...
