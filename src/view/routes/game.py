@@ -65,6 +65,8 @@ def setup():
                 cards = await cards_picker(max_cards=max_cards)
                 if check_input(cards, combo):
                     ui.notify(f'You chose {combo} with cards {cards}')
+                    raise_btn.set_enabled(False)
+                    bullshit_btn.set_enabled(False)
                 else:
                     ui.notify('Invalid input!')
 
@@ -125,19 +127,34 @@ def setup():
             ui.image('static/back.png'
                      ).style('width: 6rem; height: auto'
                              ).classes('q-mr-xl')
-
+                           
             with ui.row():
-                ui.button(
+                bullshit_btn = ui.button(
                     'Bullsh*t',
                     on_click=lambda: ui.notify("Bullsh*t!"),
                     color='red'
-                ).style('width: 10rem; height: auto')
-                ui.button(
+                ).style('width: 10rem; height: auto').set_enabled(False)
+                raise_btn = ui.button(
                     'Raise',
                     on_click=lambda: show_stake_dialog(
                         Stake(Combination.HIGH_CARD, 1)),
                     color='green'
-                ).style('width: 10rem; height: auto')
+                ).style('width: 10rem; height: auto').set_enabled(False)
+                
+            def on_player_move():
+                message = connection_handler.no_wait_message(
+                    "lobby/" + str(user_state.selected_lobby) + Topic.START_TURN)
+                if message:
+                    player: Player = message.body["player"]
+                    min_stake: Stake = message.body["minimum_stake"]
+                    if player.username == user_state.username:
+                        ui.notify(f'Your turn!')
+                        ui.notify(f'Minimum stake: {min_stake}')
+                        raise_btn.set_enabled(True)
+                        bullshit_btn.set_enabled(True)
+                        
+                    
+            ui.timer(1, on_player_move)
 
             with ui.row():
                 for card in player.cards:
