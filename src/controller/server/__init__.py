@@ -1,5 +1,6 @@
 from random import Random
 from threading import Thread
+import threading
 from typing import Dict
 
 from src.controller.game_agent import game_loop
@@ -17,12 +18,14 @@ class Server(Debuggable):
     _lobby: Dict[int, list[Player]] = {}
     _random = Random()
     _lobby_threads: Dict[int, list[Thread]] = {}
+    _shutdown_event: threading.Event 
 
     def __init__(self, debug=True):
         Debuggable.__init__(self, debug)
         self._connection = ConnectionHandler(
             "Server", [t for t in Topic], debug=debug)
         self._message_factory = MessageFactory()
+        self._shutdown_event = threading.Event()
 
     def run(self):
         topic, msg = self._connection.try_get_any_message()
@@ -42,14 +45,21 @@ class Server(Debuggable):
                 case Topic.NEW_PLAYER:
                     self.__new_player(msg.body["player"])
                 case Topic.NEW_GAME:
+                    lobby_id = msg.body["lobby_id"]
+                    players_in_lobby: list[Player] = []
+                    for player in self._lobby[lobby_id]:
+                        players_in_lobby.append(player)
                     thread = Thread(target=game_loop, args=(
-                        self._players, msg.body["lobby_id"]))
-                    self._lobby_threads[msg.body["lobby_id"]] = thread
+                        players_in_lobby, 
+                        lobby_id
+                    ))
+                    self._lobby_threads[lobby_id] = thread
                     thread.start()
-                    self._log("New game started")
+                    self._log(f"New game started for lobby {lobby_id} with {len(players_in_lobby)} players.")
+                    
                 case Topic.JOIN_LOBBY:
                     player = next((p for p in self._players if p.id == msg.body["player_id"]), None)
-                    status = self.__join_lobby(player.id, msg.body["lobby_id"])
+                    status = self.__join_lobby(player, msg.body["lobby_id"])
                     self._connection.send_message(
                         self._message_factory.create_join_lobby_message(player.id, msg.body["lobby_id"], status), Topic.JOIN_LOBBY
                     )
@@ -122,9 +132,45 @@ class Server(Debuggable):
             return True
         else:
             return False
+        
+    def shutdown(self):
+        self._log("Initiating server shutdown...")
+        self._shutdown_event.set() # Segnala a tutti i thread di terminare
+
+        # Copia delle chiavi per evitare problemi di modifica del dizionario durante l'iterazione
+        lobby_ids = list(self._lobby_threads.keys())
+        for lobby_id in lobby_ids:
+            thread = self._lobby_threads.get(lobby_id)
+            if thread and thread.is_alive():
+                self._log(f"Waiting for lobby {lobby_id} thread (ID: {thread.ident}) to join...")
+                thread.join(timeout=5) # Aspetta che il thread termini, con un timeout
+                if thread.is_alive():
+                    self._log(f"Lobby {lobby_id} thread (ID: {thread.ident}) did not terminate in time.")
+                else:
+                    self._log(f"Lobby {lobby_id} thread (ID: {thread.ident}) joined.")
+            # Rimuovi il thread dal dizionario dopo aver tentato il join
+            if lobby_id in self._lobby_threads:
+                del self._lobby_threads[lobby_id]
+
+
+        self._log("All lobby threads processed.")
+        # Aggiungi qui la chiusura di altre risorse, es. la connessione
+        if hasattr(self._connection, 'stop'): # Se la tua ConnectionHandler ha un metodo stop/close
+            self._connection.stop()
+        self._log("Server shutdown complete.")
+
 
 
 if __name__ == "__main__":
-    server = Server()
-    while True:
-        server.run()
+    server = Server(debug=True)
+    try:
+        while not server._shutdown_event.is_set(): # Continua finché non viene segnalato lo shutdown
+            server.run()
+            # Potresti voler aggiungere un breve sleep qui se server.run() è molto veloce e non bloccante
+            # per evitare un busy-waiting, ma try_get_any_message probabilmente gestisce già una forma di attesa.
+            # time.sleep(0.01) # Esempio
+    except KeyboardInterrupt:
+        print("\nKeyboardInterrupt received.")
+    finally:
+        server.shutdown()
+        print("Server has been shut down.")
