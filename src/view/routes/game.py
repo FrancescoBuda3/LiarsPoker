@@ -45,7 +45,10 @@ def setup():
 
         ui.timer(0.5, on_start_game)
         
+        @ui.refreshable 
         def content():
+            raise_enabled, set_raise_enabled = ui.state(False)
+            bullshit_enabled, set_bullshit_enabled = ui.state(False)
             async def show_stake_dialog(min_stake: Stake):
                 combo = await combination_picker(min_stake.combo)
                 max_cards = 5
@@ -65,8 +68,8 @@ def setup():
                 cards = await cards_picker(max_cards=max_cards)
                 if check_input(cards, combo):
                     ui.notify(f'You chose {combo} with cards {cards}')
-                    raise_btn.set_enabled(False)
-                    bullshit_btn.set_enabled(False)
+                    set_raise_enabled(False)
+                    set_bullshit_enabled(False)
                 else:
                     ui.notify('Invalid input!')
 
@@ -133,13 +136,13 @@ def setup():
                     'Bullsh*t',
                     on_click=lambda: ui.notify("Bullsh*t!"),
                     color='red'
-                ).style('width: 10rem; height: auto').set_enabled(False)
+                ).style('width: 10rem; height: auto').bind_enabled_from(bullshit_enabled)
                 raise_btn = ui.button(
                     'Raise',
                     on_click=lambda: show_stake_dialog(
                         Stake(Combination.HIGH_CARD, 1)),
                     color='green'
-                ).style('width: 10rem; height: auto').set_enabled(False)
+                ).style('width: 10rem; height: auto').bind_enabled_from(raise_enabled)
                 
             def on_player_move():
                 message = connection_handler.no_wait_message(
@@ -150,8 +153,8 @@ def setup():
                     if player.username == user_state.username:
                         ui.notify(f'Your turn!')
                         ui.notify(f'Minimum stake: {min_stake}')
-                        raise_btn.set_enabled(True)
-                        bullshit_btn.set_enabled(True)
+                        set_raise_enabled(True)
+                        set_bullshit_enabled(True)
                         
                     
             ui.timer(1, on_player_move)
