@@ -15,12 +15,16 @@ from utils.connection import connection_handler
 def setup():
     from src.view.utils.layout import centered_layout
     from src.view.components.dialogs import cards_picker, combination_picker
+    
+    message_factory = MessageFactory()
 
     __player_colors = [
         'red', 'blue', 'green', 'yellow',
         'purple', 'orange', 'pink', 'brown',
         'cyan', 'lime'
     ]
+    
+    is_my_turn = False
 
     @ui.page('/game')
     def game_page():
@@ -30,6 +34,7 @@ def setup():
         players: list[Player] = []
         player: Player = Player(
             user_state.username, user_state.id)
+        
         def on_start_game():
             message = connection_handler.no_wait_message(
                 "lobby/" + str(user_state.selected_lobby) + Topic.START_ROUND)
@@ -47,8 +52,7 @@ def setup():
         
         @ui.refreshable 
         def content():
-            raise_enabled, set_raise_enabled = ui.state(False)
-            bullshit_enabled, set_bullshit_enabled = ui.state(False)
+            nonlocal is_my_turn
             async def show_stake_dialog(min_stake: Stake):
                 combo = await combination_picker(min_stake.combo)
                 max_cards = 5
@@ -68,8 +72,10 @@ def setup():
                 cards = await cards_picker(max_cards=max_cards)
                 if check_input(cards, combo):
                     ui.notify(f'You chose {combo} with cards {cards}')
-                    set_raise_enabled(False)
-                    set_bullshit_enabled(False)
+                    ranks = [card.rank for card in cards]
+                    suits = [card.suit for card in cards]
+                    stake: Stake = Stake(combo, ranks, suits)
+                    connection_handler.send_message(message_factory.create_raise_stake_message(stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
                 else:
                     ui.notify('Invalid input!')
 
@@ -136,26 +142,31 @@ def setup():
                     'Bullsh*t',
                     on_click=lambda: ui.notify("Bullsh*t!"),
                     color='red'
-                ).style('width: 10rem; height: auto').bind_enabled_from(bullshit_enabled)
+                ).style('width: 10rem; height: auto')
+                bullshit_btn.set_enabled(is_my_turn)
                 raise_btn = ui.button(
                     'Raise',
                     on_click=lambda: show_stake_dialog(
                         Stake(Combination.HIGH_CARD, 1)),
                     color='green'
-                ).style('width: 10rem; height: auto').bind_enabled_from(raise_enabled)
+                ).style('width: 10rem; height: auto')
+                raise_btn.set_enabled(is_my_turn)
                 
             def on_player_move():
-                message = connection_handler.no_wait_message(
+                nonlocal is_my_turn
+                start_message = connection_handler.no_wait_message(
                     "lobby/" + str(user_state.selected_lobby) + Topic.START_TURN)
-                if message:
-                    player: Player = message.body["player"]
-                    min_stake: Stake = message.body["minimum_stake"]
+                if start_message:
+                    player: Player = start_message.body["player"]
+                    min_stake: Stake = start_message.body["minimum_stake"]
                     if player.username == user_state.username:
                         ui.notify(f'Your turn!')
                         ui.notify(f'Minimum stake: {min_stake}')
-                        set_raise_enabled(True)
-                        set_bullshit_enabled(True)
-                        
+                        is_my_turn = True
+                    else:
+                        ui.notify(f'{player.username}\'s turn!')
+                        is_my_turn = False
+                    content.refresh()
                     
             ui.timer(1, on_player_move)
 
