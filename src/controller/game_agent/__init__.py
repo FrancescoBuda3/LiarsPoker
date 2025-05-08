@@ -30,10 +30,13 @@ def game_loop(players: list[Player], id: str):
         (topic, msg) = connection_handler.try_get_any_message()
         if msg is None:
             continue
-
+        print(topic)
+        topic = Topic(topic.split("/")[-1])
+        print(topic)
+        print(msg)
         match topic:
             case Topic.RAISE_STAKE:
-                next_min_stake = game.raise_stake(msg.body)
+                next_min_stake = game.raise_stake(msg.body['stake'])
                 connection_handler.send_message(
                     message_factory.create_start_turn_message(
                         game.get_current_player(), next_min_stake),

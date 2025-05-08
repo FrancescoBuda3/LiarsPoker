@@ -3,7 +3,7 @@ from src.model.card import Card
 from src.model.card.rank import Rank
 from src.model.card.suit import Suit
 from src.model.player import Player
-from src.model.stake import Stake
+from src.model.stake import LowestStake, Stake
 from src.model.stake.combination import Combination
 from utils.state import user_state
 from src.services.connection.topic import Topic
@@ -34,6 +34,7 @@ def setup():
         players: list[Player] = []
         player: Player = Player(
             user_state.username, user_state.id)
+        min_stake: Stake = LowestStake.HIGH_CARD.value
         
         def on_start_game():
             message = connection_handler.no_wait_message(
@@ -154,11 +155,12 @@ def setup():
                 
             def on_player_move():
                 nonlocal is_my_turn
+                nonlocal min_stake
                 start_message = connection_handler.no_wait_message(
                     "lobby/" + str(user_state.selected_lobby) + Topic.START_TURN)
                 if start_message:
                     player: Player = start_message.body["player"]
-                    min_stake: Stake = start_message.body["minimum_stake"]
+                    min_stake = start_message.body["minimum_stake"]
                     if player.username == user_state.username:
                         ui.notify(f'Your turn!')
                         ui.notify(f'Minimum stake: {min_stake}')
@@ -169,6 +171,7 @@ def setup():
                     content.refresh()
                     
             ui.timer(1, on_player_move)
+            
 
             with ui.row():
                 for card in player.cards:
