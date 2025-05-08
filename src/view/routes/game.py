@@ -76,7 +76,7 @@ def setup():
                     ranks = [card.rank for card in cards]
                     suits = [card.suit for card in cards]
                     stake: Stake = Stake(combo, ranks, suits)
-                    connection_handler.send_message(message_factory.create_raise_stake_message(player, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
+                    connection_handler.send_message(message_factory.create_raise_stake_message(pl, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
                 else:
                     ui.notify('Invalid input!')
 
@@ -115,16 +115,16 @@ def setup():
                     
             with ui.row().classes('justify-center'):
                 for i in range(len(players)):
-                    player: Player = players[i]
+                    pl: Player = players[i]
                     with ui.column().classes('col-2 items-center'):
                         ui.icon(
                             'circle', color=__player_colors[i], size='1.5rem')
-                        ui.label(player.username).classes('text-lg')
+                        ui.label(pl.username).classes('text-lg')
                         with ui.row():
-                            for _ in range(player.cards_in_hand):
+                            for _ in range(pl.cards_in_hand):
                                 ui.image('static/back.png'
                                          ).style('width: 0.7rem; height: auto')
-                        ui.label(current_move[0] if current_move[0] and current_move[1].id != user_state.id and current_move[1].id == player.id else ''
+                        ui.label(current_move[1] if current_move[1] and current_move[0].id == pl.id else ''
                                         ).classes('text-lg text-gray-600'
                                                   ).style('min-height: 1.5rem')
 
@@ -170,14 +170,14 @@ def setup():
                 if message and message.body["player"].id != user_state.id:
                     pl: Player = message.body["player"]
                     stake: Stake = message.body["stake"]
-                    current_move = (pl, stake)
+                    current_move = (pl, f'{stake.combo}')
                     content.refresh()
                     
             ui.timer(1, on_start_turn)
             ui.timer(1, on_player_move)
             
             with ui.row():
-                for card in player.cards:
+                for card in pl.cards:
                     c: Card = card
                     ui.image(f"static/{c.rank}_of_{c.suit}.png"
                              ).style('width: 6.5rem; height: auto'
