@@ -28,9 +28,6 @@ def setup():
 
     @ui.page('/game')
     def game_page():
-        for topic in game_topics:
-            connection_handler.subscribe(
-                "lobby/" + str(user_state.selected_lobby) + topic)      
         players: list[Player] = []
         player: Player = Player(
             user_state.username, user_state.id)
@@ -54,7 +51,9 @@ def setup():
         @ui.refreshable 
         def content():
             nonlocal is_my_turn
+            # nonlocal min_stake
             async def show_stake_dialog(min_stake: Stake):
+                # print("min stake dialog: " + min_stake)
                 combo = await combination_picker(min_stake.combo)
                 max_cards = 5
                 match combo:
@@ -147,8 +146,7 @@ def setup():
                 bullshit_btn.set_enabled(is_my_turn)
                 raise_btn = ui.button(
                     'Raise',
-                    on_click=lambda: show_stake_dialog(
-                        Stake(Combination.HIGH_CARD, 1)),
+                    on_click=lambda: show_stake_dialog(min_stake),
                     color='green'
                 ).style('width: 10rem; height: auto')
                 raise_btn.set_enabled(is_my_turn)

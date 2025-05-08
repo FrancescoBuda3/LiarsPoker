@@ -1,6 +1,7 @@
 from src.controller.message_factory.impl import MessageFactory
 from src.model.game.GImpl import GameImpl, GamePhase
 from src.model.player import Player
+from src.model.stake import LowestStake
 from src.services.connection.impl import ConnectionHandler
 from src.services.connection.topic import Topic
 from src.services.connection.topic import game_topics
@@ -24,7 +25,7 @@ def game_loop(players: list[Player], id: str):
                 lobby_topic + Topic.START_ROUND)
             connection_handler.send_message(
                 message_factory.create_start_turn_message(
-                    game.get_current_player(), None),
+                    game.get_current_player(), LowestStake.HIGH_CARD.value),
                 lobby_topic + Topic.START_TURN)
 
         (topic, msg) = connection_handler.try_get_any_message()

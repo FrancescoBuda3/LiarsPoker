@@ -1,6 +1,6 @@
 from nicegui import ui
 from utils.state import user_state
-from src.services.connection.topic import Topic
+from src.services.connection.topic import Topic, game_topics
 from src.controller.message_factory.impl import MessageFactory
 from utils.connection import connection_handler
 
@@ -10,6 +10,9 @@ def setup():
     
     @ui.page('/lobby')
     def lobby_page():
+        for topic in game_topics:
+            connection_handler.subscribe(
+                "lobby/" + str(user_state.selected_lobby) + topic)      
         def content():
             with ui.card():
                 ui.label('Lobby page')
