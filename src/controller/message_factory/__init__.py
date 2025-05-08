@@ -81,11 +81,12 @@ class MessageFactoryInterface(Protocol):
         """
         ...
 
-    def create_raise_stake_message(self, stake: Stake) -> Message:
+    def create_raise_stake_message(self, player:Player, stake: Stake) -> Message:
         """
         Create a message to raise the stake.
 
         Args:
+            player (Player): player who raised the stake
             stake (Stake): new stake
 
         Returns:

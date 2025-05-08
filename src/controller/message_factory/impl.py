@@ -39,8 +39,9 @@ class MessageFactory(MessageFactoryInterface):
             "player": player
         })
 
-    def create_raise_stake_message(self, stake: Stake) -> Message:
+    def create_raise_stake_message(self, player: Player, stake: Stake) -> Message:
         return Message({
+            "player": player,
             "stake": stake
         })
 

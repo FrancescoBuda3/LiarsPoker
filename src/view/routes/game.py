@@ -32,6 +32,7 @@ def setup():
         player: Player = Player(
             user_state.username, user_state.id)
         min_stake: Stake = LowestStake.HIGH_CARD.value
+        current_move = (None, None)
         
         def on_start_game():
             message = connection_handler.no_wait_message(
@@ -75,7 +76,7 @@ def setup():
                     ranks = [card.rank for card in cards]
                     suits = [card.suit for card in cards]
                     stake: Stake = Stake(combo, ranks, suits)
-                    connection_handler.send_message(message_factory.create_raise_stake_message(stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
+                    connection_handler.send_message(message_factory.create_raise_stake_message(player, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
                 else:
                     ui.notify('Invalid input!')
 
@@ -111,12 +112,7 @@ def setup():
                     )
                 elif combo == Combination.HIGH_CARD or combo == Combination.PAIR or combo == Combination.THREE_OF_A_KIND or combo == Combination.FOUR_OF_A_KIND or combo == Combination.TWO_PAIR or combo == Combination.FULL_HOUSE:
                     return True
-
-            players_moves = {}
-
-            def show_player_move(player, text):
-                players_moves[player].set_text(f'"{text}"')
-
+                    
             with ui.row().classes('justify-center'):
                 for i in range(len(players)):
                     player: Player = players[i]
@@ -128,10 +124,9 @@ def setup():
                             for _ in range(player.cards_in_hand):
                                 ui.image('static/back.png'
                                          ).style('width: 0.7rem; height: auto')
-                        move = ui.label(''
+                        ui.label(current_move[0] if current_move[0] and current_move[1].id != user_state.id and current_move[1].id == player.id else ''
                                         ).classes('text-lg text-gray-600'
                                                   ).style('min-height: 1.5rem')
-                        players_moves[player.username] = move
 
             ui.image('static/back.png'
                      ).style('width: 6rem; height: auto'
@@ -151,14 +146,14 @@ def setup():
                 ).style('width: 10rem; height: auto')
                 raise_btn.set_enabled(is_my_turn)
                 
-            def on_player_move():
+            def on_start_turn():
                 nonlocal is_my_turn
                 nonlocal min_stake
-                start_message = connection_handler.no_wait_message(
+                message = connection_handler.no_wait_message(
                     "lobby/" + str(user_state.selected_lobby) + Topic.START_TURN)
-                if start_message:
-                    player: Player = start_message.body["player"]
-                    min_stake = start_message.body["minimum_stake"]
+                if message:
+                    player: Player = message.body["player"]
+                    min_stake = message.body["minimum_stake"]
                     if player.username == user_state.username:
                         ui.notify(f'Your turn!')
                         ui.notify(f'Minimum stake: {min_stake}')
@@ -168,12 +163,23 @@ def setup():
                         is_my_turn = False
                     content.refresh()
                     
+            def on_player_move():
+                nonlocal current_move
+                message = connection_handler.no_wait_message(
+                    "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
+                if message and message.body["player"].id != user_state.id:
+                    pl: Player = message.body["player"]
+                    stake: Stake = message.body["stake"]
+                    current_move = (pl, stake)
+                    content.refresh()
+                    
+            ui.timer(1, on_start_turn)
             ui.timer(1, on_player_move)
             
-
             with ui.row():
                 for card in player.cards:
-                    ui.image(f"static/{card.rank}_of_{card.suit}.png"
+                    c: Card = card
+                    ui.image(f"static/{c.rank}_of_{c.suit}.png"
                              ).style('width: 6.5rem; height: auto'
                                      ).classes('q-mx-sm')
 
