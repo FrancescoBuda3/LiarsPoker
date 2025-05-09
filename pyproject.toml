@@ -11,6 +11,7 @@ readme = "README.md"
 python = "^3.10"
 paho-mqtt = "^2.1.0"
 nicegui = "^2.12.1"
+packaging = "^25.0"
 
 
 [build-system]
