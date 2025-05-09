@@ -12,7 +12,13 @@ mosquitto -v to run mosquitto with verbose option
 
 `> poetry run python [file.py]`
 
+to update the poetry configuration run:
+
+`> poetry lock --no-update`
+
+`> poetry install`
+
 ## Files to run
 
 * Server: `src/controller/server/__init__.py`
-* GUI: `src/view/__init__.py`
+* GUI: `src/view/__init__.py [port]`

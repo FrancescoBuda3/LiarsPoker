@@ -1,5 +1,6 @@
 [tool.poetry]
-name = "src"
+name = "liars-poker"
+packages = [{include = "src"}]
 version = "0.1.0"
 description = ""
 authors = ["Francesco Buda <francesco.buda3@studio.unibo.it>",
