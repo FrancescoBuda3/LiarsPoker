@@ -51,7 +51,7 @@ class GameImpl(Game):
         if self.__phase != GamePhase.PLAYERS_TURN:
             raise ValueError("Cannot check liar while it is not the player's turn")
         loser = self.__core.check_liar()
-        if not loser.cardsInHand > GameCore.MAX_CARDS:
+        if not loser.cards_in_hand > GameCore.MAX_CARDS:
             self.__phase = GamePhase.PLAYING
         else:
             self.remove_player(loser)

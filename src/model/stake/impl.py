@@ -64,6 +64,8 @@ class StakeHandlerImpl(StakeHandler):
     def check_cards(self, cards: list[Card]) -> bool:
         card_ranks = [card.rank for card in cards]
         card_suits = [card.suit for card in cards]
+        print(card_ranks)
+        print(card_suits)
         check = False
         match self.stake.combo:
             case Combination.HIGH_CARD:

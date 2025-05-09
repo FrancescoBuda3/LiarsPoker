@@ -32,22 +32,30 @@ def setup():
         player: Player = Player(
             user_state.username, user_state.id)
         min_stake: Stake = LowestStake.HIGH_CARD.value
-        current_move = (None, None)
+        moves_label = None
+        
+        with ui.left_drawer().classes('bg-grey-2') as drawer:
+            ui.label('Moves:').classes('text-h6')
+            moves_label = ui.label('')
+        drawer.value = False
+                
+        ui.button('☰ Moves', on_click=lambda: ui.left_drawer.toggle(drawer)).classes('m-4')
         
         def on_start_game():
+            nonlocal players
+            #ui.notify('on_start_game')
             message = connection_handler.no_wait_message(
                 "lobby/" + str(user_state.selected_lobby) + Topic.START_ROUND)
             if message:
                 players_msg: list[Player] = message.body["players"]
-                players.extend([p for p in players_msg if p.id != player.id])
-                player.cards.extend(
-                    [p for p in players_msg if p.id == player.id][0].cards)
+                players = [p for p in players_msg if p.id != player.id]
+                player.cards = [p for p in players_msg if p.id == player.id][0].cards
                 ui.notify(f'Game started with players: {players}')
                 ui.notify(f'Cards in hand: {player.cards_in_hand}')
-                centered_layout(content)
-                return False
+                content.refresh()
+                
 
-        ui.timer(0.5, on_start_game)
+        ui.timer(1, on_start_game)
         
         @ui.refreshable 
         def content():
@@ -76,7 +84,7 @@ def setup():
                     ranks = [card.rank for card in cards]
                     suits = [card.suit for card in cards]
                     stake: Stake = Stake(combo, ranks, suits)
-                    connection_handler.send_message(message_factory.create_raise_stake_message(pl, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
+                    connection_handler.send_message(message_factory.create_raise_stake_message(player, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
                 else:
                     ui.notify('Invalid input!')
 
@@ -124,18 +132,18 @@ def setup():
                             for _ in range(pl.cards_in_hand):
                                 ui.image('static/back.png'
                                          ).style('width: 0.7rem; height: auto')
-                        ui.label(current_move[1] if current_move[1] and current_move[0].id == pl.id else ''
-                                        ).classes('text-lg text-gray-600'
-                                                  ).style('min-height: 1.5rem')
 
             ui.image('static/back.png'
                      ).style('width: 6rem; height: auto'
-                             ).classes('q-mr-xl')
-                           
+                             ).classes('q-mr-xl')          
+            
             with ui.row():
                 bullshit_btn = ui.button(
                     'Bullsh*t',
-                    on_click=lambda: ui.notify("Bullsh*t!"),
+                    on_click=lambda: connection_handler.send_message(
+                        message_factory.create_check_liar_message(),
+                        "lobby/" + str(user_state.selected_lobby) + Topic.CHECK_LIAR
+                    ),
                     color='red'
                 ).style('width: 10rem; height: auto')
                 bullshit_btn.set_enabled(is_my_turn)
@@ -164,25 +172,52 @@ def setup():
                     content.refresh()
                     
             def on_player_move():
-                nonlocal current_move
+                nonlocal moves_label
                 message = connection_handler.no_wait_message(
                     "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
-                if message and message.body["player"].id != user_state.id:
+                if message:
                     pl: Player = message.body["player"]
                     stake: Stake = message.body["stake"]
-                    current_move = (pl, f'{stake.combo}')
+                    moves_label.set_text(moves_label.text + '\n' +
+                        f'{pl.username} raised {stake.combo} with cards {stake.ranks} of {stake.suits}')
+                    
+            def on_round_loser():
+                message = connection_handler.no_wait_message(
+                    "lobby/" + str(user_state.selected_lobby) + Topic.ROUND_LOSER)
+                if message:
+                    loser: Player = message.body["player"]
+                    ui.notify(f'{loser.username} lost the round!')
+                    cards_message = connection_handler.no_wait_message(
+                        "lobby/" + str(user_state.selected_lobby) + Topic.SHOW_CARDS)
+                    if cards_message:
+                        cards: list[Card] = cards_message.body["cards"]
+                        ui.notify(f'Cards in game: {cards}')
+                        elimination_message = connection_handler.no_wait_message(
+                            "lobby/" + str(user_state.selected_lobby) + Topic.ELIMINATION)
+                        if elimination_message:
+                            eliminated: Player = elimination_message.body["player"]
+                            ui.notify(f'{eliminated.username} was eliminated!')
+                            players.remove(eliminated)
+                            if eliminated.username == user_state.username:
+                                ui.notify('You were eliminated!')
+                                ui.redirect('/lobby')
                     content.refresh()
                     
             ui.timer(1, on_start_turn)
             ui.timer(1, on_player_move)
+            ui.timer(1, on_round_loser)
             
             with ui.row():
-                for card in pl.cards:
-                    c: Card = card
-                    ui.image(f"static/{c.rank}_of_{c.suit}.png"
+                for card in player.cards:
+                    rank = card.rank
+                    suit = card.suit
+                    c: Card = Card(suit, rank)
+                    ui.image(f"static/{str(c.rank)}_of_{str(c.suit)}.png"
                              ).style('width: 6.5rem; height: auto'
                                      ).classes('q-mx-sm')
 
             with ui.row():
                 ui.label(user_state.username).classes('text-lg')
+                
+        centered_layout(content)
 
