@@ -11,9 +11,9 @@ from src.model.game.impl import GameCore
 class TestGameCore(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.TEST_PLAYER_1 = Player("Bob")
-        cls.TEST_PLAYER_2 = Player("Lisa")
-        cls.TEST_PLAYERS = [Player("Bob"), Player("Lisa"), Player("John")]
+        cls.TEST_PLAYER_1 = Player("Bob", 1)
+        cls.TEST_PLAYER_2 = Player("Lisa", 2)
+        cls.TEST_PLAYERS = [Player("Bob", 3), Player("Lisa", 4), Player("John", 5)]
         cls.TEST_STAKE = Stake(Combination.TWO_PAIR, [Rank.TWO, Rank.FIVE])
         cls.TEST_STAKES = [
             Stake(Combination.TWO_PAIR, [Rank.TWO,  Rank.FIVE]), 
@@ -52,10 +52,10 @@ class TestGameCore(unittest.TestCase):
         self.assertEqual(self.TEST_STAKE, self.game.get_latest_stake())
     
     def test_check_liar(self):
-        p1 = Player("Pippo")
+        p1 = Player("Pippo", 9)
         p1.cards = [Card(Suit.HEARTS, 1), Card(Suit.SPADES, 1), Card(Suit.HEARTS, 5)]
         p1.cards_in_hand = 3
-        p2 = Player("Laura")
+        p2 = Player("Laura", 10)
         p2.cards = [Card(Suit.CLUBS, 6), Card(Suit.DIAMONDS, 1)]
         p2.cards_in_hand = 2
         self.game.add_player(p1)
@@ -72,10 +72,10 @@ class TestGameCore(unittest.TestCase):
         self.assertEqual(self.TEST_PLAYERS[0], self.game.get_current_player())
 
     def test_loser_is_the_first_in_next_turn(self):
-        p1 = Player("Pippo")
+        p1 = Player("Pippo", 7)
         p1.cards = [Card(Suit.HEARTS, Rank.ONE), Card(Suit.SPADES, Rank.ONE), Card(Suit.HEARTS, Rank.FIVE)]
         p1.cards_in_hand = 3
-        p2 = Player("Laura")
+        p2 = Player("Laura", 8)
         p2.cards = [Card(Suit.CLUBS, Rank.SIX), Card(Suit.DIAMONDS, Rank.ONE)]
         p2.cards_in_hand = 2
         self.game.add_player(p1)
