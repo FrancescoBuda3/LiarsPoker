@@ -11,4 +11,4 @@ if __name__ == "__main__":
     game.setup()
 
     # Disabilita il reload automatico per evitare doppio spawn
-    ui.run(host='127.0.0.1', port=PORT, title=f'Liars Poker', reload=False)
+    ui.run(host='127.0.0.1', port=PORT, title=f'Liars Poker', reload=False, favicon='static/favicon.png')
