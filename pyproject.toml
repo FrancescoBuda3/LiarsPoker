@@ -9,7 +9,7 @@ authors = ["Francesco Buda <francesco.buda3@studio.unibo.it>",
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.12"
 paho-mqtt = "^2.1.0"
 nicegui = "^2.12.1"
 packaging = "^25.0"
