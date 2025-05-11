@@ -43,3 +43,20 @@ class Rank(Enum):
     
     def __str__(self):
         return str(self.value)
+    
+    def to_symbol(self):
+        """
+        Convert the rank to its symbol representation.
+        Returns:
+            str: the symbol representation of the rank
+        """
+        if self == Rank.JACK:
+            return 'Jack'
+        elif self == Rank.QUEEN:
+            return 'Queen'
+        elif self == Rank.KING:
+            return 'King'
+        elif self == Rank.ACE:
+            return 'Ace'
+        else:
+            return str(self.value)
