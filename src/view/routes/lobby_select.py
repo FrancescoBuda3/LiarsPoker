@@ -31,6 +31,9 @@ def setup():
                     ui.navigate.to('/lobby')
 
                 def join_lobby():
+                    if lobby.value == '':
+                        ui.notify('Please enter a lobby ID', color='red')
+                        return
                     ui.spinner(type='oval')
                     connection_handler.send_message(
                         message_factory.create_join_lobby_message(user_state.id, int(lobby.value)), Topic.JOIN_LOBBY)

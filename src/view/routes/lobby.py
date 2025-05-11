@@ -17,6 +17,18 @@ def setup():
             with ui.card():
                 ui.label('Lobby page')
                 ui.label(f'User state: {user_state}')
+                ui.label('Lobby ID:')
+                
+                def copy_lobby_id():
+                    ui.clipboard.write(f'{user_state.selected_lobby}')
+                    ui.notify('Lobby ID copied to clipboard')
+                    
+                ui.button(
+                    f'{user_state.selected_lobby} 📋',
+                    color="secondary",
+                    on_click=lambda: copy_lobby_id()
+                )
+                
                 if user_state.host:
                     ui.button('Start Game', on_click=lambda: start_game())
                 
