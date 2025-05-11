@@ -9,6 +9,7 @@ from src.services.connection.topic import Topic
 from src.controller.message_factory.impl import MessageFactory
 from utils.connection import connection_handler
 
+
 def opponent_component(
     name: str,
     avatar_color: str,
@@ -31,12 +32,14 @@ def opponent_component(
                   .classes('w-12 h-18 m-1')
     return opponent_container
 
+
 def stake_display(stake: Stake):
     with ui.element('div').classes('stake-card') as stake_container:
         if stake:
             ui.label(f'\"{stake.combo} of {stake.ranks[0].to_symbol()}\"')\
                 .classes('text-6xl font-bold text-gray-800')
     return stake_container
+
 
 def setup():
     from src.view.components.dialogs import cards_picker, combination_picker
@@ -57,7 +60,7 @@ def setup():
         min_stake: Stake = LowestStake.HIGH_CARD.value
         latest_move: Stake = None
         player_turn: Player = None
-        
+
         ui.add_head_html('''
               <style>
                 .nicegui-content {
@@ -196,21 +199,21 @@ def setup():
                         if elimination_message:
                             eliminated: Player = elimination_message.body["player"]
                             ui.notify(f'{eliminated.username} was eliminated!')
-                            players.remove(eliminated)
+                            # players.remove(eliminated)
                             if eliminated.username == user_state.username:
                                 ui.notify('You were eliminated!')
-                                ui.redirect('/lobby')
+                                ui.navigate.to('/lobby_select')
                     content.refresh()
 
             ui.timer(1, wait_start_turn)
             ui.timer(1, wait_player_move)
             ui.timer(1, wait_round_loser)
-            
+
             def is_my_turn():
                 return player_turn and player_turn.id == local_player.id
 
             with ui.element('div')\
-                .classes('bg-gray-100 flex items-center justify-center basis-full h-full w-full'):
+                    .classes('bg-gray-100 flex items-center justify-center basis-full h-full w-full'):
                 with ui.grid(rows='5% 25% 10% 5% 13% 37% 5%')\
                        .classes('w-full h-full max-w-full max-h-full grid-rows-[5%_25%_10%_5%_13%_37%_5%] border border-gray-300 gap-0 mx-[100px]'):
                     with ui.row().classes('flex items-center justify-center'):
@@ -225,7 +228,7 @@ def setup():
                             pl: Player = players[i]
                             opponent_component(
                                 pl.username,
-                                __player_colors[i], 
+                                __player_colors[i],
                                 pl.cards_in_hand,
                                 player_turn and player_turn.id == pl.id
                             )
@@ -259,7 +262,7 @@ def setup():
                                 .classes('m-1')
                     with ui.row().classes('flex items-center justify-center'):
                         ...
-                        
+
         content()
 
         def wait_start_game():
@@ -271,8 +274,24 @@ def setup():
                 for p in players_msg:
                     if p.id != local_player.id:
                         players.append(p)
-                local_player.cards = [
-                    p for p in players_msg if p.id == local_player.id][0].cards
-                content.refresh()
+                print("players: ", players)
+                print("players_msg: ", players_msg)
+                print("id: ", local_player.id)
+                local_player_data_list = [
+                    p for p in players_msg if p.id == local_player.id]
+                if local_player_data_list:
+                    local_player.cards = local_player_data_list[0].cards
+                    content.refresh()
 
         ui.timer(1, wait_start_game)
+        
+        
+        def wait_game_over():
+            message = connection_handler.no_wait_message(
+                "lobby/" + str(user_state.selected_lobby) + Topic.GAME_OVER)
+            if message:
+                winner: Player = message.body["player"]
+                ui.notify(f'{winner.username} you won the game! Congratulations!')
+                ui.timer(5, lambda: ui.navigate.to('/lobby_select'), once=True)
+                
+        ui.timer(1, wait_game_over)

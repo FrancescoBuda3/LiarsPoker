@@ -40,5 +40,6 @@ game_topics = [
     Topic.ROUND_LOSER,
     Topic.ELIMINATION,
     Topic.RAISE_STAKE,
-    Topic.CHECK_LIAR
+    Topic.CHECK_LIAR,
+    Topic.GAME_OVER,
 ]
