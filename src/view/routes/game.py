@@ -75,8 +75,8 @@ def setup():
                 }
                 
                 @font-face {
-                font-family: 'CocoSharp Trial';
-                src: url('/static/fonts/Coco-Sharp-Heavy-trial.ttf') format('truetype');
+                font-family: 'Montserrat';
+                src: url('/static/fonts/Montserrat-VariableFont_wght.ttf') format('truetype');
                 font-weight: normal;
                 font-style: normal;
                 }
@@ -85,13 +85,13 @@ def setup():
                   border-radius: 1rem;                   /* pill shape */
                   padding: 0.5rem 1.5rem;                /* verticale/orizzontale */
                   display: inline-block;
-                  font-family: 'CocoSharp Trial', sans-serif;
+                  font-family: 'Montserrat', sans-serif;
                   font-size: 1.25rem;                    /* circa 20px */
                   font-weight: bold;
                   color: #333333;
                 }
                 button {
-                    font-family: "CocoSharp Trial" !important;
+                    font-family: "Montserrat" !important;
                     border-radius: 1rem !important; 
                     color: white !important;
                     padding: 1rem !important; 
