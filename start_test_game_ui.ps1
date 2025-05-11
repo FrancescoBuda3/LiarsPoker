@@ -11,7 +11,7 @@ $mosquittoRunning = Get-Process -Name "mosquitto" -ErrorAction SilentlyContinue
 
 if (-not $mosquittoRunning) {
     Write-Host "Mosquitto is not running. Starting it..."
-    $mosquitto = Start-Process -PassThru -WindowStyle Hidden -FilePath "mosquitto" -ArgumentList "-v" 
+    $mosquitto = Start-Process -PassThru -WindowStyle Hidden -FilePath "mosquitto" 
 } else {
     Write-Host "Mosquitto is already running."
 }

@@ -15,7 +15,7 @@ fi
 
 if [ $mosquitto_running -ne 0 ]; then
     echo "Mosquitto is not running. Starting it..."
-    mosquitto -v &
+    mosquitto &
     mosquitto_pid=$!
 else
     echo "Mosquitto is already running."
