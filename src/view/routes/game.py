@@ -118,11 +118,21 @@ def setup():
                         | Combination.FULL_HOUSE
                     ):
                         max_cards = 2
-                cards = await cards_picker(max_cards=max_cards)
+                print(min_stake)
+                if min_stake.combo == combo:
+                    if len(min_stake.suits) > 0:
+                        cards = await cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0], suits=min_stake.suits)
+                    else:
+                        cards = await cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0])
+                else:
+                    cards = await cards_picker(max_cards=max_cards)
                 if check_input(cards, combo):
                     ranks = [card.rank for card in cards]
                     suits = [card.suit for card in cards]
-                    stake: Stake = Stake(combo, ranks, suits)
+                    if combo == Combination.FLUSH or combo == Combination.STRAIGHT_FLUSH or combo == Combination.ROYAL_FLUSH:
+                        stake = Stake(combo, ranks, suits)
+                    else:
+                        stake = Stake(combo, ranks)
                     connection_handler.send_message(message_factory.create_raise_stake_message(
                         local_player, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
                 else:
@@ -171,8 +181,8 @@ def setup():
                     min_stake = message.body["minimum_stake"]
                     if player_turn.username == user_state.username:
                         ui.notify(f'Your turn!')
-                    else:
-                        ui.notify(f'{player_turn.username}\'s turn!')
+                    # else:
+                    #     ui.notify(f'{player_turn.username}\'s turn!')
                     content.refresh()
 
             def wait_player_move():
@@ -193,7 +203,7 @@ def setup():
                         "lobby/" + str(user_state.selected_lobby) + Topic.SHOW_CARDS)
                     if cards_message:
                         cards: list[Card] = cards_message.body["cards"]
-                        ui.notify(f'Cards in game: {cards}')
+                        # ui.notify(f'Cards in game: {cards}')
                         elimination_message = connection_handler.no_wait_message(
                             "lobby/" + str(user_state.selected_lobby) + Topic.ELIMINATION)
                         if elimination_message:
@@ -202,7 +212,8 @@ def setup():
                             # players.remove(eliminated)
                             if eliminated.username == user_state.username:
                                 ui.notify('You were eliminated!')
-                                ui.navigate.to('/lobby_select')
+                                # ui.navigate.to('/lobby_select')
+                                local_player.cards = []
                     content.refresh()
 
             ui.timer(1, wait_start_turn)
@@ -274,9 +285,9 @@ def setup():
                 for p in players_msg:
                     if p.id != local_player.id:
                         players.append(p)
-                print("players: ", players)
-                print("players_msg: ", players_msg)
-                print("id: ", local_player.id)
+                # print("players: ", players)
+                # print("players_msg: ", players_msg)
+                # print("id: ", local_player.id)
                 local_player_data_list = [
                     p for p in players_msg if p.id == local_player.id]
                 if local_player_data_list:
@@ -291,7 +302,11 @@ def setup():
                 "lobby/" + str(user_state.selected_lobby) + Topic.GAME_OVER)
             if message:
                 winner: Player = message.body["player"]
-                ui.notify(f'{winner.username} you won the game! Congratulations!')
-                ui.timer(5, lambda: ui.navigate.to('/lobby_select'), once=True)
+                # ui.notify(f'{winner.username} you won the game! Congratulations!')
+                with ui.dialog() as game_over_dialog, ui.card():
+                    ui.label('Congratulations you won the game!')
+                if winner.id == local_player.id:
+                    game_over_dialog.open()
+                ui.timer(5, lambda: ui.navigate.to('/lobby'), once=True)
                 
         ui.timer(1, wait_game_over)
