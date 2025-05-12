@@ -53,7 +53,7 @@ def stake_display(stake: Stake):
 
 
 def setup():
-    from src.view.components.dialogs import cards_picker, combination_picker, cards_display
+    from src.view.components.dialogs import cards_picker, combination_picker, cards_display, white_cards_picker
 
     message_factory = MessageFactory()
 
@@ -129,14 +129,23 @@ def setup():
                         | Combination.FULL_HOUSE
                     ):
                         max_cards = 2
-                print(min_stake)
-                if min_stake.combo == combo:
-                    if len(min_stake.suits) > 0:
-                        cards = await cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0], suits=min_stake.suits)
-                    else:
-                        cards = await cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0])
-                else:
-                    cards = await cards_picker(max_cards=max_cards)
+                match combo:
+                    case (Combination.FLUSH
+                        | Combination.STRAIGHT_FLUSH
+                        | Combination.ROYAL_FLUSH
+                    ):
+                        if min_stake.combo == combo:
+                            if len(min_stake.suits) > 0:
+                                cards = await cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0], suits=min_stake.suits)
+                            else:
+                                cards = await cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0])
+                        else:
+                            cards = await cards_picker(max_cards=max_cards)
+                    case _:
+                        if min_stake.combo == combo:
+                            cards = await white_cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0])
+                        else:
+                            cards = await white_cards_picker(max_cards=max_cards)
                 if check_input(cards, combo):
                     ranks = [card.rank for card in cards]
                     suits = [card.suit for card in cards]
