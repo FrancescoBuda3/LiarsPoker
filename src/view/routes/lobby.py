@@ -16,7 +16,6 @@ def setup():
         def content():
             with ui.card():
                 ui.label('Lobby page')
-                ui.label(f'User state: {user_state}')
                 ui.label('Lobby ID:')
                 
                 def copy_lobby_id():

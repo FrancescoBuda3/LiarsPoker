@@ -34,11 +34,22 @@ def opponent_component(
 
 
 def stake_display(stake: Stake):
-    with ui.element('div').classes('stake-card') as stake_container:
-        if stake:
-            ui.label(f'\"{stake.combo} of {stake.ranks[0].to_symbol()}\"')\
-                .classes('text-6xl font-bold text-gray-800')
-    return stake_container
+    if stake:
+        move: str = f"{stake.combo}: "
+        for i, r in enumerate(stake.ranks):
+            if i != 0:
+                move += ", "
+            move += f"{r.to_symbol()}"
+        if stake.suits:
+            move += " of "
+        for i, s in enumerate(stake.suits):
+            if i != 0:
+                move += " and "
+            move += f"{s}"
+        with ui.element('div').classes('stake-card') as stake_container:
+                ui.label(move)\
+                    .classes('text-4xl font-bold text-gray-800')
+        return stake_container
 
 
 def setup():

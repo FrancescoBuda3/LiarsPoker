@@ -15,7 +15,6 @@ def setup():
         def content():
             with ui.card():
                 ui.label('Lobby Selection')
-                ui.label(f'User state: {user_state}')
                 lobby = ui.input(label='Lobby ID')
 
                 def create_lobby():
