@@ -1,3 +1,4 @@
+from typing import Callable
 from nicegui import events, ui
 
 from src.model.card import Card
@@ -73,10 +74,15 @@ def cards_picker(max_cards: int = 5,
     return cards_dialog
 
 
-def cards_display(cards: list[Card]) -> ui.dialog:
+def cards_display(cards: list[Card], onClose: Callable[[], None]) -> ui.dialog:
     with ui.dialog() as display_dialog, ui.card():
-        for card in cards:
-            ui.image(f"static/{card.rank}_of_{card.suit}.png"
-                     ).style('width: 5rem; height: auto')
+        with ui.row():
+            for card in cards:
+                ui.image(f"static/{card.rank}_of_{card.suit}.png"
+                         ).style('width: 5rem; height: auto')
+        ui.button(
+            'Close',
+            on_click=onClose,
+        )
 
     return display_dialog

@@ -8,17 +8,6 @@ from src.services.message import Message
 
 
 class MessageFactoryInterface(Protocol):
-    def create_show_cards_message(self, cards: list[Card]) -> Message:
-        """
-        Create a message to show the cards currently in game.
-
-        Args:
-            cards (list[Card]): list of cards to be shown
-
-        Returns:
-            Message: the constructed message
-        """
-        ...
 
     def create_start_turn_message(self, player: Player, minimum_stake: Stake) -> Message:
         """
@@ -45,24 +34,14 @@ class MessageFactoryInterface(Protocol):
         """
         ...
 
-    def create_round_loser_message(self, player: Player) -> Message:
+    def create_round_loser_message(self, player: Player, cards: list[Card], elimination: bool) -> Message:
         """
         Create a message to notify the loser of the round.
 
         Args:
             player (Player): player who lost the round
-
-        Returns:
-            Message: the constructed message
-        """
-        ...
-
-    def create_elimination_message(self, player: Player) -> Message:
-        """
-        Create a message to notify the elimination of a player.
-
-        Args:
-            player (Player): player who was eliminated
+            cards (list[Card]): list of cards in game
+            elimination (bool): true if the player was eliminated, false otherwise
 
         Returns:
             Message: the constructed message

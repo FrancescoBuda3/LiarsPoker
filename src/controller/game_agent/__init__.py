@@ -1,4 +1,5 @@
 from src.controller.message_factory.impl import MessageFactory
+from src.model.card import Card
 from src.model.game.GImpl import GameImpl, GamePhase
 from src.model.player import Player
 from src.model.stake import LowestStake
@@ -44,18 +45,18 @@ def game_loop(players: list[Player], id: str):
                     lobby_topic + Topic.START_TURN)
             case Topic.CHECK_LIAR:
                 loser_player: Player = game.check_liar()
+                cards_in_game: list[Card] = []
+                for p in game.get_players():
+                    for c in p.cards:
+                        cards_in_game.append(c)
+                elimination = not loser_player in game.get_players()
                 connection_handler.send_message(
-                    message_factory.create_round_loser_message(loser_player),
+                    message_factory.create_round_loser_message(
+                        loser_player,
+                        cards_in_game,
+                        elimination
+                    ),
                     lobby_topic + Topic.ROUND_LOSER)
-                cards_in_game = [p.cards for p in game.get_players()]
-                connection_handler.send_message(
-                    message_factory.create_show_cards_message(cards_in_game),
-                    lobby_topic + Topic.SHOW_CARDS)
-                if not loser_player in game.get_players():
-                    connection_handler.send_message(
-                        message_factory.create_elimination_message(
-                            loser_player),
-                        lobby_topic + Topic.ELIMINATION)
 
     connection_handler.send_message(
         message_factory.create_game_over_message(game.get_players()[0]),

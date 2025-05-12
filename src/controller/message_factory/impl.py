@@ -8,11 +8,6 @@ from src.services.message import Message
 
 class MessageFactory(MessageFactoryInterface):
 
-    def create_show_cards_message(self, cards: list[Card]) -> Message:
-        return Message({
-            "cards": cards
-        })
-
     def create_start_turn_message(self, player: Player, minimum_stake: Stake) -> Message:
         return Message({
             "player": player,
@@ -24,14 +19,11 @@ class MessageFactory(MessageFactoryInterface):
             "players": players
         })
 
-    def create_round_loser_message(self, player: Player) -> Message:
+    def create_round_loser_message(self, player: Player, cards: list[Card], elimination: bool) -> Message:
         return Message({
-            "player": player
-        })
-
-    def create_elimination_message(self, player: Player) -> Message:
-        return Message({
-            "player": player
+            "player": player,
+            "cards": cards,
+            "elimination": elimination
         })
 
     def create_game_over_message(self, player: Player) -> Message:

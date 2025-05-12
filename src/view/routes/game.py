@@ -42,7 +42,7 @@ def stake_display(stake: Stake):
 
 
 def setup():
-    from src.view.components.dialogs import cards_picker, combination_picker
+    from src.view.components.dialogs import cards_picker, combination_picker, cards_display
 
     message_factory = MessageFactory()
 
@@ -181,8 +181,6 @@ def setup():
                     min_stake = message.body["minimum_stake"]
                     if player_turn.username == user_state.username:
                         ui.notify(f'Your turn!')
-                    # else:
-                    #     ui.notify(f'{player_turn.username}\'s turn!')
                     content.refresh()
 
             def wait_player_move():
@@ -199,22 +197,14 @@ def setup():
                 if message:
                     loser: Player = message.body["player"]
                     ui.notify(f'{loser.username} lost the round!')
-                    cards_message = connection_handler.no_wait_message(
-                        "lobby/" + str(user_state.selected_lobby) + Topic.SHOW_CARDS)
-                    if cards_message:
-                        cards: list[Card] = cards_message.body["cards"]
-                        # ui.notify(f'Cards in game: {cards}')
-                        elimination_message = connection_handler.no_wait_message(
-                            "lobby/" + str(user_state.selected_lobby) + Topic.ELIMINATION)
-                        if elimination_message:
-                            eliminated: Player = elimination_message.body["player"]
-                            ui.notify(f'{eliminated.username} was eliminated!')
-                            # players.remove(eliminated)
-                            if eliminated.username == user_state.username:
-                                ui.notify('You were eliminated!')
-                                # ui.navigate.to('/lobby_select')
-                                local_player.cards = []
-                    content.refresh()
+                    cards: list[Card] = message.body["cards"]
+                    cards_display(cards, lambda: content.refresh()).open()
+                    eliminated: bool = message.body["elimination"]
+                    if eliminated:
+                        ui.notify(f'{loser.username} was eliminated!')
+                        if loser.username == local_player.username:
+                            ui.notify('You were eliminated!')
+                            local_player.cards = []
 
             ui.timer(1, wait_start_turn)
             ui.timer(1, wait_player_move)
