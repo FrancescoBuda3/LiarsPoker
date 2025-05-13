@@ -4,52 +4,15 @@ from src.model.card.rank import Rank
 from src.model.player import Player
 from src.model.stake import LowestStake, Stake
 from src.model.stake.combination import Combination
+from src.view.components.game import opponent_component, stake_display
+from src.view.logic.game import check_input
 from utils.state import user_state
 from src.services.connection.topic import Topic
 from src.controller.message_factory.impl import MessageFactory
 from utils.connection import connection_handler
 
 
-def opponent_component(
-    name: str,
-    avatar_color: str,
-    cards: int,
-    current_player: bool
-):
-    card_images = ['./static/back_small.png'] * cards
-    current_player_class = 'border-t-black' if current_player else 'border-t-transparent opacity-0'
-    with ui.column().classes('items-center mx-4 gap-0') as opponent_container:
-        ui.element('div')\
-            .classes(
-                f'border-solid border-t-8 border-x-transparent border-x-8 border-b-0 mb-2 {current_player_class}')
-        ui.element('div')\
-          .classes(f'bg-{avatar_color}-500 rounded-full')\
-          .style('width:55px; height:55px;')
-        ui.label(name).classes('mt-2 font-semibold')
-        with ui.row().classes('mt-2 gap-0'):
-            for img in card_images:
-                ui.image(source=img)\
-                  .classes('w-12 h-18 m-1')
-    return opponent_container
 
-
-def stake_display(stake: Stake):
-    if stake:
-        move: str = f"{stake.combo}: "
-        for i, r in enumerate(stake.ranks):
-            if i != 0:
-                move += ", "
-            move += f"{r.to_symbol()}"
-        if stake.suits:
-            move += " of "
-        for i, s in enumerate(stake.suits):
-            if i != 0:
-                move += " and "
-            move += f"{s}"
-        with ui.element('div').classes('stake-card') as stake_container:
-                ui.label(move)\
-                    .classes('text-4xl font-bold text-gray-800')
-        return stake_container
 
 
 def setup():
@@ -72,44 +35,8 @@ def setup():
         latest_move: Stake = None
         player_turn: Player = None
 
-        ui.add_head_html('''
-              <style>
-                .nicegui-content {
-                  height: 100vh !important;
-                  padding: 0 !important;
-                }
-                
-                @layer utilities {
-                  .grid-rows-[5%_25%_10%_5%_13%_37%_5%] {
-                    grid-template-rows: 5% 25% 10% 5% 13% 37% 5%;
-                  }
-                }
-                
-                @font-face {
-                font-family: 'Montserrat';
-                src: url('/static/fonts/Montserrat-VariableFont_wght.ttf') format('truetype');
-                font-weight: normal;
-                font-style: normal;
-                }
-                .stake-card {
-                  background-color: #e0e0e0;             /* grigio chiaro */
-                  border-radius: 1rem;                   /* pill shape */
-                  padding: 0.5rem 1.5rem;                /* verticale/orizzontale */
-                  display: inline-block;
-                  font-family: 'Montserrat', sans-serif;
-                  font-size: 1.25rem;                    /* circa 20px */
-                  font-weight: bold;
-                  color: #333333;
-                }
-                button {
-                    font-family: "Montserrat" !important;
-                    border-radius: 1rem !important; 
-                    color: white !important;
-                    padding: 1rem !important; 
-                    min-height: 0 !important;
-                }
-              </style>
-            ''')
+        
+       
 
         @ui.refreshable
         def content():
@@ -149,38 +76,7 @@ def setup():
                 else:
                     ui.notify('Choose valid cards!')
 
-            def check_input(cards: list[Card], combo: Combination) -> bool:
-                if combo == Combination.STRAIGHT:
-                    cards.sort(key=lambda x: x.rank.value)
-                    return all(
-                        cards[i].rank.value == cards[i + 1].rank.value - 1
-                        for i in range(len(cards) - 1)
-                    )
-                elif combo == Combination.FLUSH:
-                    return all(
-                        cards[i].suit == cards[i + 1].suit
-                        for i in range(len(cards) - 1)
-                    )
-                elif combo == Combination.STRAIGHT_FLUSH:
-                    cards.sort(key=lambda x: x.rank.value)
-                    return all(
-                        cards[i].suit == cards[i + 1].suit
-                        for i in range(len(cards) - 1)
-                    ) and all(
-                        cards[i].rank.value == cards[i + 1].rank.value - 1
-                        for i in range(len(cards) - 1)
-                    )
-                elif combo == Combination.ROYAL_FLUSH:
-                    cards.sort(key=lambda x: x.rank.value)
-                    return all(
-                        cards[i].suit == cards[i + 1].suit
-                        for i in range(len(cards) - 1)
-                    ) and all(
-                        cards[i].rank.value == Rank(i + 10).value
-                        for i in range(len(cards))
-                    )
-                elif combo == Combination.HIGH_CARD or combo == Combination.PAIR or combo == Combination.THREE_OF_A_KIND or combo == Combination.FOUR_OF_A_KIND or combo == Combination.TWO_PAIR or combo == Combination.FULL_HOUSE:
-                    return True
+            
 
             def wait_start_turn():
                 nonlocal player_turn
@@ -227,7 +123,7 @@ def setup():
             with ui.element('div')\
                     .classes('bg-gray-100 flex items-center justify-center basis-full h-full w-full'):
                 with ui.grid(rows='5% 25% 10% 5% 13% 37% 5%')\
-                       .classes('w-full h-full max-w-full max-h-full grid-rows-[5%_25%_10%_5%_13%_37%_5%] border border-gray-300 gap-0 mx-[100px]'):
+                       .classes('w-full h-full max-w-full max-h-full grid-rows-game border border-gray-300 gap-0 mx-[100px]'):
                     with ui.row().classes('flex items-center justify-center'):
                         # with ui.left_drawer().classes('bg-grey-2') as drawer:
                         #     ui.label('Moves:').classes('text-h6')

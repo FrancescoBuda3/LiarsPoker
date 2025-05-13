@@ -10,5 +10,40 @@ if __name__ == "__main__":
     lobby_select.setup()
     game.setup()
 
-    # Disabilita il reload automatico per evitare doppio spawn
+    ui.add_head_html('''
+              <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+            ''', shared=True)
+    
+    ui.add_css('''
+        .nicegui-content {
+          height: 100vh !important;
+          padding: 0 !important;
+        }
+
+        @layer utilities {
+          .grid-rows-game {
+            grid-template-rows: 5% 25% 10% 5% 13% 37% 5%;
+          }
+        }
+
+        .stake-card {
+          background-color: #e0e0e0;             
+          border-radius: 1rem;                   
+          padding: 0.5rem 1.5rem;                
+          display: inline-block;
+          font-family: 'Montserrat', sans-serif;
+          font-size: 1.25rem;                    
+          font-weight: bold;
+          color: #333333;
+        }
+        button {
+            font-family: "Montserrat" !important;
+            font-weight: 700 !important;
+            border-radius: 1rem !important; 
+            color: white !important;
+            padding: 1rem !important; 
+            min-height: 0 !important;
+        }
+    ''', shared=True)
+    
     ui.run(host='127.0.0.1', port=PORT, title=f'Liars Poker', reload=False, favicon='static/favicon.png')
