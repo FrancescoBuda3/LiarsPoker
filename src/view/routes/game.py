@@ -5,7 +5,7 @@ from src.model.player import Player
 from src.model.stake import LowestStake, Stake
 from src.model.stake.combination import Combination
 from src.view.components.game import opponent_component, stake_display
-from src.view.logic.game import check_input
+from src.view.logic.game import check_cards_combination
 from utils.state import user_state
 from src.services.connection.topic import Topic
 from src.controller.message_factory.impl import MessageFactory
@@ -64,7 +64,7 @@ def setup():
                         cards = await cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0])
                 else:
                     cards = await cards_picker(max_cards=max_cards)
-                if check_input(cards, combo):
+                if check_cards_combination(cards, combo):
                     ranks = [card.rank for card in cards]
                     suits = [card.suit for card in cards]
                     if combo == Combination.FLUSH or combo == Combination.STRAIGHT_FLUSH or combo == Combination.ROYAL_FLUSH:
