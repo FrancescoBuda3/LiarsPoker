@@ -24,30 +24,60 @@ def combination_picker(minimum_combo: Combination = Combination.HIGH_CARD) -> ui
     return combination_dialog
 
 
+cards_selected: list[Card] = []
+card_to_box: dict[Card, ui.checkbox] = {}
+
+
+def __on_checkbox_change(card, max_cards):
+    if card in cards_selected:
+        cards_selected.remove(card)
+        card_to_box[card].value = False
+    elif len(cards_selected) < max_cards:
+        cards_selected.append(card)
+        card_to_box[card].value = True
+    else:
+        card_to_box[card].value = False
+
+
+def __on_submit(dialog) -> list[Card]:
+    ret = cards_selected.copy()
+    cards_selected.clear()
+    for box in card_to_box.values():
+        box.clear()
+    dialog.submit(ret)
+
+
+def white_cards_picker(max_cards: int = 5,
+                       min_rank: Rank = Rank.ONE
+                       ) -> ui.dialog:
+    with ui.dialog() as cards_dialog, ui.card():
+        with ui.column().classes('items-center'):
+            ui.label('Select cards').classes('text-lg')
+            with ui.row():
+                for i in range(min_rank.value, len(Rank) + 1):
+                    rank = Rank(i)
+                    card = Card(None, rank)
+                    with ui.column().classes('items-center'):
+                        ui.image(f"static/{rank}.png",
+                                 ).style('width: 5rem; height: auto')
+                        checkbox = ui.checkbox(
+                            value=False,
+                            on_change=lambda c=card: __on_checkbox_change(
+                                c, max_cards),
+                        )
+                        card_to_box[card] = checkbox
+            ui.button(
+                'Submit',
+                on_click=lambda: __on_submit(cards_dialog)
+            )
+    return cards_dialog
+
+
 def cards_picker(max_cards: int = 5,
                  suits: set[Suit] = {Suit.CLUBS,
                                      Suit.DIAMONDS, Suit.HEARTS, Suit.SPADES},
-                 min_rank: Rank = Rank.ONE,
+                 min_rank: Rank = Rank.ONE
                  ) -> ui.dialog:
-    cards_selected: list[Card] = []
-    card_to_box: dict[Card, ui.checkbox] = {}
-
-    def __on_checkbox_change(card):
-        if card in cards_selected:
-            cards_selected.remove(card)
-            card_to_box[card].value = False
-        elif len(cards_selected) < max_cards:
-            cards_selected.append(card)
-            card_to_box[card].value = True
-        else:
-            card_to_box[card].value = False
-
-    def __on_submit() -> list[Card]:
-        ret = cards_selected.copy()
-        cards_selected.clear()
-        for box in card_to_box.values():
-            box.clear()
-        cards_dialog.submit(ret)
 
     with ui.dialog() as cards_dialog, ui.card():
         with ui.column().classes('items-center'):
@@ -63,12 +93,12 @@ def cards_picker(max_cards: int = 5,
                             checkbox = ui.checkbox(
                                 value=False,
                                 on_change=lambda c=card: __on_checkbox_change(
-                                    c),
+                                    c, max_cards),
                             )
                             card_to_box[card] = checkbox
             ui.button(
                 'Submit',
-                on_click=lambda: __on_submit()
+                on_click=lambda: __on_submit(cards_dialog)
             )
 
     return cards_dialog

@@ -12,11 +12,8 @@ from src.controller.message_factory.impl import MessageFactory
 from utils.connection import connection_handler
 
 
-
-
-
 def setup():
-    from src.view.components.dialogs import cards_picker, combination_picker, cards_display
+    from src.view.components.dialogs import cards_picker, combination_picker, cards_display, white_cards_picker
 
     message_factory = MessageFactory()
 
@@ -34,9 +31,6 @@ def setup():
         min_stake: Stake = LowestStake.HIGH_CARD.value
         latest_move: Stake = None
         player_turn: Player = None
-
-        
-       
 
         @ui.refreshable
         def content():
@@ -56,14 +50,23 @@ def setup():
                         | Combination.FULL_HOUSE
                     ):
                         max_cards = 2
-                print(min_stake)
-                if min_stake.combo == combo:
-                    if len(min_stake.suits) > 0:
-                        cards = await cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0], suits=min_stake.suits)
-                    else:
-                        cards = await cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0])
-                else:
-                    cards = await cards_picker(max_cards=max_cards)
+                match combo:
+                    case (Combination.FLUSH
+                          | Combination.STRAIGHT_FLUSH
+                          | Combination.ROYAL_FLUSH
+                          ):
+                        if min_stake.combo == combo:
+                            if len(min_stake.suits) > 0:
+                                cards = await cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0], suits=min_stake.suits)
+                            else:
+                                cards = await cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0])
+                        else:
+                            cards = await cards_picker(max_cards=max_cards)
+                    case _:
+                        if min_stake.combo == combo:
+                            cards = await white_cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0])
+                        else:
+                            cards = await white_cards_picker(max_cards=max_cards)
                 if check_cards_combination(cards, combo):
                     ranks = [card.rank for card in cards]
                     suits = [card.suit for card in cards]
@@ -75,8 +78,6 @@ def setup():
                         local_player, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
                 else:
                     ui.notify('Choose valid cards!')
-
-            
 
             def wait_start_turn():
                 nonlocal player_turn
@@ -192,8 +193,7 @@ def setup():
                     content.refresh()
 
         ui.timer(1, wait_start_game)
-        
-        
+
         def wait_game_over():
             message = connection_handler.no_wait_message(
                 "lobby/" + str(user_state.selected_lobby) + Topic.GAME_OVER)
@@ -205,5 +205,5 @@ def setup():
                 if winner.id == local_player.id:
                     game_over_dialog.open()
                 ui.timer(5, lambda: ui.navigate.to('/lobby'), once=True)
-                
+
         ui.timer(1, wait_game_over)
