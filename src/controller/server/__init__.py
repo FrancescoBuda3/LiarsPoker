@@ -42,8 +42,10 @@ class Server(Debuggable):
                     self._log(f"New lobby created. ID: {lobby_id}")
                     self._connection.send_message(
                         self._message_factory.create_new_lobby_message(player.id, lobby_id), Topic.NEW_LOBBY)
+                
                 case Topic.NEW_PLAYER:
                     self.__new_player(msg.body["player"])
+                    
                 case Topic.NEW_GAME:
                     lobby_id = msg.body["lobby_id"]
                     players_in_lobby: list[Player] = []
@@ -64,23 +66,26 @@ class Server(Debuggable):
                         self._message_factory.create_join_lobby_message(player.id, msg.body["lobby_id"], status), Topic.JOIN_LOBBY
                     )
                     self._log(f"Player joined lobby: {status}")
-
+                    
                 case Topic.LEAVE_LOBBY:
-                    if self.__leave_lobby(msg.body["player"], msg.body["lobby"]):
-                        self._log("Player left lobby")
+                    lobby_id = msg.body["lobby_id"]
+                    player = msg.body["player"]
+                    if self.__leave_lobby(player, lobby_id):
+                        self._log(f"Player {player} left lobby")
+                        if len(self._lobby[lobby_id]) == 0:
+                            self.__delete_lobby(lobby_id)
+                            self._log(f"Lobby {lobby_id} deleted")
+                        else:
+                            self._log(f"Lobby {lobby_id} not deleted")
                     else:
-                        self._log("Player couldn't leave lobby")
-                case Topic.DISCONNECT_PLAYER:
-                    if self.__disconnect_player(msg.body["player"]):
-                        self._log("Player disconnected")
+                        self._log(f"Player {player} couldn't leave lobby")
+                
+                case Topic.REMOVE_PLAYER:
+                    player = msg.body["player"]
+                    if self.__remove_player(player):
+                        self._log(f"Player {player} disconnected")
                     else:
-                        self._log("Player not found")
-                case Topic.DELETE_LOBBY:
-                    if self.__delete_lobby(msg.body["player"], msg.body["lobby"]):
-                        thread.join()
-                        self._log("Lobby deleted")
-                    else:
-                        self._log("Lobby not found")
+                        self._log(f"Player {player} not found")
                 case _:
                     self._log("Unknown topic")
         except KeyError as e:
@@ -115,7 +120,7 @@ class Server(Debuggable):
     def __new_player(self, player):
         self._players.append(player)
 
-    def __disconnect_player(self, player):
+    def __remove_player(self, player):
         if player in self._players:
             self._players.remove(player)
             if player in [player for lobby in self._lobby.values() for player in lobby]:
@@ -126,8 +131,8 @@ class Server(Debuggable):
         else:
             return False
 
-    def __delete_lobby(self, player, lobby):
-        if lobby in self._lobby.keys() and player in self._lobby[lobby]:
+    def __delete_lobby(self, lobby):
+        if lobby in self._lobby.keys():
             del self._lobby[lobby]
             return True
         else:

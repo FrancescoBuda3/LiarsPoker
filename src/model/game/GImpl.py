@@ -22,8 +22,6 @@ class GameImpl(Game):
         self.__core.add_player(player)
     
     def remove_player(self, player):
-        if (self.__phase != GamePhase.WAITING_FOR_PLAYERS and self.__phase != GamePhase.PLAYERS_TURN) or self.__core.get_current_player() != player:
-            raise ValueError("Cannot remove player while it is not their turn")
         self.__core.remove_player(player)
         if len(self.__core.get_players()) == 1:
             self.__phase = GamePhase.GAME_OVER

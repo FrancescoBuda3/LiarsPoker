@@ -30,34 +30,39 @@ def game_loop(players: list[Player], id: str):
                 lobby_topic + Topic.START_TURN)
 
         (topic, msg) = connection_handler.try_get_any_message()
-        if msg is None:
-            continue
-        print(topic)
-        topic = Topic(topic.split("/")[-1])
-        print(topic)
-        print(msg)
-        match topic:
-            case Topic.RAISE_STAKE:
-                next_min_stake = game.raise_stake(msg.body['stake'])
-                connection_handler.send_message(
-                    message_factory.create_start_turn_message(
-                        game.get_current_player(), next_min_stake),
-                    lobby_topic + Topic.START_TURN)
-            case Topic.CHECK_LIAR:
-                loser_player: Player = game.check_liar()
-                cards_in_game: list[Card] = []
-                for p in game.get_players():
-                    for c in p.cards:
-                        cards_in_game.append(c)
-                elimination = not loser_player in game.get_players()
-                connection_handler.send_message(
-                    message_factory.create_round_loser_message(
-                        loser_player,
-                        cards_in_game,
-                        elimination
-                    ),
-                    lobby_topic + Topic.ROUND_LOSER)
+        if msg:
+            topic = Topic(topic.split("/")[-1])
+            match topic:
+                case Topic.RAISE_STAKE:
+                    next_min_stake = game.raise_stake(msg.body['stake'])
+                    connection_handler.send_message(
+                        message_factory.create_start_turn_message(
+                            game.get_current_player(), next_min_stake),
+                        lobby_topic + Topic.START_TURN)
 
+                case Topic.CHECK_LIAR:
+                    loser_player: Player = game.check_liar()
+                    cards_in_game: list[Card] = []
+                    for p in game.get_players():
+                        for c in p.cards:
+                            cards_in_game.append(c)
+                    elimination = not loser_player in game.get_players()
+                    connection_handler.send_message(
+                        message_factory.create_round_loser_message(
+                            loser_player,
+                            cards_in_game,
+                            elimination
+                        ),
+                        lobby_topic + Topic.ROUND_LOSER)
+
+                case Topic.REMOVE_PLAYER:
+                    player = msg.body['player']
+                    game.remove_player(player)
+                    connection_handler.send_message(
+                        message_factory.create_round_loser_message(player, [], True),
+                        lobby_topic + Topic.ROUND_LOSER
+                    )
+                
     connection_handler.send_message(
         message_factory.create_game_over_message(game.get_players()[0]),
         lobby_topic + Topic.GAME_OVER)
