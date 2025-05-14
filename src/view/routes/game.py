@@ -1,9 +1,11 @@
 from nicegui import ui
 from src.model.card import Card
 from src.model.card.rank import Rank
+from src.model.card.suit import Suit
 from src.model.player import Player
 from src.model.stake import LowestStake, Stake
 from src.model.stake.combination import Combination
+from src.view.components.dialogs import suit_picker
 from src.view.components.game import opponent_component, stake_display
 from src.view.logic.game import check_cards_combination
 from utils.state import user_state
@@ -35,7 +37,14 @@ def setup():
         @ui.refreshable
         def content():
             async def show_stake_dialog(min_stake: Stake):
+                stake: Stake = None
                 combo = await combination_picker(min_stake.combo)
+                min_rank: Rank = Rank.ONE
+                suits: set[Suit] = {Suit.HEARTS, Suit.DIAMONDS, Suit.CLUBS, Suit.SPADES}
+                if min_stake.ranks and combo == min_stake.combo:
+                    min_rank = min_stake.ranks[0]
+                if len(min_stake.suits)  > 0 and combo == min_stake.combo:
+                    suits = min_stake.suits
                 max_cards = 5
                 match combo:
                     case (
@@ -51,29 +60,21 @@ def setup():
                     ):
                         max_cards = 2
                 match combo:
-                    case (Combination.FLUSH
-                          | Combination.STRAIGHT_FLUSH
-                          | Combination.ROYAL_FLUSH
-                          ):
-                        if min_stake.combo == combo:
-                            if len(min_stake.suits) > 0:
-                                cards = await cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0], suits=min_stake.suits)
-                            else:
-                                cards = await cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0])
-                        else:
-                            cards = await cards_picker(max_cards=max_cards)
+                    case (
+                            Combination.FLUSH
+                            | Combination.ROYAL_FLUSH
+                        ):
+                        suit = await suit_picker(suits)
+                        stake = Stake(combo, [], suit)
+                    case Combination.STRAIGHT_FLUSH:
+                        cards = await cards_picker(max_cards=max_cards, suits=suits, min_rank=min_rank)
+                        if check_cards_combination(cards, combo):
+                            stake = Stake(combo, [card.rank for card in cards], [card.suit for card in cards])
                     case _:
-                        if min_stake.combo == combo:
-                            cards = await white_cards_picker(max_cards=max_cards, min_rank=min_stake.ranks[0])
-                        else:
-                            cards = await white_cards_picker(max_cards=max_cards)
-                if check_cards_combination(cards, combo):
-                    ranks = [card.rank for card in cards]
-                    suits = [card.suit for card in cards]
-                    if combo == Combination.FLUSH or combo == Combination.STRAIGHT_FLUSH or combo == Combination.ROYAL_FLUSH:
-                        stake = Stake(combo, ranks, suits)
-                    else:
-                        stake = Stake(combo, ranks)
+                        cards = await white_cards_picker(max_cards=max_cards, min_rank=min_rank)
+                        if check_cards_combination(cards, combo):
+                            stake = Stake(combo, [card.rank for card in cards])
+                if stake:
                     connection_handler.send_message(message_factory.create_raise_stake_message(
                         local_player, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
                 else:

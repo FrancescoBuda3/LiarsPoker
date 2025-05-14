@@ -73,6 +73,42 @@ def white_cards_picker(max_cards: int = 5,
     return cards_dialog
 
 
+def suit_picker(suits: set[Suit] = {Suit.CLUBS,Suit.DIAMONDS, Suit.HEARTS, Suit.SPADES}) -> ui.dialog:
+    selected_suit: Suit = None
+    suit_to_box: dict[Suit, ui.checkbox] = {}
+    
+    def __handle_suit_change(suit_value):
+        nonlocal selected_suit
+        selected_suit = suit_value
+        for suit, box in suit_to_box.items():
+            box.value = suit == suit_value
+            
+    def __on_suit_submit(dialog) -> Suit:
+        nonlocal selected_suit
+        ret = Suit(selected_suit.value)
+        selected_suit = None
+        for box in suit_to_box.values():
+            box.clear()
+        dialog.submit(ret)
+        
+    with ui.dialog() as suit_dialog, ui.card():
+        with ui.column().classes('items-center'):
+            ui.label('Select suits').classes('text-lg')
+            with ui.row():
+                for suit in suits:
+                    with ui.column().classes('items-center'):
+                        ui.image(f"static/{suit}.png").style('width: 5rem; height: auto')
+                        suit_to_box[suit] = ui.checkbox(
+                            value=False,
+                            on_change=lambda s=suit: __handle_suit_change(s)
+                        )
+            ui.button(
+                'Submit',
+                on_click=lambda: __on_suit_submit(suit_dialog)
+            )
+    return suit_dialog
+
+
 def cards_picker(max_cards: int = 5,
                  suits: set[Suit] = {Suit.CLUBS,
                                      Suit.DIAMONDS, Suit.HEARTS, Suit.SPADES},
@@ -106,13 +142,14 @@ def cards_picker(max_cards: int = 5,
 
 def cards_display(cards: list[Card], onClose: Callable[[], None]) -> ui.dialog:
     with ui.dialog() as display_dialog, ui.card():
-        with ui.row():
-            for card in cards:
-                ui.image(f"static/{card.rank}_of_{card.suit}.png"
-                         ).style('width: 5rem; height: auto')
-        ui.button(
-            'Close',
-            on_click=onClose,
-        )
+        with ui.column().classes('items-center'):
+            with ui.row():
+                for card in cards:
+                    ui.image(f"static/{card.rank}_of_{card.suit}.png"
+                            ).style('width: 5rem; height: auto')
+            ui.button(
+                'Close',
+                on_click=onClose,
+            )
 
     return display_dialog
