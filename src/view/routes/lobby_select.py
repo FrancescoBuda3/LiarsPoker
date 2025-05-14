@@ -47,6 +47,15 @@ def setup():
 
                 ui.button('Create Lobby', on_click=create_lobby)
                 ui.button('Join Lobby', on_click=join_lobby)
-                ui.button('Logout', on_click=lambda: ui.navigate.to('/login'))
+                
+                def logout():
+                    connection_handler.send_message(
+                        message_factory.create_remove_player_message(user_state.id), 
+                        Topic.REMOVE_PLAYER
+                    )
+                    user_state.reset()
+                    ui.navigate.to('/')
+                
+                ui.button('Logout', on_click=logout)
 
         centered_layout(content)

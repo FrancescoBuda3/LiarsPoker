@@ -28,11 +28,13 @@ def setup():
     @ui.page('/game')
     def game_page():
         players: list[Player] = []
-        local_player: Player = Player(
-            user_state.username, user_state.id)
+        local_player: Player = Player(user_state.username, user_state.id)
         min_stake: Stake = LowestStake.HIGH_CARD.value
         latest_move: Stake = None
         player_turn: Player = None
+
+        def __to_game_topic(topic: Topic):
+            return "lobby/" + str(user_state.selected_lobby) + topic
 
         @ui.refreshable
         def content():
@@ -40,10 +42,11 @@ def setup():
                 stake: Stake = None
                 combo = await combination_picker(min_stake.combo)
                 min_rank: Rank = Rank.ONE
-                suits: set[Suit] = {Suit.HEARTS, Suit.DIAMONDS, Suit.CLUBS, Suit.SPADES}
+                suits: set[Suit] = {Suit.HEARTS,
+                                    Suit.DIAMONDS, Suit.CLUBS, Suit.SPADES}
                 if min_stake.ranks and combo == min_stake.combo:
                     min_rank = min_stake.ranks[0]
-                if len(min_stake.suits)  > 0 and combo == min_stake.combo:
+                if len(min_stake.suits) > 0 and combo == min_stake.combo:
                     suits = min_stake.suits
                 max_cards = 5
                 match combo:
@@ -61,22 +64,23 @@ def setup():
                         max_cards = 2
                 match combo:
                     case (
-                            Combination.FLUSH
-                            | Combination.ROYAL_FLUSH
-                        ):
+                        Combination.FLUSH
+                        | Combination.ROYAL_FLUSH
+                    ):
                         suit = await suit_picker(suits)
                         stake = Stake(combo, [], suit)
                     case Combination.STRAIGHT_FLUSH:
                         cards = await cards_picker(max_cards=max_cards, suits=suits, min_rank=min_rank)
                         if check_cards_combination(cards, combo):
-                            stake = Stake(combo, [card.rank for card in cards], [card.suit for card in cards])
+                            stake = Stake(combo, [card.rank for card in cards], [
+                                          card.suit for card in cards])
                     case _:
                         cards = await white_cards_picker(max_cards=max_cards, min_rank=min_rank)
                         if check_cards_combination(cards, combo):
                             stake = Stake(combo, [card.rank for card in cards])
                 if stake:
                     connection_handler.send_message(message_factory.create_raise_stake_message(
-                        local_player, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
+                        local_player, stake), __to_game_topic(Topic.RAISE_STAKE))
                 else:
                     ui.notify('Choose valid cards!')
 
@@ -84,7 +88,7 @@ def setup():
                 nonlocal player_turn
                 nonlocal min_stake
                 message = connection_handler.no_wait_message(
-                    "lobby/" + str(user_state.selected_lobby) + Topic.START_TURN)
+                    __to_game_topic(Topic.START_TURN))
                 if message:
                     player_turn = message.body["player"]
                     min_stake = message.body["minimum_stake"]
@@ -95,14 +99,14 @@ def setup():
             def wait_player_move():
                 nonlocal latest_move
                 message = connection_handler.no_wait_message(
-                    "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
+                    __to_game_topic(Topic.RAISE_STAKE))
                 if message:
                     latest_move = message.body["stake"]
                     content.refresh()
 
             def wait_round_loser():
                 message = connection_handler.no_wait_message(
-                    "lobby/" + str(user_state.selected_lobby) + Topic.ROUND_LOSER)
+                    __to_game_topic(Topic.ROUND_LOSER))
                 if message:
                     loser: Player = message.body["player"]
                     ui.notify(f'{loser.username} lost the round!')
@@ -127,13 +131,6 @@ def setup():
                 with ui.grid(rows='5% 25% 10% 5% 13% 37% 5%')\
                        .classes('w-full h-full max-w-full max-h-full grid-rows-game border border-gray-300 gap-0 mx-[100px]'):
                     with ui.row().classes('flex items-center justify-center'):
-                        # with ui.left_drawer().classes('bg-grey-2') as drawer:
-                        #     ui.label('Moves:').classes('text-h6')
-                        #     moves_label = ui.label('')
-                        # drawer.value = False
-                        # ui.button('☰ Moves', on_click=lambda: ui.left_drawer.toggle(drawer)).classes('m-4')
-                        ...
-                    with ui.row().classes('flex items-center justify-center'):
                         for i in range(len(players)):
                             pl: Player = players[i]
                             opponent_component(
@@ -145,8 +142,6 @@ def setup():
                     with ui.row().classes('flex items-center justify-center'):
                         stake_display(latest_move)
                     with ui.row().classes('flex items-center justify-center'):
-                        ...
-                    with ui.row().classes('flex items-center justify-center'):
                         rise_button = ui.button('RISE STAKE')\
                             .classes('text-4xl font-bold')\
                             .style('background-color: #00999E !important;')\
@@ -157,9 +152,7 @@ def setup():
                             .style('background-color: #9E2500 !important;')\
                             .on('click', lambda: connection_handler.send_message(
                                 message_factory.create_check_liar_message(),
-                                "lobby/" +
-                                str(user_state.selected_lobby) +
-                                Topic.CHECK_LIAR
+                                __to_game_topic(Topic.CHECK_LIAR)
                             ))
                         bullshit_button.set_enabled(is_my_turn())
                     with ui.row().classes('flex items-center justify-center'):
@@ -170,8 +163,24 @@ def setup():
                             ui.image(f"static/{str(c.rank)}_of_{str(c.suit)}.png")\
                                 .style('width: 10%;')\
                                 .classes('m-1')
+
+                    def leave_game():
+                        connection_handler.send_message(
+                            message_factory.create_remove_player_message(
+                                local_player.id),
+                            __to_game_topic(Topic.REMOVE_PLAYER)
+                        )
+                        connection_handler.send_message(
+                            MessageFactory().create_leave_lobby_message(
+                                user_state.selected_lobby),
+                            Topic.LEAVE_LOBBY
+                        )
+                        user_state.selected_lobby = None
+                        user_state.host = False
+                        ui.navigate.to('/lobby_select')
+
                     with ui.row().classes('flex items-center justify-center'):
-                        ...
+                        ui.button('Leave Game').on('click', leave_game)
 
         content()
 

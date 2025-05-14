@@ -106,6 +106,18 @@ class MessageFactoryInterface(Protocol):
         """
         ...
         
+    def create_new_game_message(self, lobby_id: int) -> Message:
+        """
+        Create a message to start a new game.
+
+        Args:
+            lobby_id (int): ID of the lobby
+
+        Returns:
+            Message: the constructed message
+        """
+        ...
+        
     def create_join_lobby_message(self, player_id: UUID, lobby_id: int, status: bool) -> Message:
         """
         Create a message to join a lobby.
@@ -119,14 +131,25 @@ class MessageFactoryInterface(Protocol):
             Message: the constructed message
         """
         ...
-
-    def create_new_game_message(self, lobby_id: int) -> Message:
+        
+    def create_leave_lobby_message(self, player_id: UUID, lobby_id: int) -> Message:
         """
-        Create a message to start a new game.
+        Create a message to leave a lobby.
 
         Args:
+            player_id (UUID): ID of the player
             lobby_id (int): ID of the lobby
 
+        Returns:
+            Message: the constructed message
+        """
+        ...
+        
+    def create_remove_player_message(self, player_id: UUID) -> Message:
+        """
+        Create a message to remove a player.
+        Args:
+            player_id (UUID): ID of the player to remove
         Returns:
             Message: the constructed message
         """

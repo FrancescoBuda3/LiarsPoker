@@ -56,12 +56,17 @@ def game_loop(players: list[Player], id: str):
                         lobby_topic + Topic.ROUND_LOSER)
 
                 case Topic.REMOVE_PLAYER:
-                    player = msg.body['player']
-                    game.remove_player(player)
-                    connection_handler.send_message(
-                        message_factory.create_round_loser_message(player, [], True),
-                        lobby_topic + Topic.ROUND_LOSER
-                    )
+                    player_id = msg.body['player_id']
+                    player = None
+                    for p in game.get_players():
+                        if p.id == player_id:
+                            player = p
+                    if player:
+                        game.remove_player(player)
+                        connection_handler.send_message(
+                            message_factory.create_round_loser_message(player, [], True),
+                            lobby_topic + Topic.ROUND_LOSER
+                        )
                 
     connection_handler.send_message(
         message_factory.create_game_over_message(game.get_players()[0]),

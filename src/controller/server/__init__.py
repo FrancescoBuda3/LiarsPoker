@@ -31,14 +31,11 @@ class Server(Debuggable):
         topic, msg = self._connection.try_get_any_message()
         if msg is None:
             return
-        #self._log(f"Received `{msg.body}` from `{topic}` topic")
         try:
             match topic:
                 case Topic.NEW_LOBBY:
-                    player = next((p for p in self._players if p.id == msg.body["player_id"]), None)
-                    #if msg.body["lobby_id"] not in self._lobby.keys():
+                    player = self.__get_player_by_id(msg.body["player_id"])
                     lobby_id = self.__create_lobby(player)
-                    # self.client.subscribe(f"lobby/{id}")
                     self._log(f"New lobby created. ID: {lobby_id}")
                     self._connection.send_message(
                         self._message_factory.create_new_lobby_message(player.id, lobby_id), Topic.NEW_LOBBY)
@@ -60,7 +57,7 @@ class Server(Debuggable):
                     self._log(f"New game started for lobby {lobby_id} with {len(players_in_lobby)} players.")
                     
                 case Topic.JOIN_LOBBY:
-                    player = next((p for p in self._players if p.id == msg.body["player_id"]), None)
+                    player = self.__get_player_by_id(msg.body["player_id"])
                     status = self.__join_lobby(player, msg.body["lobby_id"])
                     self._connection.send_message(
                         self._message_factory.create_join_lobby_message(player.id, msg.body["lobby_id"], status), Topic.JOIN_LOBBY
@@ -69,7 +66,7 @@ class Server(Debuggable):
                     
                 case Topic.LEAVE_LOBBY:
                     lobby_id = msg.body["lobby_id"]
-                    player = msg.body["player"]
+                    player = self.__get_player_by_id(msg.body["player_id"])
                     if self.__leave_lobby(player, lobby_id):
                         self._log(f"Player {player} left lobby")
                         if len(self._lobby[lobby_id]) == 0:
@@ -81,7 +78,7 @@ class Server(Debuggable):
                         self._log(f"Player {player} couldn't leave lobby")
                 
                 case Topic.REMOVE_PLAYER:
-                    player = msg.body["player"]
+                    player = self.__get_player_by_id(msg.body["player_id"])
                     if self.__remove_player(player):
                         self._log(f"Player {player} disconnected")
                     else:
@@ -90,6 +87,12 @@ class Server(Debuggable):
                     self._log("Unknown topic")
         except KeyError as e:
             self._log(f"Unexpected message: {e}")
+
+    def __get_player_by_id(self, player_id) -> Player:
+        for player in self._players:
+            if player.id == player_id:
+                return player
+        return None
 
     def __generate_id(self) -> int:
         id = self._random.randint(0, self._MAX_LOBBIES)
