@@ -20,12 +20,6 @@ if __name__ == "__main__":
           padding: 0 !important;
         }
 
-        @layer utilities {
-          .grid-rows-game {
-            grid-template-rows: 5% 25% 10% 5% 13% 37% 5%;
-          }
-        }
-
         .stake-card {
           background-color: #e0e0e0;             
           border-radius: 1rem;                   

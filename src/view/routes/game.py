@@ -139,7 +139,7 @@ def setup():
             with ui.element('div')\
                     .classes('bg-gray-100 flex items-center justify-center basis-full h-full w-full'):
                 with ui.grid(rows='5% 25% 10% 5% 13% 37% 5%')\
-                       .classes('w-full h-full max-w-full max-h-full grid-rows-game border border-gray-300 gap-0 mx-[100px]'):
+                       .classes('w-full h-full max-w-full max-h-full border border-gray-300 gap-0 mx-[100px]'):
                     with ui.row().classes('flex items-center justify-center'):
                         # with ui.left_drawer().classes('bg-grey-2') as drawer:
                         #     ui.label('Moves:').classes('text-h6')
@@ -185,7 +185,7 @@ def setup():
                                 .style('width: 10%;')\
                                 .classes('m-1')
                     with ui.row().classes('flex items-center justify-center'):
-                        ...
+                        ui.button('BACK TO LOBBY')
 
         content()
 
