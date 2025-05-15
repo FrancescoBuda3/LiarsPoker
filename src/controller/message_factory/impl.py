@@ -82,7 +82,7 @@ class MessageFactory(MessageFactoryInterface):
             "player_id": player_id
         })
         
-    def create_response_message(self, player_id: UUID, response: bool):
+    def create_response_message(self, player_id: UUID, response: bool) -> Message:
         return Message({
             "player_id": player_id,
             "response": response

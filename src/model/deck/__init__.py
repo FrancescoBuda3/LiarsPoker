@@ -8,5 +8,5 @@ class Deck():
         Returns:
             list[int]: list of hands with the number of cards specified in the input
         """
-        pass
+        ...
 

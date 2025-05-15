@@ -57,6 +57,7 @@ class ConnectionHandlerInterface(Protocol):
         Returns:
             tuple[Topic, Message]: the topic and message, None if message isn't present
         """
+        ...
         
     def no_wait_message(self, topic: Topic) -> Message:
         """

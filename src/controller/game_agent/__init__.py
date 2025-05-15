@@ -30,7 +30,7 @@ def game_loop(players: list[Player], id: str):
                 lobby_topic + Topic.START_TURN)
 
         (topic, msg) = connection_handler.try_get_any_message()
-        if msg:
+        if topic and msg:
             topic = Topic(topic.split("/")[-1])
             match topic:
                 case Topic.RAISE_STAKE:

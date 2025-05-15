@@ -80,6 +80,7 @@ class MessageFactoryInterface(Protocol):
         Returns:
             Message: the constructed message
         """
+        ...
         
     def create_new_player_message(self, username: str, id: UUID) -> Message:
         """

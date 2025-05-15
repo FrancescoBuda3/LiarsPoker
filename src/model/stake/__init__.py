@@ -15,7 +15,7 @@ class Stake:
     suits: set[Suit]
     combo: Combination
     
-    def __init__(self, combo: Combination, ranks: list[Rank] = None, suits = None):
+    def __init__(self, combo: Combination, ranks: list[Rank] = [], suits = None):
         """
         Models the stake that a player calls when playing.
         Args:
@@ -24,7 +24,7 @@ class Stake:
             suits (Suit or set[Suit], optional): the suit or suits of the stake. Defaults to None.
         """
         self.combo = combo
-        self.ranks = ranks if ranks is not None else set()
+        self.ranks = []
         if suits is None:
             self.suits = set()
         elif isinstance(suits, Suit):
@@ -38,7 +38,7 @@ class Stake:
         
     @property
     def suit(self) -> Suit:
-        return next(iter(self.suits), None)
+        return self.suits.pop()
     
     @suit.setter
     def suit(self, suit: Suit):
