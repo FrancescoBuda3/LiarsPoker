@@ -20,14 +20,16 @@ def setup():
                 def create_lobby():
                     ui.spinner(type='oval')
                     connection_handler.send_message(
-                        message_factory.create_new_lobby_message(user_state.id), Topic.NEW_LOBBY)
-                    message = connection_handler.wait_message(Topic.NEW_LOBBY)
-                    while message.body["player_id"] != user_state.id:
-                        message = connection_handler.wait_message(
-                            Topic.NEW_LOBBY)
-                    user_state.selected_lobby = message.body["lobby_id"]
-                    user_state.host = True
-                    ui.navigate.to('/lobby')
+                        message_factory.create_new_lobby_message(user_state.id), 
+                        Topic.NEW_LOBBY)
+                    response = connection_handler.wait_message(Topic.NEW_LOBBY)
+                    while response == None or response.body["player_id"] != user_state.id:
+                        response = connection_handler.wait_message(Topic.NEW_LOBBY)
+                    if response.body["status"]:
+                        user_state.selected_lobby = response.body["lobby_id"]
+                        ui.navigate.to('/lobby')
+                    else:
+                        ui.notify("Error creating lobby", color='red')
 
                 def join_lobby():
                     if lobby.value == '':
@@ -35,15 +37,18 @@ def setup():
                         return
                     ui.spinner(type='oval')
                     connection_handler.send_message(
-                        message_factory.create_join_lobby_message(user_state.id, int(lobby.value)), Topic.JOIN_LOBBY)
-                    message = connection_handler.wait_message(Topic.JOIN_LOBBY)
-                    while message == None or message.body["player_id"] != user_state.id:
-                        message = connection_handler.wait_message(Topic.JOIN_LOBBY)
-                    if not message.body["status"]:
+                        message_factory.create_join_lobby_message(
+                            user_state.id, int(lobby.value)), 
+                        Topic.JOIN_LOBBY)
+                    response = connection_handler.wait_message(Topic.JOIN_LOBBY)
+                    while response == None or response.body["player_id"] != user_state.id:
+                        response = connection_handler.wait_message(Topic.JOIN_LOBBY)
+                    if response.body["status"]:
+                        user_state.selected_lobby = lobby.value
+                        ui.navigate.to('/lobby')
+                    else:
                         ui.notify("Error joining lobby", color='red')
                         return
-                    user_state.selected_lobby = message.body["lobby_id"]
-                    ui.navigate.to('/lobby')
 
                 ui.button('Create Lobby', on_click=create_lobby)
                 ui.button('Join Lobby', on_click=join_lobby)

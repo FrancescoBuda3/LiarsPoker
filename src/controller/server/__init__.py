@@ -151,11 +151,12 @@ class Server(Debuggable):
                             lobby.add_player(player)
                             self._log(f"New lobby created. ID: {lobby_id}")
                     else:
+                        lobby_id = 0
                         response = False
                         self._log("Lobby limit reached. Cannot create new lobby.")
                     self._connection.send_message(
-                        self._message_factory.create_response_message(
-                            player.id, response), 
+                        self._message_factory.create_new_lobby_message(
+                            player.id, lobby_id=lobby_id, status=response), 
                         Topic.NEW_LOBBY)
                 
                 case Topic.NEW_PLAYER:

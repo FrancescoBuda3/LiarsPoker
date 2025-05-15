@@ -54,7 +54,7 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
         deserialized_message = self._deserializer.deserialize(message)
         self._topic_queues[msg.topic].put(deserialized_message)
 
-    def send_message(self, message: Message, topic: str):
+    def send_message(self, message: Message, topic: Topic | str):
         serialized_message = self._serializer.serialize(message)
         result = self._client.publish(topic, serialized_message)
         status = result[0]
@@ -64,7 +64,7 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
         else:
             self._log(f"Failed to send message to topic '{topic}'")
 
-    def wait_message(self, topic: str, timeout=None) -> Message | None:
+    def wait_message(self, topic: Topic | str, timeout=None) -> Message | None:
         if topic in self._topic_queues:
             try:
                 return self._topic_queues[topic].get(timeout=timeout)
@@ -80,7 +80,7 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
                 continue
         return None, None
     
-    def no_wait_message(self, topic) -> Message | None:
+    def no_wait_message(self, topic: Topic | str) -> Message | None:
         if topic in self._topic_queues:
             try:
                 return self._topic_queues[topic].get_nowait()
@@ -88,7 +88,7 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
                 return None
         return None
     
-    def subscribe(self, topic: str):
+    def subscribe(self, topic: Topic | str):
         if topic not in self._topics:
             self._client.subscribe(topic)
             self._topics.append(topic)
@@ -97,7 +97,7 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
         else:
             self._log(f"Already subscribed to topic '{topic}'")
             
-    def unsubscribe(self, topic: str):
+    def unsubscribe(self, topic: Topic | str):
         if topic in self._topics:
             self._client.unsubscribe(topic)
             self._topics.remove(topic)

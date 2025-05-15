@@ -10,6 +10,8 @@ def setup():
 
     @ui.page('/lobby')
     def lobby_page():
+        message_factory = MessageFactory()
+        ready_state = False
 
         def __subscribe_to_game_topics():
             for topic in game_topics:
@@ -30,17 +32,18 @@ def setup():
                     color="secondary",
                     on_click=lambda: copy_lobby_id()
                 )
-
-                if user_state.host:
-                    ui.button('Start Game', on_click=lambda: start_game())
-
-                def start_game():
+                
+                ui.label(f'{'Not' if not ready_state else ''} Ready')
+                
+                def switch_ready():
+                    nonlocal ready_state
+                    ready_state = not ready_state
                     connection_handler.send_message(
-                        MessageFactory().create_new_game_message(
-                            user_state.selected_lobby), Topic.NEW_GAME
-                    )
-                    __subscribe_to_game_topics()
-                    ui.navigate.to('/game')
+                        message_factory.create_ready_to_play_message(
+                            user_state.id, user_state.selected_lobby, ready_state),
+                        Topic.READY_TO_PLAY)
+
+                ui.button('Set Ready', on_click=switch_ready)
 
                 def back_to_lobby_select():
                     connection_handler.send_message(
@@ -48,21 +51,19 @@ def setup():
                             user_state.id, user_state.selected_lobby),
                         Topic.LEAVE_LOBBY
                     )
-                    user_state.selected_lobby = None
-                    user_state.host = False
+                    user_state.reset_lobby()
                     ui.navigate.to('/lobby_select')
 
-                ui.button('Back to lobby selection',
-                          on_click=back_to_lobby_select)
+                ui.button('Back to lobby selection', on_click=back_to_lobby_select)
 
         centered_layout(content)
 
-        if not user_state.host:
-            def check_for_new_game():
-                message = connection_handler.no_wait_message(Topic.NEW_GAME)
-                if message and message.body["lobby_id"] == user_state.selected_lobby:
-                    __subscribe_to_game_topics()
-                    ui.navigate.to('/game')
-                    return False
 
-            ui.timer(0.5, check_for_new_game)
+        def wait_start_game():
+            message = connection_handler.no_wait_message(Topic.START_GAME)
+            if message and message.body["lobby_id"] == user_state.selected_lobby:
+                __subscribe_to_game_topics()
+                ui.navigate.to('/game')
+                return False
+            
+        ui.timer(0.5, wait_start_game)

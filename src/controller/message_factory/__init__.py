@@ -95,13 +95,14 @@ class MessageFactoryInterface(Protocol):
         """
         ...
         
-    def create_new_lobby_message(self, player_id: UUID, lobby_id: int) -> Message:
+    def create_new_lobby_message(self, player_id: UUID, lobby_id: int, status: bool) -> Message:
         """
         Create a message to create a new lobby.
 
         Args:
             player_id (UUID): ID of the player
             lobby_id (int): ID of the lobby
+            status (bool): true if the lobby was created successfully, false otherwise
 
         Returns:
             Message: the constructed message

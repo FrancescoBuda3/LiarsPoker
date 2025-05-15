@@ -30,16 +30,16 @@ def setup():
         players: list[Player] = []
         local_player: Player = Player(user_state.username, user_state.id)
         min_stake: Stake = LowestStake.HIGH_CARD.value
-        latest_move: Stake = None
-        player_turn: Player = None
+        latest_move: Stake | None = None
+        player_turn: Player | None = None
 
-        def __to_game_topic(topic: Topic):
+        def __to_game_topic(topic: Topic) -> str:
             return "lobby/" + str(user_state.selected_lobby) + topic
 
         @ui.refreshable
         def content():
             async def show_stake_dialog(min_stake: Stake):
-                stake: Stake = None
+                stake: Stake | None = None
                 combo = await combination_picker(min_stake.combo)
                 min_rank: Rank = Rank.ONE
                 suits: set[Suit] = {Suit.HEARTS,
@@ -92,7 +92,7 @@ def setup():
                 if message:
                     player_turn = message.body["player"]
                     min_stake = message.body["minimum_stake"]
-                    if player_turn.username == user_state.username:
+                    if player_turn and player_turn.username == user_state.username:
                         ui.notify(f'Your turn!')
                     content.refresh()
 
@@ -124,8 +124,8 @@ def setup():
             ui.timer(1, wait_player_move)
             ui.timer(1, wait_round_loser)
 
-            def is_my_turn():
-                return player_turn and player_turn.id == local_player.id
+            def __is_player_turn(player: Player) -> bool:
+                return player_turn != None and player_turn.id == player.id
 
             with ui.element('div')\
                     .classes('bg-gray-100 flex items-center justify-center basis-full h-full w-full'):
@@ -138,7 +138,7 @@ def setup():
                                 pl.username,
                                 __player_colors[i],
                                 pl.cards_in_hand,
-                                player_turn and player_turn.id == pl.id
+                                __is_player_turn(pl)
                             )
                     with ui.row().classes('flex items-center justify-center'):
                         stake_display(latest_move)
@@ -147,7 +147,7 @@ def setup():
                             .classes('text-4xl font-bold')\
                             .style('background-color: #00999E !important;')\
                             .on('click', lambda: show_stake_dialog(min_stake))
-                        rise_button.set_enabled(is_my_turn())
+                        rise_button.set_enabled(__is_player_turn(local_player))
                         bullshit_button = ui.button('BULLSHIT')\
                             .classes('text-4xl font-bold')\
                             .style('background-color: #9E2500 !important;')\
@@ -155,7 +155,7 @@ def setup():
                                 message_factory.create_check_liar_message(),
                                 __to_game_topic(Topic.CHECK_LIAR)
                             ))
-                        bullshit_button.set_enabled(is_my_turn())
+                        bullshit_button.set_enabled(__is_player_turn(local_player))
                     with ui.row().classes('flex items-center justify-center'):
                         for card in local_player.cards:
                             rank = card.rank
@@ -172,13 +172,12 @@ def setup():
                             __to_game_topic(Topic.REMOVE_PLAYER)
                         )
                         connection_handler.send_message(
-                            MessageFactory().create_leave_lobby_message(
+                            message_factory.create_leave_lobby_message(
                                 user_state.id,
                                 user_state.selected_lobby),
                             Topic.LEAVE_LOBBY
                         )
-                        user_state.selected_lobby = None
-                        user_state.host = False
+                        user_state.reset_lobby()
                         ui.navigate.to('/lobby_select')
 
                     with ui.row().classes('flex items-center justify-center'):

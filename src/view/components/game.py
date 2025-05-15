@@ -25,7 +25,7 @@ def opponent_component(
     return opponent_container
 
 
-def stake_display(stake: Stake):
+def stake_display(stake: Stake | None):
     if stake:
         move: str = f"{stake.combo}: "
         for i, r in enumerate(stake.ranks):
