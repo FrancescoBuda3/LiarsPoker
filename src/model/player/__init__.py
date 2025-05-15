@@ -20,3 +20,6 @@ class Player():
             raise ValueError("Username is required")
         if not self.id:
             raise ValueError("ID is required")
+        
+    def __str__(self):
+        return f"Player({self.username}, {self.id})"

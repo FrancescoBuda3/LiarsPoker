@@ -173,6 +173,7 @@ def setup():
                         )
                         connection_handler.send_message(
                             MessageFactory().create_leave_lobby_message(
+                                user_state.id,
                                 user_state.selected_lobby),
                             Topic.LEAVE_LOBBY
                         )
@@ -208,7 +209,7 @@ def setup():
             if message:
                 winner: Player = message.body["player"]
                 with ui.dialog() as game_over_dialog, ui.card():
-                    ui.label(f'Congratulations {winner} won the game!')
+                    ui.label(f'Congratulations {winner.username} won the game!')
                 game_over_dialog.open()
                 ui.timer(5, lambda: ui.navigate.to('/lobby'), once=True)
 

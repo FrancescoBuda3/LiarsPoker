@@ -44,7 +44,8 @@ def setup():
 
                 def back_to_lobby_select():
                     connection_handler.send_message(
-                        MessageFactory().create_leave_lobby_message(user_state.selected_lobby),
+                        MessageFactory().create_leave_lobby_message(
+                            user_state.id, user_state.selected_lobby),
                         Topic.LEAVE_LOBBY
                     )
                     user_state.selected_lobby = None

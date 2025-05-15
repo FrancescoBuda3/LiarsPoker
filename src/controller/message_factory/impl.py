@@ -40,18 +40,26 @@ class MessageFactory(MessageFactoryInterface):
     def create_check_liar_message(self) -> Message:
         return Message({})
 
-    def create_new_player_message(self, player: str, id: UUID) -> Message:
+    def create_new_player_message(self, username: str, id: UUID) -> Message:
         return Message({
-            "player": Player(player, id)
+            "player": Player(username, id)
         })
         
-    def create_new_lobby_message(self, player_id: UUID, lobby_id: int = 0) -> Message:
+    def create_new_lobby_message(self, player_id: UUID, lobby_id: int = 0, status: bool = True) -> Message:
         return Message({
             "player_id": player_id,
-            "lobby_id": lobby_id
+            "lobby_id": lobby_id,
+            "status": status
         })
         
-    def create_new_game_message(self, lobby_id):
+    def create_ready_to_play_message(self, player_id: UUID, lobby_id: int, ready: bool) -> Message:
+        return Message({
+            "player_id": player_id,
+            "lobby_id": lobby_id,
+            "ready": ready
+        })
+        
+    def create_start_game_message(self, lobby_id: int) -> Message:
         return Message({
             "lobby_id": lobby_id
         })
@@ -63,13 +71,19 @@ class MessageFactory(MessageFactoryInterface):
             "status": status
         })
         
-    def create_leave_lobby_message(self, player: Player, lobby_id: int) -> Message:
+    def create_leave_lobby_message(self, player_id: UUID, lobby_id: int) -> Message:
         return Message({
-            "player": player,
+            "player_id": player_id,
             "lobby_id": lobby_id
         })
         
     def create_remove_player_message(self, player_id: UUID) -> Message:
         return Message({
             "player_id": player_id
+        })
+        
+    def create_response_message(self, player_id: UUID, response: bool):
+        return Message({
+            "player_id": player_id,
+            "response": response
         })
