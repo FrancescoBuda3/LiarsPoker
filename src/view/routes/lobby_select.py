@@ -35,7 +35,7 @@ def setup():
                         return
                     ui.spinner(type='oval')
                     connection_handler.send_message(
-                        message_factory.create_join_lobby_message(user_state.id, int(lobby.value)), Topic.JOIN_LOBBY)
+                        message_factory.create_join_lobby_message(player_id=user_state.id, lobby_id=int(lobby.value), players_in_lobby=[]), Topic.JOIN_LOBBY)
                     message = connection_handler.wait_message(Topic.JOIN_LOBBY)
                     while message == None or message.body["player_id"] != user_state.id:
                         message = connection_handler.wait_message(Topic.JOIN_LOBBY)
@@ -43,6 +43,7 @@ def setup():
                         ui.notify("Error joining lobby", color='red')
                         return
                     user_state.selected_lobby = message.body["lobby_id"]
+                    user_state.players_in_lobby = message.body["players_in_lobby"]
                     ui.navigate.to('/lobby')
 
                 ui.button('Create Lobby', on_click=create_lobby)

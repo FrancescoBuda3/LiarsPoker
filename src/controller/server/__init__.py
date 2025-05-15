@@ -61,7 +61,7 @@ class Server(Debuggable):
                     player = next((p for p in self._players if p.id == msg.body["player_id"]), None)
                     status = self.__join_lobby(player, msg.body["lobby_id"])
                     self._connection.send_message(
-                        self._message_factory.create_join_lobby_message(player.id, msg.body["lobby_id"], status), Topic.JOIN_LOBBY
+                        self._message_factory.create_join_lobby_message(player.id, msg.body["lobby_id"], status, self.__get_players_in_lobby(msg.body["lobby_id"])), Topic.JOIN_LOBBY
                     )
                     self._log(f"Player joined lobby: {status}")
 
@@ -132,6 +132,12 @@ class Server(Debuggable):
             return True
         else:
             return False
+    
+    def __get_players_in_lobby(self, lobby):
+        if lobby in self._lobby.keys():
+            return self._lobby[lobby]
+        else:
+            return None
         
     def shutdown(self):
         self._log("Initiating server shutdown...")

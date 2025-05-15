@@ -60,7 +60,7 @@ class MessageFactoryInterface(Protocol):
         """
         ...
 
-    def create_raise_stake_message(self, player:Player, stake: Stake) -> Message:
+    def create_raise_stake_message(self, player: Player, stake: Stake) -> Message:
         """
         Create a message to raise the stake.
 
@@ -80,7 +80,7 @@ class MessageFactoryInterface(Protocol):
         Returns:
             Message: the constructed message
         """
-        
+
     def create_new_player_message(self, player: str, id: UUID) -> Message:
         """
         Create a message to create a new player.
@@ -92,7 +92,7 @@ class MessageFactoryInterface(Protocol):
             Message: the constructed message
         """
         ...
-        
+
     def create_new_lobby_message(self, player_id: UUID, lobby_id: int) -> Message:
         """
         Create a message to create a new lobby.
@@ -105,8 +105,8 @@ class MessageFactoryInterface(Protocol):
             Message: the constructed message
         """
         ...
-        
-    def create_join_lobby_message(self, player_id: UUID, lobby_id: int, status: bool) -> Message:
+
+    def create_join_lobby_message(self, player_id: UUID, lobby_id: int, status: bool, players_in_lobby: list) -> Message:
         """
         Create a message to join a lobby.
 
@@ -114,6 +114,7 @@ class MessageFactoryInterface(Protocol):
             player_id (UUID): ID of the player
             lobby_id (int): ID of the lobby
             status (bool): true if the player joined the lobby, false otherwise
+            players_in_lobby (list): list of players in the lobby
 
         Returns:
             Message: the constructed message
