@@ -23,8 +23,8 @@ def setup():
                         Topic.NEW_PLAYER)
                     response = connection_handler.wait_message(Topic.NEW_PLAYER)
                     while response == None or response.body["player_id"] != user_state.id:
-                        response = connection_handler.wait_message(Topic.JOIN_LOBBY)
-                    if response.body["status"]:
+                        response = connection_handler.wait_message(Topic.NEW_PLAYER)
+                    if response.body["response"]:
                         user_state.username = username.value
                         ui.navigate.to('/lobby_select')
                     else:

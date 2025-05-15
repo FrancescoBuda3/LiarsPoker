@@ -7,15 +7,14 @@ from src.controller.game_agent import game_loop
 from src.controller.message_factory.impl import MessageFactory
 from src.model.player import Player
 from src.services.connection.impl import ConnectionHandler
-from src.services.message import Message
 from src.utils.debug import Debuggable
 from src.services.connection.topic import Topic
 
-__LOBBY_SIZE = 10
-__MAX_LOBBIES = 1000
-__MAX_PLAYERS = __MAX_LOBBIES * __LOBBY_SIZE
+_LOBBY_SIZE = 10
+_MAX_LOBBIES = 1000
+_MAX_PLAYERS = _MAX_LOBBIES * _LOBBY_SIZE
 
-class __Lobby:
+class _Lobby:
     _id: int
     _players: list[tuple[Player, bool]]
     agent: Thread
@@ -34,7 +33,7 @@ class __Lobby:
         return [p[0] for p in self._players]
         
     def add_player(self, player: Player) -> bool:
-        if len(self._players) < __LOBBY_SIZE and player not in self.players:
+        if len(self._players) < _LOBBY_SIZE and player not in self.players:
             self._players.append((player, False))
             return True
         else:
@@ -70,8 +69,8 @@ class __Lobby:
     def __str__(self):
         return f"Lobby({self._id})"
     
-class __Lobbies_Handler:
-    _lobbies: list[__Lobby]
+class _Lobbies_Handler:
+    _lobbies: list[_Lobby]
     __random: Random
     
     def __init__(self):
@@ -79,21 +78,21 @@ class __Lobbies_Handler:
         self.__random = Random()
         
     def __generate_id(self) -> int:
-        id = self.__random.randint(0, __MAX_LOBBIES)
+        id = self.__random.randint(0, _MAX_LOBBIES)
         if id not in self.ids():
             return id
         else:
             return self.__generate_id()
         
     def create_lobby(self) -> int | None:
-        if len(self._lobbies) >= __MAX_LOBBIES:
+        if len(self._lobbies) >= _MAX_LOBBIES:
             return None
         id = self.__generate_id()
-        new_lobby = __Lobby(id)
+        new_lobby = _Lobby(id)
         self._lobbies.append(new_lobby)
         return id
         
-    def get_lobby(self, id: int) -> __Lobby | None:
+    def get_lobby(self, id: int) -> _Lobby | None:
         for lobby in self._lobbies:
             if lobby.id == id:
                 return lobby
@@ -121,12 +120,12 @@ class __Lobbies_Handler:
 class Server(Debuggable):
     
     _players: list[Player] = []
-    _lobbies: __Lobbies_Handler
+    _lobbies: _Lobbies_Handler
     _shutdown_event: threading.Event 
 
     def __init__(self, debug=True):
         Debuggable.__init__(self, debug)
-        self._lobbies = __Lobbies_Handler()
+        self._lobbies = _Lobbies_Handler()
         self._connection = ConnectionHandler(
             "Server", [t for t in Topic], debug=debug)
         self._message_factory = MessageFactory()
@@ -156,28 +155,29 @@ class Server(Debuggable):
                         self._log("Lobby limit reached. Cannot create new lobby.")
                     self._connection.send_message(
                         self._message_factory.create_new_lobby_message(
-                            player.id, lobby_id=lobby_id, status=response), 
+                            player.id, lobby_id=lobby_id, response=response), 
                         Topic.NEW_LOBBY)
                 
                 case Topic.NEW_PLAYER:
-                    p: Player = msg.body["player"]
+                    p: Player = Player(msg.body["username"], msg.body["player_id"])
                     response: bool = True
-                    if len(self._players) < __MAX_PLAYERS:
+                    if len(self._players) < _MAX_PLAYERS:
                         self._players.append(p)
                         self._log(f"New {p} created.")
                     else:
                         response = False
                         self._log("Player limit reached. Cannot create new player.")
                     self._connection.send_message(
-                        self._message_factory.create_response_message(
-                            p.id, response), 
+                        self._message_factory.create_new_player_message(
+                            p.username, p.id, response), 
                         Topic.NEW_PLAYER)
                     
                 case Topic.READY_TO_PLAY:
-                    player = self.__get_player_by_id(msg.body["player_id"])
+                    p: Player = msg.body["player"]
+                    player = self.__get_player_by_id(p.id)
                     lobby = self._lobbies.get_lobby(msg.body["lobby_id"])
                     player_ready = msg.body["ready"]
-                    if player is None or lobby is None:
+                    if player == None or lobby == None:
                         self._log("Player or lobby not found.")
                         return
                     lobby.set_player_status(player, player_ready)
@@ -195,7 +195,8 @@ class Server(Debuggable):
                     if player is None:
                         self._log("Player not found.")
                         return
-                    lobby = self._lobbies.get_lobby(msg.body["lobby_id"])
+                    lobby_id = msg.body["lobby_id"]
+                    lobby = self._lobbies.get_lobby(lobby_id)
                     response: bool = True
                     if lobby and lobby.add_player(player):
                         self._log(f"{player} joined lobby {lobby}.")
@@ -203,8 +204,8 @@ class Server(Debuggable):
                         response = False
                         self._log(f"{player} couldn't join lobby {lobby}.")
                     self._connection.send_message(
-                        self._message_factory.create_response_message(
-                            player.id, response),
+                        self._message_factory.create_join_lobby_message(
+                            player.id, lobby_id, response),
                         Topic.JOIN_LOBBY)
                     
                 case Topic.LEAVE_LOBBY:

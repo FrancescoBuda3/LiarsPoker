@@ -25,7 +25,7 @@ def setup():
                     response = connection_handler.wait_message(Topic.NEW_LOBBY)
                     while response == None or response.body["player_id"] != user_state.id:
                         response = connection_handler.wait_message(Topic.NEW_LOBBY)
-                    if response.body["status"]:
+                    if response.body["response"]:
                         user_state.selected_lobby = response.body["lobby_id"]
                         ui.navigate.to('/lobby')
                     else:
@@ -43,7 +43,7 @@ def setup():
                     response = connection_handler.wait_message(Topic.JOIN_LOBBY)
                     while response == None or response.body["player_id"] != user_state.id:
                         response = connection_handler.wait_message(Topic.JOIN_LOBBY)
-                    if response.body["status"]:
+                    if response.body["response"]:
                         user_state.selected_lobby = lobby.value
                         ui.navigate.to('/lobby')
                     else:

@@ -40,21 +40,23 @@ class MessageFactory(MessageFactoryInterface):
     def create_check_liar_message(self) -> Message:
         return Message({})
 
-    def create_new_player_message(self, username: str, id: UUID) -> Message:
+    def create_new_player_message(self, username: str, id: UUID, response: bool = True) -> Message:
         return Message({
-            "player": Player(username, id)
+            "username": username,
+            "player_id": id,
+            "response": response
         })
         
-    def create_new_lobby_message(self, player_id: UUID, lobby_id: int = 0, status: bool = True) -> Message:
+    def create_new_lobby_message(self, player_id: UUID, lobby_id: int = 0, response: bool = True) -> Message:
         return Message({
             "player_id": player_id,
             "lobby_id": lobby_id,
-            "status": status
+            "response": response
         })
         
-    def create_ready_to_play_message(self, player_id: UUID, lobby_id: int, ready: bool) -> Message:
+    def create_ready_to_play_message(self, player: Player, lobby_id: int, ready: bool) -> Message:
         return Message({
-            "player_id": player_id,
+            "player": player,
             "lobby_id": lobby_id,
             "ready": ready
         })
@@ -64,11 +66,11 @@ class MessageFactory(MessageFactoryInterface):
             "lobby_id": lobby_id
         })
 
-    def create_join_lobby_message(self, player_id: UUID, lobby_id: int, status: bool = True) -> Message:
+    def create_join_lobby_message(self, player_id: UUID, lobby_id: int, response: bool = True) -> Message:
         return Message({
             "player_id": player_id,
             "lobby_id": lobby_id,
-            "status": status
+            "response": response
         })
         
     def create_leave_lobby_message(self, player_id: UUID, lobby_id: int) -> Message:
@@ -82,8 +84,3 @@ class MessageFactory(MessageFactoryInterface):
             "player_id": player_id
         })
         
-    def create_response_message(self, player_id: UUID, response: bool) -> Message:
-        return Message({
-            "player_id": player_id,
-            "response": response
-        })
