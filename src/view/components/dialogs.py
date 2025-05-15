@@ -47,11 +47,13 @@ def __on_submit(dialog) -> list[Card]:
     dialog.submit(ret)
 
 
-def white_cards_picker(max_cards: int = 5,
-                       min_rank: Rank = Rank.ONE
+def white_cards_picker(combo: Combination,
+                       max_cards: int = 5,
+                       min_rank: Rank = Rank.ONE,
                        ) -> ui.dialog:
     with ui.dialog() as cards_dialog, ui.card():
         with ui.column().classes('items-center'):
+            ui.label(str(combo)).classes('text-lg')
             ui.label('Select cards').classes('text-lg')
             with ui.row():
                 for i in range(min_rank.value, len(Rank) + 1):
@@ -73,7 +75,7 @@ def white_cards_picker(max_cards: int = 5,
     return cards_dialog
 
 
-def suit_picker(suits: set[Suit] = {Suit.CLUBS,Suit.DIAMONDS, Suit.HEARTS, Suit.SPADES}) -> ui.dialog:
+def suit_picker(combo: Combination, suits: set[Suit] = {Suit.CLUBS,Suit.DIAMONDS, Suit.HEARTS, Suit.SPADES}) -> ui.dialog:
     selected_suit: Suit = None
     suit_to_box: dict[Suit, ui.checkbox] = {}
     
@@ -93,6 +95,7 @@ def suit_picker(suits: set[Suit] = {Suit.CLUBS,Suit.DIAMONDS, Suit.HEARTS, Suit.
         
     with ui.dialog() as suit_dialog, ui.card():
         with ui.column().classes('items-center'):
+            ui.label(str(combo)).classes('text-lg')
             ui.label('Select suits').classes('text-lg')
             with ui.row():
                 for suit in suits:
@@ -109,7 +112,8 @@ def suit_picker(suits: set[Suit] = {Suit.CLUBS,Suit.DIAMONDS, Suit.HEARTS, Suit.
     return suit_dialog
 
 
-def cards_picker(max_cards: int = 5,
+def cards_picker(combo: Combination,
+                 max_cards: int = 5,
                  suits: set[Suit] = {Suit.CLUBS,
                                      Suit.DIAMONDS, Suit.HEARTS, Suit.SPADES},
                  min_rank: Rank = Rank.ONE
@@ -117,6 +121,7 @@ def cards_picker(max_cards: int = 5,
 
     with ui.dialog() as cards_dialog, ui.card():
         with ui.column().classes('items-center'):
+            ui.label(str(combo)).classes('text-lg')
             ui.label('Select cards').classes('text-lg')
             for suit in suits:
                 with ui.row():
