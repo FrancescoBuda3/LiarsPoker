@@ -110,8 +110,9 @@ def setup():
                 if message:
                     loser: Player = message.body["player"]
                     ui.notify(f'{loser.username} lost the round!')
-                    cards: list[Card] = message.body["cards"]
-                    cards_display(cards, lambda: content.refresh()).open()
+                    cards_in_game: list[Card] = message.body["cards"]
+                    if len(cards_in_game) > 0:
+                        cards_display(cards_in_game, lambda: content.refresh()).open()
                     eliminated: bool = message.body["elimination"]
                     if eliminated:
                         ui.notify(f'{loser.username} was eliminated!')
@@ -193,9 +194,6 @@ def setup():
                 for p in players_msg:
                     if p.id != local_player.id:
                         players.append(p)
-                # print("players: ", players)
-                # print("players_msg: ", players_msg)
-                # print("id: ", local_player.id)
                 local_player_data_list = [
                     p for p in players_msg if p.id == local_player.id]
                 if local_player_data_list:
@@ -206,14 +204,12 @@ def setup():
 
         def wait_game_over():
             message = connection_handler.no_wait_message(
-                "lobby/" + str(user_state.selected_lobby) + Topic.GAME_OVER)
+                __to_game_topic(Topic.GAME_OVER))
             if message:
                 winner: Player = message.body["player"]
-                # ui.notify(f'{winner.username} you won the game! Congratulations!')
                 with ui.dialog() as game_over_dialog, ui.card():
-                    ui.label('Congratulations you won the game!')
-                if winner.id == local_player.id:
-                    game_over_dialog.open()
+                    ui.label(f'Congratulations {winner} won the game!')
+                game_over_dialog.open()
                 ui.timer(5, lambda: ui.navigate.to('/lobby'), once=True)
 
         ui.timer(1, wait_game_over)

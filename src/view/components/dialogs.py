@@ -143,6 +143,7 @@ def cards_picker(max_cards: int = 5,
 def cards_display(cards: list[Card], onClose: Callable[[], None]) -> ui.dialog:
     with ui.dialog() as display_dialog, ui.card():
         with ui.column().classes('items-center'):
+            ui.label('Held cards').classes('text-lg')
             with ui.row():
                 for card in cards:
                     ui.image(f"static/{card.rank}_of_{card.suit}.png"
