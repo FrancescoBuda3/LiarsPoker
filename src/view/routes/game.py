@@ -43,10 +43,11 @@ def setup():
                 combo = await combination_picker(min_stake.combo)
                 if combo:
                     min_rank: Rank = Rank.ONE
-                    suits: set[Suit] = {Suit.HEARTS, Suit.DIAMONDS, Suit.CLUBS, Suit.SPADES}
+                    suits: set[Suit] = {Suit.HEARTS,
+                                        Suit.DIAMONDS, Suit.CLUBS, Suit.SPADES}
                     if min_stake.ranks and combo == min_stake.combo:
                         min_rank = min_stake.ranks[0]
-                    if len(min_stake.suits)  > 0 and combo == min_stake.combo:
+                    if len(min_stake.suits) > 0 and combo == min_stake.combo:
                         suits = min_stake.suits
                     max_cards = 5
                     match combo:
@@ -64,30 +65,33 @@ def setup():
                             max_cards = 2
                     match combo:
                         case (
-                                Combination.FLUSH
-                                | Combination.ROYAL_FLUSH
-                            ):
+                            Combination.FLUSH
+                            | Combination.ROYAL_FLUSH
+                        ):
                             suit = await suit_picker(combo, suits)
                             stake = Stake(combo, [], suit)
                         case Combination.STRAIGHT_FLUSH:
                             cards = await cards_picker(combo, max_cards=max_cards, suits=suits, min_rank=min_rank)
                             if check_cards_combination(cards, combo):
-                                stake = Stake(combo, [card.rank for card in cards], [card.suit for card in cards])
+                                stake = Stake(combo, [card.rank for card in cards], [
+                                              card.suit for card in cards])
                         case Combination.FULL_HOUSE:
                             min_pair = min_rank
                             min_three = min_rank
                             if combo == min_stake.combo:
                                 min_pair = min_stake.ranks[1]
                                 min_three = min_stake.ranks[0]
-                                
+
                             three_of_a_kind = await white_cards_picker(Combination.THREE_OF_A_KIND, max_cards=1, min_rank=min_three)
                             pair = await white_cards_picker(Combination.PAIR, max_cards=1, min_rank=min_pair)
                             if three_of_a_kind and pair and check_cards_combination(pair + three_of_a_kind, combo):
-                                stake = Stake(combo, [card.rank for card in three_of_a_kind + pair])
+                                stake = Stake(
+                                    combo, [card.rank for card in three_of_a_kind + pair])
                         case _:
                             cards = await white_cards_picker(combo, max_cards=max_cards, min_rank=min_rank)
                             if check_cards_combination(cards, combo):
-                                stake = Stake(combo, [card.rank for card in cards])
+                                stake = Stake(
+                                    combo, [card.rank for card in cards])
                     if stake and (len(stake.ranks) > 0 or len(stake.suits) > 0):
                         connection_handler.send_message(message_factory.create_raise_stake_message(
                             local_player, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
@@ -124,7 +128,8 @@ def setup():
                     ui.notify(f'{loser.username} lost the round!')
                     cards_in_game: list[Card] = message.body["cards"]
                     if len(cards_in_game) > 0:
-                        cards_display(cards_in_game, lambda: content.refresh()).open()
+                        cards_display(
+                            cards_in_game, lambda: content.refresh()).open()
                     eliminated: bool = message.body["elimination"]
                     if eliminated:
                         ui.notify(f'{loser.username} was eliminated!')
@@ -167,7 +172,8 @@ def setup():
                                 message_factory.create_check_liar_message(),
                                 __to_game_topic(Topic.CHECK_LIAR)
                             ))
-                        bullshit_button.set_enabled(__is_player_turn(local_player))
+                        bullshit_button.set_enabled(
+                            __is_player_turn(local_player))
                     with ui.row().classes('flex items-center justify-center'):
                         for card in local_player.cards:
                             rank = card.rank
@@ -177,25 +183,27 @@ def setup():
                                 .style('width: 10%;')\
                                 .classes('m-1')
 
-                    def leave_game():
-                        connection_handler.send_message(
-                            message_factory.create_remove_player_message(
-                                local_player.id),
-                            __to_game_topic(Topic.REMOVE_PLAYER)
-                        )
-                        connection_handler.send_message(
-                            message_factory.create_leave_lobby_message(
-                                user_state.id,
-                                user_state.selected_lobby),
-                            Topic.LEAVE_LOBBY
-                        )
-                        user_state.reset_lobby()
-                        ui.navigate.to('/lobby_select')
-
-                    with ui.row().classes('flex items-center justify-center'):
-                        ui.button('Leave Game').on('click', leave_game)
-
         content()
+
+        def leave_game():
+            connection_handler.send_message(
+                message_factory.create_remove_player_message(
+                    local_player.id),
+                __to_game_topic(Topic.REMOVE_PLAYER)
+            )
+            connection_handler.send_message(
+                message_factory.create_leave_lobby_message(
+                    user_state.id,
+                    user_state.selected_lobby),
+                Topic.LEAVE_LOBBY
+            )
+            user_state.reset_lobby()
+            ui.navigate.to('/lobby_select')
+
+        with ui.element('div').classes('fixed top-4 right-4 z-50'):
+            ui.button('Logout')\
+                .on('click', leave_game)\
+                .classes('bg-red-500 text-white px-4 py-2 rounded shadow-lg hover:bg-red-600 transition')
 
         def wait_start_game():
             message = connection_handler.no_wait_message(
@@ -220,7 +228,8 @@ def setup():
             if message:
                 winner: Player = message.body["player"]
                 with ui.dialog() as game_over_dialog, ui.card():
-                    ui.label(f'Congratulations {winner.username} won the game!')
+                    ui.label(
+                        f'Congratulations {winner.username} won the game!')
                 game_over_dialog.open()
                 ui.timer(5, lambda: ui.navigate.to('/lobby'), once=True)
 

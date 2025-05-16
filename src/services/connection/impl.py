@@ -71,11 +71,11 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
             except queue.Empty:
                 return None
     
-    def try_get_any_message(self) -> tuple[Topic, Message] | tuple[None, None]:
+    def try_get_any_message(self) -> tuple[Topic | str, Message] | tuple[None, None]:
         for topic, q in self._topic_queues.items():
             try:
                 message = q.get_nowait()
-                return Topic(topic), message
+                return topic, message
             except queue.Empty:
                 continue
         return None, None

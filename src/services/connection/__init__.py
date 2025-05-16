@@ -50,7 +50,7 @@ class ConnectionHandlerInterface(Protocol):
         """
         ...
     
-    def try_get_any_message(self) -> tuple[Topic, Message]:
+    def try_get_any_message(self) -> tuple[Topic | str, Message]:
         """
         Try to get a message if present on any topic
         

@@ -55,7 +55,7 @@ class _Lobby:
         for p in self._players:
             if not p.ready:
                 return False
-        return True
+        return len(self._players) > 1
     
     def unready(self) -> None:
         for p in self._players:
