@@ -92,18 +92,19 @@ class StakeHandlerImpl(StakeHandler):
                     cards_by_suit[self.stake.suit])
             case Combination.ROYAL_FLUSH:
                 cards_by_suit = self.__group_suits(cards)
-                cards = cards_by_suit[self.stake.suit]
-                has_five_or_more = len(cards) >= 5
-                min_rank = min(cards, key=lambda r: r.value)
-                max_rank = max(cards, key=lambda r: r.value)
-                is_min_ten = min_rank == Rank.TEN
-                is_max_ace = max_rank == Rank.ACE
-                is_straight = self.__check_straight(cards)
-                check = has_five_or_more and is_min_ten and is_max_ace and is_straight
+                if self.stake.suit in cards_by_suit:
+                    cards = cards_by_suit[self.stake.suit]
+                    has_five_or_more = len(cards) >= 5
+                    min_rank = min(cards, key=lambda r: r)
+                    max_rank = max(cards, key=lambda r: r)
+                    is_min_ten = min_rank == Rank.TEN
+                    is_max_ace = max_rank == Rank.ACE
+                    is_straight = self.__check_straight(cards)
+                    check = has_five_or_more and is_min_ten and is_max_ace and is_straight
         return check
 
     def __check_straight(self, ranks: set[Rank]) -> bool:
-        ranks = sorted([rank.value for rank in ranks])
+        ranks = sorted([rank for rank in ranks])
         for i in range(len(ranks) - 4):
             if all(ranks[i + j] == ranks[i] + j for j in range(5)):
                 return True
