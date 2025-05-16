@@ -80,54 +80,100 @@ class MessageFactoryInterface(Protocol):
         Returns:
             Message: the constructed message
         """
-
-    def create_new_player_message(self, player: str, id: UUID) -> Message:
+        ...
+        
+    def create_new_player_message(self, username: str, id: UUID, response: bool) -> Message:
         """
         Create a message to create a new player.
 
         Args:
-            player (Player): new player
+            username (str): name of the player
+            id (UUID): ID of the player
+            response (bool): true if the player was created successfully, false otherwise
 
         Returns:
             Message: the constructed message
         """
         ...
-
-    def create_new_lobby_message(self, player_id: UUID, lobby_id: int) -> Message:
+        
+    def create_new_lobby_message(self, player_id: UUID, lobby_id: int, response: bool) -> Message:
         """
         Create a message to create a new lobby.
 
         Args:
             player_id (UUID): ID of the player
             lobby_id (int): ID of the lobby
+            response (bool): true if the lobby was created successfully, false otherwise
 
         Returns:
             Message: the constructed message
         """
         ...
+        
+    def create_ready_to_play_message(self, 
+            player_id: UUID, 
+            lobby_id: int, 
+            ready: bool, 
+            players_in_lobby: list[Player]
+        ) -> Message:
+        """
+        Create a message to indicate that a player is ready to play.
 
-    def create_join_lobby_message(self, player_id: UUID, lobby_id: int, status: bool, players_in_lobby: list) -> Message:
+        Args:
+            player_id (UUID): player who is ready or not
+            lobby_id (int): ID of the lobby
+            ready (bool): true if the player is ready, false otherwise
+            players_in_lobby (list[Player]): list of players in the lobby
+
+        Returns:
+            Message: the constructed message
+        """
+        ...
+        
+    def create_start_game_message(self, lobby_id: int) -> Message:
+        """
+        Create a message to start a game.
+
+        Args:
+            lobby_id (int): ID of the lobby
+
+        Returns:
+            Message: the constructed message
+        """
+        ...
+        
+    def create_join_lobby_message(self, player_id: UUID, lobby_id: int, response: bool) -> Message:
         """
         Create a message to join a lobby.
 
         Args:
             player_id (UUID): ID of the player
             lobby_id (int): ID of the lobby
-            status (bool): true if the player joined the lobby, false otherwise
-            players_in_lobby (list): list of players in the lobby
+            response (bool): true if the player joined successfully, false otherwise
 
         Returns:
             Message: the constructed message
         """
         ...
-
-    def create_new_game_message(self, lobby_id: int) -> Message:
+        
+    def create_leave_lobby_message(self, player_id: UUID, lobby_id: int) -> Message:
         """
-        Create a message to start a new game.
+        Create a message to leave a lobby.
 
         Args:
+            player_id (UUID): ID of the player
             lobby_id (int): ID of the lobby
 
+        Returns:
+            Message: the constructed message
+        """
+        ...
+        
+    def create_remove_player_message(self, player_id: UUID) -> Message:
+        """
+        Create a message to remove a player.
+        Args:
+            player_id (UUID): ID of the player to remove
         Returns:
             Message: the constructed message
         """

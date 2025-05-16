@@ -41,6 +41,7 @@ class Deserializer:
         )
         p.cards = self._ast_to_obj(data["cards"])
         p.cards_in_hand = data["cards_in_hand"]
+        p.ready = data["ready"]
         return p
     
     def _ast_to_uuid(self, data):

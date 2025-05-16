@@ -10,7 +10,7 @@ class ConnectionHandlerInterface(Protocol):
     One or more topics can be subscribed to.
     """
     
-    def subscribe(self, topic: Topic):
+    def subscribe(self, topic: Topic | str):
         """
         Subscribe to a topic to receive messages.
 
@@ -19,7 +19,7 @@ class ConnectionHandlerInterface(Protocol):
         """
         ...
         
-    def unsubscribe(self, topic: Topic):
+    def unsubscribe(self, topic: Topic | str):
         """
         Unsubscribe from a topic to stop receiving messages.
 
@@ -28,7 +28,7 @@ class ConnectionHandlerInterface(Protocol):
         """
         ...
 
-    def send_message(self, message: Message, topic: Topic):
+    def send_message(self, message: Message, topic: Topic | str):
         """
         Sends a message to all the listeners subcribed to the topic
 
@@ -38,7 +38,7 @@ class ConnectionHandlerInterface(Protocol):
         """
         ...
 
-    def wait_message(self, topic: Topic, timeout=None) -> Message:
+    def wait_message(self, topic: Topic | str, timeout=None) -> Message:
         """
         Waits for a message to be received on the topic.
 
@@ -50,15 +50,16 @@ class ConnectionHandlerInterface(Protocol):
         """
         ...
     
-    def try_get_any_message(self) -> tuple[Topic, Message]:
+    def try_get_any_message(self) -> tuple[Topic | str, Message]:
         """
         Try to get a message if present on any topic
         
         Returns:
             tuple[Topic, Message]: the topic and message, None if message isn't present
         """
+        ...
         
-    def no_wait_message(self, topic: Topic) -> Message:
+    def no_wait_message(self, topic: Topic | str) -> Message:
         """
         Get a message if present on the topic, None if not present
         

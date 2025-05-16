@@ -28,23 +28,26 @@ def setup():
     @ui.page('/game')
     def game_page():
         players: list[Player] = []
-        local_player: Player = Player(
-            user_state.username, user_state.id)
+        local_player: Player = Player(user_state.username, user_state.id)
         min_stake: Stake = LowestStake.HIGH_CARD.value
-        latest_move: Stake = None
-        player_turn: Player = None
+        latest_move: Stake | None = None
+        player_turn: Player | None = None
+
+        def __to_game_topic(topic: Topic) -> str:
+            return "lobby/" + str(user_state.selected_lobby) + topic
 
         @ui.refreshable
         def content():
             async def show_stake_dialog(min_stake: Stake):
-                stake: Stake = None
+                stake: Stake | None = None
                 combo = await combination_picker(min_stake.combo)
                 if combo:
                     min_rank: Rank = Rank.ONE
-                    suits: set[Suit] = {Suit.HEARTS, Suit.DIAMONDS, Suit.CLUBS, Suit.SPADES}
+                    suits: set[Suit] = {Suit.HEARTS,
+                                        Suit.DIAMONDS, Suit.CLUBS, Suit.SPADES}
                     if min_stake.ranks and combo == min_stake.combo:
                         min_rank = min_stake.ranks[0]
-                    if len(min_stake.suits)  > 0 and combo == min_stake.combo:
+                    if len(min_stake.suits) > 0 and combo == min_stake.combo:
                         suits = min_stake.suits
                     max_cards = 5
                     match combo:
@@ -62,30 +65,33 @@ def setup():
                             max_cards = 2
                     match combo:
                         case (
-                                Combination.FLUSH
-                                | Combination.ROYAL_FLUSH
-                            ):
+                            Combination.FLUSH
+                            | Combination.ROYAL_FLUSH
+                        ):
                             suit = await suit_picker(combo, suits)
                             stake = Stake(combo, [], suit)
                         case Combination.STRAIGHT_FLUSH:
                             cards = await cards_picker(combo, max_cards=max_cards, suits=suits, min_rank=min_rank)
                             if check_cards_combination(cards, combo):
-                                stake = Stake(combo, [card.rank for card in cards], [card.suit for card in cards])
+                                stake = Stake(combo, [card.rank for card in cards], [
+                                              card.suit for card in cards])
                         case Combination.FULL_HOUSE:
                             min_pair = min_rank
                             min_three = min_rank
                             if combo == min_stake.combo:
                                 min_pair = min_stake.ranks[1]
                                 min_three = min_stake.ranks[0]
-                                
+
                             three_of_a_kind = await white_cards_picker(Combination.THREE_OF_A_KIND, max_cards=1, min_rank=min_three)
                             pair = await white_cards_picker(Combination.PAIR, max_cards=1, min_rank=min_pair)
                             if three_of_a_kind and pair and check_cards_combination(pair + three_of_a_kind, combo):
-                                stake = Stake(combo, [card.rank for card in three_of_a_kind + pair])
+                                stake = Stake(
+                                    combo, [card.rank for card in three_of_a_kind + pair])
                         case _:
                             cards = await white_cards_picker(combo, max_cards=max_cards, min_rank=min_rank)
                             if check_cards_combination(cards, combo):
-                                stake = Stake(combo, [card.rank for card in cards])
+                                stake = Stake(
+                                    combo, [card.rank for card in cards])
                     if stake and (len(stake.ranks) > 0 or len(stake.suits) > 0):
                         connection_handler.send_message(message_factory.create_raise_stake_message(
                             local_player, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
@@ -98,30 +104,32 @@ def setup():
                 nonlocal player_turn
                 nonlocal min_stake
                 message = connection_handler.no_wait_message(
-                    "lobby/" + str(user_state.selected_lobby) + Topic.START_TURN)
+                    __to_game_topic(Topic.START_TURN))
                 if message:
                     player_turn = message.body["player"]
                     min_stake = message.body["minimum_stake"]
-                    if player_turn.username == user_state.username:
+                    if player_turn and player_turn.username == user_state.username:
                         ui.notify(f'Your turn!')
                     content.refresh()
 
             def wait_player_move():
                 nonlocal latest_move
                 message = connection_handler.no_wait_message(
-                    "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
+                    __to_game_topic(Topic.RAISE_STAKE))
                 if message:
                     latest_move = message.body["stake"]
                     content.refresh()
 
             def wait_round_loser():
                 message = connection_handler.no_wait_message(
-                    "lobby/" + str(user_state.selected_lobby) + Topic.ROUND_LOSER)
+                    __to_game_topic(Topic.ROUND_LOSER))
                 if message:
                     loser: Player = message.body["player"]
                     ui.notify(f'{loser.username} lost the round!')
-                    cards: list[Card] = message.body["cards"]
-                    cards_display(cards, lambda: content.refresh()).open()
+                    cards_in_game: list[Card] = message.body["cards"]
+                    if len(cards_in_game) > 0:
+                        cards_display(
+                            cards_in_game, lambda: content.refresh()).open()
                     eliminated: bool = message.body["elimination"]
                     if eliminated:
                         ui.notify(f'{loser.username} was eliminated!')
@@ -133,20 +141,13 @@ def setup():
             ui.timer(1, wait_player_move)
             ui.timer(1, wait_round_loser)
 
-            def is_my_turn():
-                return player_turn and player_turn.id == local_player.id
+            def __is_player_turn(player: Player) -> bool:
+                return player_turn != None and player_turn.id == player.id
 
             with ui.element('div')\
                     .classes('bg-gray-100 flex items-center justify-center basis-full h-full w-full'):
                 with ui.grid(rows='5% 25% 10% 5% 13% 37% 5%')\
-                       .classes('w-full h-full max-w-full max-h-full border border-gray-300 gap-0 mx-[100px]'):
-                    with ui.row().classes('flex items-center justify-center'):
-                        # with ui.left_drawer().classes('bg-grey-2') as drawer:
-                        #     ui.label('Moves:').classes('text-h6')
-                        #     moves_label = ui.label('')
-                        # drawer.value = False
-                        # ui.button('☰ Moves', on_click=lambda: ui.left_drawer.toggle(drawer)).classes('m-4')
-                        ...
+                       .classes('w-full h-full max-w-full max-h-full grid-rows-game border border-gray-300 gap-0 mx-[100px]'):
                     with ui.row().classes('flex items-center justify-center'):
                         for i in range(len(players)):
                             pl: Player = players[i]
@@ -154,28 +155,25 @@ def setup():
                                 pl.username,
                                 __player_colors[i],
                                 pl.cards_in_hand,
-                                player_turn and player_turn.id == pl.id
+                                __is_player_turn(pl)
                             )
                     with ui.row().classes('flex items-center justify-center'):
                         stake_display(latest_move)
-                    with ui.row().classes('flex items-center justify-center'):
-                        ...
                     with ui.row().classes('flex items-center justify-center'):
                         rise_button = ui.button('RISE STAKE')\
                             .classes('text-4xl font-bold')\
                             .style('background-color: #00999E !important;')\
                             .on('click', lambda: show_stake_dialog(min_stake))
-                        rise_button.set_enabled(is_my_turn())
+                        rise_button.set_enabled(__is_player_turn(local_player))
                         bullshit_button = ui.button('BULLSHIT')\
                             .classes('text-4xl font-bold')\
                             .style('background-color: #9E2500 !important;')\
                             .on('click', lambda: connection_handler.send_message(
                                 message_factory.create_check_liar_message(),
-                                "lobby/" +
-                                str(user_state.selected_lobby) +
-                                Topic.CHECK_LIAR
+                                __to_game_topic(Topic.CHECK_LIAR)
                             ))
-                        bullshit_button.set_enabled(is_my_turn())
+                        bullshit_button.set_enabled(
+                            __is_player_turn(local_player))
                     with ui.row().classes('flex items-center justify-center'):
                         for card in local_player.cards:
                             rank = card.rank
@@ -184,10 +182,28 @@ def setup():
                             ui.image(f"static/{str(c.rank)}_of_{str(c.suit)}.png")\
                                 .style('width: 10%;')\
                                 .classes('m-1')
-                    with ui.row().classes('flex items-center justify-center'):
-                        ui.button('BACK TO LOBBY')
 
         content()
+
+        def leave_game():
+            connection_handler.send_message(
+                message_factory.create_remove_player_message(
+                    local_player.id),
+                __to_game_topic(Topic.REMOVE_PLAYER)
+            )
+            connection_handler.send_message(
+                message_factory.create_leave_lobby_message(
+                    user_state.id,
+                    user_state.selected_lobby),
+                Topic.LEAVE_LOBBY
+            )
+            user_state.reset_lobby()
+            ui.navigate.to('/lobby_select')
+
+        with ui.element('div').classes('fixed top-4 right-4 z-50'):
+            ui.button('Logout')\
+                .on('click', leave_game)\
+                .classes('bg-red-500 text-white px-4 py-2 rounded shadow-lg hover:bg-red-600 transition')
 
         def wait_start_game():
             message = connection_handler.no_wait_message(
@@ -198,9 +214,6 @@ def setup():
                 for p in players_msg:
                     if p.id != local_player.id:
                         players.append(p)
-                # print("players: ", players)
-                # print("players_msg: ", players_msg)
-                # print("id: ", local_player.id)
                 local_player_data_list = [
                     p for p in players_msg if p.id == local_player.id]
                 if local_player_data_list:
@@ -211,14 +224,13 @@ def setup():
 
         def wait_game_over():
             message = connection_handler.no_wait_message(
-                "lobby/" + str(user_state.selected_lobby) + Topic.GAME_OVER)
+                __to_game_topic(Topic.GAME_OVER))
             if message:
                 winner: Player = message.body["player"]
-                # ui.notify(f'{winner.username} you won the game! Congratulations!')
                 with ui.dialog() as game_over_dialog, ui.card():
-                    ui.label('Congratulations you won the game!')
-                if winner.id == local_player.id:
-                    game_over_dialog.open()
+                    ui.label(
+                        f'Congratulations {winner.username} won the game!')
+                game_over_dialog.open()
                 ui.timer(5, lambda: ui.navigate.to('/lobby'), once=True)
 
         ui.timer(1, wait_game_over)

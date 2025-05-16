@@ -40,26 +40,53 @@ class MessageFactory(MessageFactoryInterface):
     def create_check_liar_message(self) -> Message:
         return Message({})
 
-    def create_new_player_message(self, player: str, id: UUID) -> Message:
+    def create_new_player_message(self, username: str, id: UUID, response: bool = True) -> Message:
         return Message({
-            "player": Player(player, id)
+            "username": username,
+            "player_id": id,
+            "response": response
         })
         
-    def create_new_lobby_message(self, player_id: UUID, lobby_id: int = 0) -> Message:
-        return Message({
-            "player_id": player_id,
-            "lobby_id": lobby_id
-        })
-
-    def create_join_lobby_message(self, player_id: UUID, lobby_id: int, status: bool = True, players_in_lobby:list = []) -> Message:
+    def create_new_lobby_message(self, player_id: UUID, lobby_id: int = 0, response: bool = True) -> Message:
         return Message({
             "player_id": player_id,
             "lobby_id": lobby_id,
-            "status": status,
+            "response": response
+        })
+        
+    def create_ready_to_play_message(self, 
+            player_id: UUID, 
+            lobby_id: int, 
+            ready: bool, 
+            players_in_lobby: list[Player] = []
+        ) -> Message:
+        return Message({
+            "player_id": player_id,
+            "lobby_id": lobby_id,
+            "ready": ready,
             "players_in_lobby": players_in_lobby
         })
         
-    def create_new_game_message(self, lobby_id):
+    def create_start_game_message(self, lobby_id: int) -> Message:
         return Message({
             "lobby_id": lobby_id
         })
+
+    def create_join_lobby_message(self, player_id: UUID, lobby_id: int, response: bool = True) -> Message:
+        return Message({
+            "player_id": player_id,
+            "lobby_id": lobby_id,
+            "response": response
+        })
+        
+    def create_leave_lobby_message(self, player_id: UUID, lobby_id: int) -> Message:
+        return Message({
+            "player_id": player_id,
+            "lobby_id": lobby_id
+        })
+        
+    def create_remove_player_message(self, player_id: UUID) -> Message:
+        return Message({
+            "player_id": player_id
+        })
+        

@@ -10,159 +10,269 @@ from src.services.connection.impl import ConnectionHandler
 from src.utils.debug import Debuggable
 from src.services.connection.topic import Topic
 
+_LOBBY_SIZE = 10
+_MAX_LOBBIES = 1000
+_MAX_PLAYERS = _MAX_LOBBIES * _LOBBY_SIZE
+
+class _Lobby:
+    _id: int
+    _players: list[Player]
+    agent: Thread
+    
+    def __init__(self, id: int):
+        self._id = id
+        self._players = []
+        self.agent = Thread()
+        
+    @property
+    def id(self) -> int:
+        return self._id
+    
+    @property
+    def players(self) -> list[Player]:
+        return self._players
+        
+    def add_player(self, player: Player) -> bool:
+        if len(self._players) < _LOBBY_SIZE and player not in self._players:
+            self._players.append(player)
+            return True
+        else:
+            return False
+        
+    def remove_player(self, player: Player) -> bool:
+        for p in self._players:
+            if p == player:
+                self._players.remove(p)
+                return True
+        return False
+    
+    def set_player_status(self, player: Player, is_ready: bool) -> None:
+        for p in self._players:
+            if p == player:
+                p.ready = is_ready
+                
+    def is_ready(self) -> bool:
+        for p in self._players:
+            if not p.ready:
+                return False
+        return len(self._players) > 1
+    
+    def unready(self) -> None:
+        for p in self._players:
+            p.ready = False
+    
+    def start_game(self):
+        if self.is_ready():
+            self.agent = Thread(target=game_loop, args=(self._players, self._id))
+            self.agent.start()
+        
+    def stop_game(self):
+        if self.agent and self.agent.is_alive():
+            self.agent.join(timeout=5)
+            
+    def __str__(self):
+        return f"Lobby({self._id})"
+    
+class _Lobbies_Handler:
+    _lobbies: list[_Lobby]
+    __random: Random
+    
+    def __init__(self):
+        self._lobbies = []
+        self.__random = Random()
+        
+    def __generate_id(self) -> int:
+        id = self.__random.randint(0, _MAX_LOBBIES)
+        if id not in self.ids():
+            return id
+        else:
+            return self.__generate_id()
+        
+    def create_lobby(self) -> int | None:
+        if len(self._lobbies) >= _MAX_LOBBIES:
+            return None
+        id = self.__generate_id()
+        new_lobby = _Lobby(id)
+        self._lobbies.append(new_lobby)
+        return id
+        
+    def get_lobby(self, id: int) -> _Lobby | None:
+        for lobby in self._lobbies:
+            if lobby.id == id:
+                return lobby
+        return None
+    
+    def get_lobby_players(self, id: int) -> list[Player] | None:
+        for lobby in self._lobbies:
+            if lobby.id == id:
+                return lobby.players
+        return None
+        
+    def remove_lobby(self, id: int) -> bool:
+        for lobby in self._lobbies:
+            if lobby.id == id:
+                self._lobbies.remove(lobby)
+                return True
+        return False
+    
+    def ids(self) -> list[int]:
+        ids = []
+        for lobby in self._lobbies:
+            ids.append(lobby.id)
+        return ids
+    
 class Server(Debuggable):
     
-    _LOBBY_SIZE = 10
-    _MAX_LOBBIES = 1000
     _players: list[Player] = []
-    _lobby: Dict[int, list[Player]] = {}
-    _random = Random()
-    _lobby_threads: Dict[int, list[Thread]] = {}
+    _lobbies: _Lobbies_Handler
     _shutdown_event: threading.Event 
 
     def __init__(self, debug=True):
         Debuggable.__init__(self, debug)
+        self._lobbies = _Lobbies_Handler()
         self._connection = ConnectionHandler(
             "Server", [t for t in Topic], debug=debug)
         self._message_factory = MessageFactory()
         self._shutdown_event = threading.Event()
 
     def run(self):
-        topic, msg = self._connection.try_get_any_message()
-        if msg is None:
+        (topic, msg) = self._connection.try_get_any_message()
+        if topic is None or msg is None:
             return
-        #self._log(f"Received `{msg.body}` from `{topic}` topic")
         try:
             match topic:
                 case Topic.NEW_LOBBY:
-                    player = next((p for p in self._players if p.id == msg.body["player_id"]), None)
-                    #if msg.body["lobby_id"] not in self._lobby.keys():
-                    lobby_id = self.__create_lobby(player)
-                    # self.client.subscribe(f"lobby/{id}")
-                    self._log(f"New lobby created. ID: {lobby_id}")
+                    player = self.__get_player_by_id(msg.body["player_id"])
+                    if player is None:
+                        self._log("Player not found. Cannot create lobby.")
+                        return
+                    lobby_id = self._lobbies.create_lobby()
+                    response: bool = True
+                    if lobby_id:
+                        lobby = self._lobbies.get_lobby(lobby_id)
+                        if lobby:
+                            lobby.add_player(player)
+                            self._log(f"New lobby created. ID: {lobby_id}")
+                    else:
+                        lobby_id = 0
+                        response = False
+                        self._log("Lobby limit reached. Cannot create new lobby.")
                     self._connection.send_message(
-                        self._message_factory.create_new_lobby_message(player.id, lobby_id), Topic.NEW_LOBBY)
+                        self._message_factory.create_new_lobby_message(
+                            player.id, lobby_id=lobby_id, response=response), 
+                        Topic.NEW_LOBBY)
+                
                 case Topic.NEW_PLAYER:
-                    self.__new_player(msg.body["player"])
-                case Topic.NEW_GAME:
-                    lobby_id = msg.body["lobby_id"]
-                    players_in_lobby: list[Player] = []
-                    for player in self._lobby[lobby_id]:
-                        players_in_lobby.append(player)
-                    thread = Thread(target=game_loop, args=(
-                        players_in_lobby, 
-                        lobby_id
-                    ))
-                    self._lobby_threads[lobby_id] = thread
-                    thread.start()
-                    self._log(f"New game started for lobby {lobby_id} with {len(players_in_lobby)} players.")
+                    p: Player = Player(msg.body["username"], msg.body["player_id"])
+                    response: bool = True
+                    if len(self._players) < _MAX_PLAYERS:
+                        self._players.append(p)
+                        self._log(f"New {p} created.")
+                    else:
+                        response = False
+                        self._log("Player limit reached. Cannot create new player.")
+                    self._connection.send_message(
+                        self._message_factory.create_new_player_message(
+                            p.username, p.id, response), 
+                        Topic.NEW_PLAYER)
+                    
+                case Topic.READY_TO_PLAY:
+                    player = self.__get_player_by_id(msg.body["player_id"])
+                    lobby = self._lobbies.get_lobby(msg.body["lobby_id"])
+                    player_ready = msg.body["ready"]
+                    if player == None or lobby == None:
+                        self._log(f"Player: {player} or lobby: {lobby} not found.")
+                        self._log(self._lobbies.ids())
+                        return
+                    lobby.set_player_status(player, player_ready)
+                    self._connection.send_message(
+                        self._message_factory.create_ready_to_play_message(
+                            player.id, lobby.id, player_ready, lobby.players), 
+                        Topic.READY_TO_PLAY)
+                    if lobby.is_ready():
+                        lobby.start_game()
+                        lobby.unready()
+                        self._connection.send_message(
+                            self._message_factory.create_start_game_message(lobby.id), 
+                            Topic.START_GAME)
+                        self._log(f"New game started for {lobby} with {len(lobby.players)} players.")
+                    else:
+                        self._log(f"{player} is {"not" if player_ready == False else ""} ready to play in lobby {lobby}.")
                     
                 case Topic.JOIN_LOBBY:
-                    player = next((p for p in self._players if p.id == msg.body["player_id"]), None)
-                    status = self.__join_lobby(player, msg.body["lobby_id"])
+                    player = self.__get_player_by_id(msg.body["player_id"])
+                    if player is None:
+                        self._log("Player not found.")
+                        return
+                    lobby_id = msg.body["lobby_id"]
+                    lobby = self._lobbies.get_lobby(lobby_id)
+                    response: bool = True
+                    if lobby and lobby.add_player(player):
+                        self._log(f"{player} joined lobby {lobby}.")
+                    else:
+                        response = False
+                        self._log(f"{player} couldn't join lobby {lobby}.")
                     self._connection.send_message(
-                        self._message_factory.create_join_lobby_message(player.id, msg.body["lobby_id"], status, self.__get_players_in_lobby(msg.body["lobby_id"])), Topic.JOIN_LOBBY
-                    )
-                    self._log(f"Player joined lobby: {status}")
-
+                        self._message_factory.create_join_lobby_message(
+                            player.id, lobby_id, response),
+                        Topic.JOIN_LOBBY)
+                    
                 case Topic.LEAVE_LOBBY:
-                    if self.__leave_lobby(msg.body["player"], msg.body["lobby"]):
-                        self._log("Player left lobby")
+                    lobby = self._lobbies.get_lobby(msg.body["lobby_id"])
+                    player = self.__get_player_by_id(msg.body["player_id"])
+                    if lobby and player and lobby.remove_player(player):
+                        self._log(f"{player} left lobby")
+                        if len(lobby.players) <= 0:
+                            self._lobbies.remove_lobby(lobby.id)
+                            self._log(f"{lobby} deleted")
+                        else:
+                            self._log(f"{lobby} not deleted")
                     else:
-                        self._log("Player couldn't leave lobby")
-                case Topic.DISCONNECT_PLAYER:
-                    if self.__disconnect_player(msg.body["player"]):
-                        self._log("Player disconnected")
+                        self._log(f"{player} couldn't leave lobby")
+                
+                case Topic.REMOVE_PLAYER:
+                    player = self.__get_player_by_id(msg.body["player_id"])
+                    if player and self.__remove_player(player):
+                        self._log(f"{player} deleted")
                     else:
-                        self._log("Player not found")
-                case Topic.DELETE_LOBBY:
-                    if self.__delete_lobby(msg.body["player"], msg.body["lobby"]):
-                        thread.join()
-                        self._log("Lobby deleted")
-                    else:
-                        self._log("Lobby not found")
+                        self._log(f"{player} not found")
+                        
                 case _:
                     self._log("Unknown topic")
+                    
         except KeyError as e:
             self._log(f"Unexpected message: {e}")
 
-    def __generate_id(self) -> int:
-        id = self._random.randint(0, self._MAX_LOBBIES)
-        if id not in self._lobby.keys():
-            return id
-        else:
-            return self.__generate_id()
+    def __get_player_by_id(self, player_id) -> Player | None:
+        for player in self._players:
+            if player.id == player_id:
+                return player
+        return None
 
-    def __create_lobby(self, player) -> int:
-        id = self.__generate_id()
-        self._lobby[id] = [player]
-        return id
-
-    def __join_lobby(self, player, lobby):
-        if lobby in self._lobby.keys() and player not in self._lobby[lobby] and len(self._lobby[lobby]) < self._LOBBY_SIZE:
-            self._lobby[lobby].append(player)
-            return True
-        else:
-            return False
-
-    def __leave_lobby(self, player, lobby):
-        if lobby in self._lobby.keys() and player in self._lobby[lobby]:
-            self._lobby[lobby].remove(player)
-            return True
-        else:
-            return False
-
-    def __new_player(self, player):
-        self._players.append(player)
-
-    def __disconnect_player(self, player):
+    def __remove_player(self, player):
         if player in self._players:
             self._players.remove(player)
-            if player in [player for lobby in self._lobby.values() for player in lobby]:
-                for lobby in self._lobby.values():
-                    if player in lobby:
-                        lobby.remove(player)
             return True
         else:
             return False
-
-    def __delete_lobby(self, player, lobby):
-        if lobby in self._lobby.keys() and player in self._lobby[lobby]:
-            del self._lobby[lobby]
-            return True
-        else:
-            return False
-    
-    def __get_players_in_lobby(self, lobby):
-        if lobby in self._lobby.keys():
-            return self._lobby[lobby]
-        else:
-            return None
         
     def shutdown(self):
         self._log("Initiating server shutdown...")
-        self._shutdown_event.set() # Segnala a tutti i thread di terminare
+        self._shutdown_event.set()
 
-        # Copia delle chiavi per evitare problemi di modifica del dizionario durante l'iterazione
-        lobby_ids = list(self._lobby_threads.keys())
-        for lobby_id in lobby_ids:
-            thread = self._lobby_threads.get(lobby_id)
-            if thread and thread.is_alive():
-                self._log(f"Waiting for lobby {lobby_id} thread (ID: {thread.ident}) to join...")
-                thread.join(timeout=5) # Aspetta che il thread termini, con un timeout
-                if thread.is_alive():
-                    self._log(f"Lobby {lobby_id} thread (ID: {thread.ident}) did not terminate in time.")
-                else:
-                    self._log(f"Lobby {lobby_id} thread (ID: {thread.ident}) joined.")
-            # Rimuovi il thread dal dizionario dopo aver tentato il join
-            if lobby_id in self._lobby_threads:
-                del self._lobby_threads[lobby_id]
-
+        for id in self._lobbies.ids():
+            lobby = self._lobbies.get_lobby(id)
+            if lobby:
+                thread = lobby.agent
+                if thread and thread.is_alive():
+                    self._log(f"Waiting for {lobby} thread (ID: {thread.ident}) to join...")
+                    thread.join(timeout=5) 
+                    if thread.is_alive():
+                        self._log(f"{lobby} thread (ID: {thread.ident}) did not terminate in time.")
+                    else:
+                        self._log(f"{lobby} thread (ID: {thread.ident}) joined.")
 
         self._log("All lobby threads processed.")
-        # Aggiungi qui la chiusura di altre risorse, es. la connessione
-        if hasattr(self._connection, 'stop'): # Se la tua ConnectionHandler ha un metodo stop/close
-            self._connection.stop()
         self._log("Server shutdown complete.")
 
 
@@ -170,13 +280,10 @@ class Server(Debuggable):
 if __name__ == "__main__":
     server = Server(debug=True)
     try:
-        while not server._shutdown_event.is_set(): # Continua finché non viene segnalato lo shutdown
+        while not server._shutdown_event.is_set():
             server.run()
-            # Potresti voler aggiungere un breve sleep qui se server.run() è molto veloce e non bloccante
-            # per evitare un busy-waiting, ma try_get_any_message probabilmente gestisce già una forma di attesa.
-            # time.sleep(0.01) # Esempio
     except KeyboardInterrupt:
-        print("\nKeyboardInterrupt received.")
+        print("\nShutting down server...")
     finally:
         server.shutdown()
         print("Server has been shut down.")

@@ -30,7 +30,7 @@ class GameCore(Game):
 
     def start_round(self) -> None:
         self.__stake_handler.reset_stake()
-        hands = self.__deck.shuffle(player.cards_in_hand for player in self.__players)
+        hands = self.__deck.shuffle([player.cards_in_hand for player in self.__players])
         for i, hand in enumerate(hands):
             self.__players[i].cards = hand
 

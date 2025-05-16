@@ -16,10 +16,22 @@ def setup():
                 username = ui.input(label='Username')
 
                 def login():
-                    connection_handler.send_message(message_factory.create_new_player_message(
-                        username.value, user_state.id), Topic.NEW_PLAYER)
-                    user_state.username = username.value
-                    ui.navigate.to('/lobby_select')
+                    if username.value == '':
+                        ui.notify("Please enter a username", color='red')
+                        return
+                    ui.spinner(type='oval')
+                    connection_handler.send_message(
+                        message_factory.create_new_player_message(
+                            username.value, user_state.id), 
+                        Topic.NEW_PLAYER)
+                    response = connection_handler.wait_message(Topic.NEW_PLAYER)
+                    while response == None or response.body["player_id"] != user_state.id:
+                        response = connection_handler.wait_message(Topic.NEW_PLAYER)
+                    if response.body["response"]:
+                        user_state.username = username.value
+                        ui.navigate.to('/lobby_select')
+                    else:
+                        ui.notify("Error joining lobby", color='red')
 
                 ui.button('Login', on_click=login)
 

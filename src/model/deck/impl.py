@@ -25,5 +25,5 @@ class DeckImpl(Deck):
         retList = []
         for suit in Suit:
             for rank in range(Rank.ONE.value, Rank.ACE.value):
-                retList.append(Card(suit, rank))
+                retList.append(Card(suit, Rank(rank)))
         return retList

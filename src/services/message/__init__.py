@@ -5,4 +5,4 @@ class Message:
     """
     A container for simple messages with only a body. 
     """
-    body: object
+    body: dict

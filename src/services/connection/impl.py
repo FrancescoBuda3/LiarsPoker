@@ -2,6 +2,9 @@ import queue
 import uuid
 from paho.mqtt import client as mqtt
 
+from paho.mqtt.packettypes import PacketTypes
+from paho.mqtt.properties import Properties
+from paho.mqtt.subscribeoptions import SubscribeOptions
 from src.services.connection import ConnectionHandlerInterface
 from src.services.connection.topic import Topic
 from src.services.deserialize.impl import Deserializer
@@ -24,10 +27,10 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
         self._deserializer = Deserializer()
         self._client = self.__connect_mqtt(self._client_id)
         self._topics = topics
-        props = mqtt.Properties(mqtt.PacketTypes.SUBSCRIBE)
+        props = Properties(PacketTypes.SUBSCRIBE)
         props.SubscriptionIdentifier = 1
         for topic in self._topics:
-            self._client.subscribe(topic, options=mqtt.SubscribeOptions(noLocal=True), properties=props)
+            self._client.subscribe(topic, options=SubscribeOptions(noLocal=True), properties=props)
 
     def __connect_mqtt(self, client_id: str):
         client = mqtt.Client(client_id=client_id, protocol=mqtt.MQTTv5)
@@ -51,7 +54,7 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
         deserialized_message = self._deserializer.deserialize(message)
         self._topic_queues[msg.topic].put(deserialized_message)
 
-    def send_message(self, message: Message, topic: str):
+    def send_message(self, message: Message, topic: Topic | str):
         serialized_message = self._serializer.serialize(message)
         result = self._client.publish(topic, serialized_message)
         status = result[0]
@@ -61,14 +64,14 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
         else:
             self._log(f"Failed to send message to topic '{topic}'")
 
-    def wait_message(self, topic: str, timeout=None) -> Message:
+    def wait_message(self, topic: Topic | str, timeout=None) -> Message | None:
         if topic in self._topic_queues:
             try:
                 return self._topic_queues[topic].get(timeout=timeout)
             except queue.Empty:
                 return None
     
-    def try_get_any_message(self) -> tuple[str, Message]:
+    def try_get_any_message(self) -> tuple[Topic | str, Message] | tuple[None, None]:
         for topic, q in self._topic_queues.items():
             try:
                 message = q.get_nowait()
@@ -77,7 +80,7 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
                 continue
         return None, None
     
-    def no_wait_message(self, topic) -> Message:
+    def no_wait_message(self, topic: Topic | str) -> Message | None:
         if topic in self._topic_queues:
             try:
                 return self._topic_queues[topic].get_nowait()
@@ -85,7 +88,7 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
                 return None
         return None
     
-    def subscribe(self, topic: str):
+    def subscribe(self, topic: Topic | str):
         if topic not in self._topics:
             self._client.subscribe(topic)
             self._topics.append(topic)
@@ -94,7 +97,7 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
         else:
             self._log(f"Already subscribed to topic '{topic}'")
             
-    def unsubscribe(self, topic: str):
+    def unsubscribe(self, topic: Topic | str):
         if topic in self._topics:
             self._client.unsubscribe(topic)
             self._topics.remove(topic)
