@@ -1,4 +1,5 @@
 import queue
+import time
 import uuid
 from paho.mqtt import client as mqtt
 
@@ -14,8 +15,11 @@ from src.utils.debug import Debuggable
 
 
 broker = 'broker.emqx.io'
-broker_address = "127.0.0.1"
-port = 1883
+broker_addresses = [
+            ("127.0.0.1", 1883),  # principal broker
+            ("127.0.0.1", 1884)  # backup broker
+        ]
+broker_index = 0
 
 
 class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
@@ -37,10 +41,37 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
 
         client.on_connect = self.__on_connect
         client.on_message = self.__on_message
-        client.connect(broker_address, port, keepalive=120)
-
+        client.on_disconnect = self.__on_disconnect
+        
+        self.__try_connect(client)
         client.loop_start()
         return client
+
+    def __try_connect(self, client):
+        global broker_index
+        for i in range(len(broker_addresses)):
+            index = (broker_index + i) % len(broker_addresses)
+            host, port = broker_addresses[index]
+            try:
+                client.connect(host, port, keepalive=120)
+                broker_index = index
+                return
+            except:
+                continue
+        raise ConnectionError("No brokers available to connect")
+
+    def __on_disconnect(self, client, userdata, rc, properties=None):
+        if rc != 0:
+            self._log("Unexpected disconnection. Attempting to reconnect...")
+            while True:
+                try:
+                    self.__try_connect(client)
+                    time.sleep(2)
+                    for topic in self._topics:
+                        client.subscribe(topic, options=SubscribeOptions(noLocal=True))
+                    break
+                except:
+                    time.sleep(5)
 
     def __on_connect(self, client, userdata, flags, rc, properties):
         if rc == 0:

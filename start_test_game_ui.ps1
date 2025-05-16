@@ -7,13 +7,21 @@ if (-not $clients_number) {
     exit 1
 }
 
-$mosquittoRunning = Get-Process -Name "mosquitto" -ErrorAction SilentlyContinue
+$mosquitto1 = Get-Process -Name "mosquitto1" -ErrorAction SilentlyContinue
+$mosquitto2 = Get-Process -Name "mosquitto2" -ErrorAction SilentlyContinue
 
-if (-not $mosquittoRunning) {
-    Write-Host "Mosquitto is not running. Starting it..."
-    $mosquitto = Start-Process -PassThru -WindowStyle Hidden -FilePath "mosquitto" 
+if (-not $mosquitto1) {
+    Write-Host "Starting primary Mosquitto (1883)..."
+    $mosquitto1 = Start-Process -PassThru -WindowStyle Hidden -FilePath "mosquitto" -ArgumentList "-c", "mosquitto1.conf"
 } else {
-    Write-Host "Mosquitto is already running."
+    Write-Host "Primary Mosquitto already running."
+}
+
+if (-not $mosquitto2) {
+    Write-Host "Starting backup Mosquitto (1884)..."
+    $mosquitto2 = Start-Process -PassThru -WindowStyle Hidden -FilePath "mosquitto" -ArgumentList "-c", "mosquitto2.conf"
+} else {
+    Write-Host "Backup Mosquitto already running."
 }
 
 Write-Host "Starting $clients_number client(s)..."
@@ -31,6 +39,13 @@ for ($i = 0; $i -lt $clients_number; $i++) {
 
 $cleanup = {
     Write-Host "`nTerminating processes..."
+
+    if ($mosquitto1 -and !$mosquitto1.HasExited) {
+    $mosquitto1.Kill()
+    }
+    if ($mosquitto2 -and !$mosquitto2.HasExited) {
+        $mosquitto2.Kill()
+    }
 
     if ($server -and !$server.HasExited) {
         $server.Kill()
