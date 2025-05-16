@@ -1,5 +1,4 @@
 from src.model.card import Card
-from src.model.card.rank import Rank
 from src.model.stake.combination import Combination
 
 
@@ -24,3 +23,20 @@ def check_cards_combination(cards: list[Card], combo: Combination) -> bool:
             case _:
                 return True
     return False
+
+def cards_permitted(combo: Combination) -> int:
+    max_cards = 5
+    match combo:
+        case (
+            Combination.HIGH_CARD
+            | Combination.PAIR
+            | Combination.THREE_OF_A_KIND
+            | Combination.FOUR_OF_A_KIND
+        ):
+            max_cards = 1
+        case (
+            Combination.TWO_PAIR
+            | Combination.FULL_HOUSE
+        ):
+            max_cards = 2
+    return max_cards

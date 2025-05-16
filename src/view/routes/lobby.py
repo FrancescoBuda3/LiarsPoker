@@ -66,7 +66,6 @@ def setup():
                     message = connection_handler.no_wait_message(Topic.READY_TO_PLAY)
                     if message and message.body["lobby_id"] == user_state.selected_lobby:
                         players = message.body["players_in_lobby"]
-                        ui.notify("New player(s) in lobby")
                         content.refresh()
                         
                 ui.timer(1, check_for_players)

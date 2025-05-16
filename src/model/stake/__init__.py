@@ -24,7 +24,7 @@ class Stake:
             suits (Suit or set[Suit], optional): the suit or suits of the stake. Defaults to None.
         """
         self.combo = combo
-        self.ranks = []
+        self.ranks = ranks
         if suits is None:
             self.suits = set()
         elif isinstance(suits, Suit):
