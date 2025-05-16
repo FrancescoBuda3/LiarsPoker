@@ -16,6 +16,9 @@ def setup():
                 username = ui.input(label='Username')
 
                 def login():
+                    if username.value == '':
+                        ui.notify("Please enter a username", color='red')
+                        return
                     ui.spinner(type='oval')
                     connection_handler.send_message(
                         message_factory.create_new_player_message(

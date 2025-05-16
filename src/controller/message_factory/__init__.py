@@ -110,14 +110,20 @@ class MessageFactoryInterface(Protocol):
         """
         ...
         
-    def create_ready_to_play_message(self, player: Player, lobby_id: int, ready: bool) -> Message:
+    def create_ready_to_play_message(self, 
+            player_id: UUID, 
+            lobby_id: int, 
+            ready: bool, 
+            players_in_lobby: list[Player]
+        ) -> Message:
         """
         Create a message to indicate that a player is ready to play.
 
         Args:
-            player (Player): player who is ready or not
+            player_id (UUID): player who is ready or not
             lobby_id (int): ID of the lobby
             ready (bool): true if the player is ready, false otherwise
+            players_in_lobby (list[Player]): list of players in the lobby
 
         Returns:
             Message: the constructed message

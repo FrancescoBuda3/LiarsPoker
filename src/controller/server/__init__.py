@@ -16,7 +16,7 @@ _MAX_PLAYERS = _MAX_LOBBIES * _LOBBY_SIZE
 
 class _Lobby:
     _id: int
-    _players: list[tuple[Player, bool]]
+    _players: list[Player]
     agent: Thread
     
     def __init__(self, id: int):
@@ -30,32 +30,36 @@ class _Lobby:
     
     @property
     def players(self) -> list[Player]:
-        return [p[0] for p in self._players]
+        return self._players
         
     def add_player(self, player: Player) -> bool:
-        if len(self._players) < _LOBBY_SIZE and player not in self.players:
-            self._players.append((player, False))
+        if len(self._players) < _LOBBY_SIZE and player not in self._players:
+            self._players.append(player)
             return True
         else:
             return False
         
     def remove_player(self, player: Player) -> bool:
         for p in self._players:
-            if p[0] == player:
+            if p == player:
                 self._players.remove(p)
                 return True
         return False
     
     def set_player_status(self, player: Player, is_ready: bool) -> None:
         for p in self._players:
-            if p[0] == player:
-                p = (p[0], is_ready)
+            if p == player:
+                p.ready = is_ready
                 
     def is_ready(self) -> bool:
         for p in self._players:
-            if not p[1]:
+            if not p.ready:
                 return False
         return True
+    
+    def unready(self) -> None:
+        for p in self._players:
+            p.ready = False
     
     def start_game(self):
         if self.is_ready():
@@ -173,16 +177,21 @@ class Server(Debuggable):
                         Topic.NEW_PLAYER)
                     
                 case Topic.READY_TO_PLAY:
-                    p: Player = msg.body["player"]
-                    player = self.__get_player_by_id(p.id)
+                    player = self.__get_player_by_id(msg.body["player_id"])
                     lobby = self._lobbies.get_lobby(msg.body["lobby_id"])
                     player_ready = msg.body["ready"]
                     if player == None or lobby == None:
-                        self._log("Player or lobby not found.")
+                        self._log(f"Player: {player} or lobby: {lobby} not found.")
+                        self._log(self._lobbies.ids())
                         return
                     lobby.set_player_status(player, player_ready)
+                    self._connection.send_message(
+                        self._message_factory.create_ready_to_play_message(
+                            player.id, lobby.id, player_ready, lobby.players), 
+                        Topic.READY_TO_PLAY)
                     if lobby.is_ready():
                         lobby.start_game()
+                        lobby.unready()
                         self._connection.send_message(
                             self._message_factory.create_start_game_message(lobby.id), 
                             Topic.START_GAME)

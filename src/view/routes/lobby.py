@@ -13,7 +13,9 @@ def setup():
     def lobby_page():
         message_factory = MessageFactory()
         ready_state = False
-        players: list[tuple[Player, bool]] = [] 
+        players: list[Player] = [
+            Player(user_state.username, user_state.id)
+        ] 
 
         def __subscribe_to_game_topics():
             for topic in game_topics:
@@ -44,8 +46,7 @@ def setup():
                         ready_state = not ready_state
                         connection_handler.send_message(
                             message_factory.create_ready_to_play_message(
-                                Player(user_state.username, user_state.id), 
-                                user_state.selected_lobby, ready_state),
+                                user_state.id, user_state.selected_lobby, ready_state),
                             Topic.READY_TO_PLAY)
                         content.refresh()
 
@@ -61,24 +62,23 @@ def setup():
                         ui.navigate.to('/lobby_select')
 
                     ui.button('Back to lobby selection', on_click=back_to_lobby_select)
+                
+                def check_for_players():
+                    nonlocal players
+                    message = connection_handler.no_wait_message(Topic.READY_TO_PLAY)
+                    if message and message.body["lobby_id"] == user_state.selected_lobby:
+                        players = message.body["players_in_lobby"]
+                        ui.notify("New player(s) in lobby")
+                        content.refresh()
+                        
+                ui.timer(1, check_for_players)
                         
                 with ui.card():
                     ui.label(f'Players Ready:')
                     for player in players:
-                        ui.label(f'{player[0].username} {"✅" if player[1] else "❌"}')
+                        ui.label(f'{player.username} {"✅" if player.ready else "❌"}')
                         
         centered_layout(content)
-        
-        def check_for_players():
-            message = connection_handler.no_wait_message(Topic.READY_TO_PLAY)
-            if message and message.body["lobby_id"] == user_state.selected_lobby:
-                player = message.body["player"]
-                if player not in players:
-                    players.append((player, message.body["ready"]))
-                else:
-                    index = players.index(player)
-                    players[index] = (player, message.body["ready"])
-                content.refresh()
 
         def wait_start_game():
             message = connection_handler.no_wait_message(Topic.START_GAME)
@@ -87,5 +87,4 @@ def setup():
                 ui.navigate.to('/game')
                 return False
         
-        ui.timer(0.5, check_for_players) 
         ui.timer(0.5, wait_start_game)

@@ -36,15 +36,16 @@ def setup():
                         ui.notify('Please enter a lobby ID', color='red')
                         return
                     ui.spinner(type='oval')
+                    lobby_id = int(lobby.value)
                     connection_handler.send_message(
                         message_factory.create_join_lobby_message(
-                            user_state.id, int(lobby.value)), 
+                            user_state.id, lobby_id), 
                         Topic.JOIN_LOBBY)
                     response = connection_handler.wait_message(Topic.JOIN_LOBBY)
                     while response == None or response.body["player_id"] != user_state.id:
                         response = connection_handler.wait_message(Topic.JOIN_LOBBY)
                     if response.body["response"]:
-                        user_state.selected_lobby = lobby.value
+                        user_state.selected_lobby = lobby_id
                         ui.navigate.to('/lobby')
                     else:
                         ui.notify("Error joining lobby", color='red')

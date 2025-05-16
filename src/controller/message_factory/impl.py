@@ -54,11 +54,17 @@ class MessageFactory(MessageFactoryInterface):
             "response": response
         })
         
-    def create_ready_to_play_message(self, player: Player, lobby_id: int, ready: bool) -> Message:
+    def create_ready_to_play_message(self, 
+            player_id: UUID, 
+            lobby_id: int, 
+            ready: bool, 
+            players_in_lobby: list[Player] = []
+        ) -> Message:
         return Message({
-            "player": player,
+            "player_id": player_id,
             "lobby_id": lobby_id,
-            "ready": ready
+            "ready": ready,
+            "players_in_lobby": players_in_lobby
         })
         
     def create_start_game_message(self, lobby_id: int) -> Message:

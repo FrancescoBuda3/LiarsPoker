@@ -44,6 +44,7 @@ class Serializer(SeriliazerInterface):
             'id': self._to_ast(player.id),
             'cards': [self._to_ast(card) for card in player.cards],
             'cards_in_hand': self._to_ast(player.cards_in_hand),
+            'ready': self._to_ast(player.ready),
         }
         
     def _uuid_to_ast(self, uuid):
