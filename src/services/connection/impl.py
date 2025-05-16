@@ -31,10 +31,6 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
         self._deserializer = Deserializer()
         self._client = self.__connect_mqtt(self._client_id)
         self._topics = topics
-        props = Properties(PacketTypes.SUBSCRIBE)
-        props.SubscriptionIdentifier = 1
-        for topic in self._topics:
-            self._client.subscribe(topic, options=SubscribeOptions(noLocal=True), properties=props)
 
     def __connect_mqtt(self, client_id: str):
         client = mqtt.Client(client_id=client_id, protocol=mqtt.MQTTv5)
@@ -67,14 +63,16 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
                 try:
                     self.__try_connect(client)
                     time.sleep(2)
-                    for topic in self._topics:
-                        client.subscribe(topic, options=SubscribeOptions(noLocal=True))
                     break
                 except:
                     time.sleep(5)
 
     def __on_connect(self, client, userdata, flags, rc, properties):
         if rc == 0:
+            props = Properties(PacketTypes.SUBSCRIBE)
+            props.SubscriptionIdentifier = 1
+            for topic in self._topics:
+                self._client.subscribe(topic, options=SubscribeOptions(noLocal=True), properties=props)
             self._log("Connected to MQTT Broker!")
         else:
             self._log("Failed to connect, return code %d\n", rc)
