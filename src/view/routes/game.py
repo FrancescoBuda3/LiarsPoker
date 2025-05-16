@@ -11,7 +11,7 @@ from src.view.logic.game import check_cards_combination
 from utils.state import user_state
 from src.services.connection.topic import Topic
 from src.controller.message_factory.impl import MessageFactory
-from utils.connection import connection_handler
+from utils.connection import connection_handler, unsubscribe_from_game_topics
 
 
 def setup():
@@ -143,11 +143,33 @@ def setup():
 
             def __is_player_turn(player: Player) -> bool:
                 return player_turn != None and player_turn.id == player.id
+            
+            def leave_game():
+                connection_handler.send_message(
+                    message_factory.create_remove_player_message(
+                        local_player.id),
+                    __to_game_topic(Topic.REMOVE_PLAYER)
+                )
+                connection_handler.send_message(
+                    message_factory.create_leave_lobby_message(
+                        user_state.id,
+                        user_state.selected_lobby),
+                    Topic.LEAVE_LOBBY
+                )
+                unsubscribe_from_game_topics(user_state.selected_lobby)
+                user_state.reset_lobby()
+                ui.navigate.to('/lobby_select')
 
             with ui.element('div')\
                     .classes('bg-gray-100 flex items-center justify-center basis-full h-full w-full'):
-                with ui.grid(rows='5% 25% 10% 5% 13% 37% 5%')\
+                with ui.grid(rows='7% 23% 10% 5% 13% 37% 5%')\
                        .classes('w-full h-full max-w-full max-h-full grid-rows-game border border-gray-300 gap-0 mx-[100px]'):
+                    with ui.row().classes('flex items-end justify-end p-2'):
+                        with ui.element('div').classes('top-4 right-4 z-50')\
+                                .style('padding: 5px;'):
+                            ui.button('Logout')\
+                                .on('click', leave_game)\
+                                .classes('bg-red-500 text-white px-4 py-2 rounded shadow-lg hover:bg-red-600 transition')
                     with ui.row().classes('flex items-center justify-center'):
                         for i in range(len(players)):
                             pl: Player = players[i]
@@ -159,14 +181,15 @@ def setup():
                             )
                     with ui.row().classes('flex items-center justify-center'):
                         stake_display(latest_move)
+                    ui.row().classes('flex items-center justify-center')
                     with ui.row().classes('flex items-center justify-center'):
                         rise_button = ui.button('RISE STAKE')\
-                            .classes('text-4xl font-bold')\
+                            .classes('text-4xl font-bold p-4')\
                             .style('background-color: #00999E !important;')\
                             .on('click', lambda: show_stake_dialog(min_stake))
                         rise_button.set_enabled(__is_player_turn(local_player))
                         bullshit_button = ui.button('BULLSHIT')\
-                            .classes('text-4xl font-bold')\
+                            .classes('text-4xl font-bold p-4')\
                             .style('background-color: #9E2500 !important;')\
                             .on('click', lambda: connection_handler.send_message(
                                 message_factory.create_check_liar_message(),
@@ -182,32 +205,12 @@ def setup():
                             ui.image(f"static/{str(c.rank)}_of_{str(c.suit)}.png")\
                                 .style('width: 10%;')\
                                 .classes('m-1')
+                    ui.row().classes('flex items-center justify-center')
 
         content()
 
-        def leave_game():
-            connection_handler.send_message(
-                message_factory.create_remove_player_message(
-                    local_player.id),
-                __to_game_topic(Topic.REMOVE_PLAYER)
-            )
-            connection_handler.send_message(
-                message_factory.create_leave_lobby_message(
-                    user_state.id,
-                    user_state.selected_lobby),
-                Topic.LEAVE_LOBBY
-            )
-            user_state.reset_lobby()
-            ui.navigate.to('/lobby_select')
-
-        with ui.element('div').classes('fixed top-4 right-4 z-50'):
-            ui.button('Logout')\
-                .on('click', leave_game)\
-                .classes('bg-red-500 text-white px-4 py-2 rounded shadow-lg hover:bg-red-600 transition')
-
         def wait_start_game():
-            message = connection_handler.no_wait_message(
-                "lobby/" + str(user_state.selected_lobby) + Topic.START_ROUND)
+            message = connection_handler.no_wait_message(__to_game_topic(Topic.START_ROUND))
             if message:
                 players_msg: list[Player] = message.body["players"]
                 players.clear()
