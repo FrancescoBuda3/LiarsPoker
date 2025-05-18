@@ -13,12 +13,8 @@ def setup():
     def lobby_page():
         message_factory = MessageFactory()
         ready_state = False
-        players: list[Player] = [
-            Player(user_state.username, user_state.id)
-        ] 
+        players: list[Player] = user_state.lobby_players
 
-        
-                
         @ui.refreshable
         def content():
             with ui.row():
@@ -47,7 +43,7 @@ def setup():
                             Topic.READY_TO_PLAY)
                         content.refresh()
 
-                    ui.button('Set Ready', on_click=switch_ready)
+                    ui.button('Set Not Ready' if ready_state else 'Set Ready', on_click=switch_ready)
 
                     def back_to_lobby_select():
                         unsubscribe_from_game_topics(user_state.selected_lobby)
@@ -63,12 +59,21 @@ def setup():
                 
                 def check_for_players():
                     nonlocal players
+                    message = connection_handler.no_wait_message(Topic.JOIN_LOBBY)
+                    if message and message.body["lobby_id"] == user_state.selected_lobby:
+                        user_state.lobby_players = message.body["players_in_lobby"]
+                        players = message.body["players_in_lobby"]
+                        content.refresh()
+                    
                     message = connection_handler.no_wait_message(Topic.READY_TO_PLAY)
                     if message and message.body["lobby_id"] == user_state.selected_lobby:
-                        players = message.body["players_in_lobby"]
+                        for player in players:
+                            if player.id == message.body["player_id"]:
+                                player.ready = message.body["ready"]
                         content.refresh()
                         
                 ui.timer(1, check_for_players)
+            
                         
                 with ui.card():
                     ui.label(f'Players Ready:')
