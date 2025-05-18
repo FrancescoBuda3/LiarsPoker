@@ -45,10 +45,10 @@ def setup():
                     ui.notify('Choose valid combination!')
                     return
                 min_rank: Rank = Rank.ONE
-                suits: set[Suit] = {Suit.HEARTS,
-                                    Suit.DIAMONDS, Suit.CLUBS, Suit.SPADES}
+                suits: list[Suit] = [Suit.HEARTS,
+                                    Suit.DIAMONDS, Suit.CLUBS, Suit.SPADES]
                 if min_stake.ranks and combo == min_stake.combo:
-                    min_rank = min_stake.ranks[0]
+                    min_rank = min_stake.single_rank
                 if len(min_stake.suits) > 0 and combo == min_stake.combo:
                     suits = min_stake.suits
                 max_cards = cards_permitted(combo)
@@ -58,23 +58,27 @@ def setup():
                         | Combination.ROYAL_FLUSH
                     ):
                         suit = await suit_picker(combo, suits)
-                        stake = Stake(combo, [], suit)
+                        stake = Stake(combo)
+                        stake.suit = suit
                     case Combination.STRAIGHT_FLUSH:
-                        cards = await cards_picker(combo, max_cards=max_cards, suits=suits, min_rank=min_rank)
+                        cards = await cards_picker(combo, max_cards, suits, min_rank)
                         if check_cards_combination(cards, combo):
                             stake = Stake(combo, [card.rank for card in cards], [
                                           card.suit for card in cards])
                     case Combination.FULL_HOUSE:
                         min_pair = min_rank
-                        min_three = min_rank
+                        min_triple = min_rank
                         if combo == min_stake.combo:
-                            min_pair = min_stake.ranks[1]
-                            min_three = min_stake.ranks[0]
-                        three_of_a_kind = await white_cards_picker(Combination.THREE_OF_A_KIND, max_cards=1, min_rank=min_three)
-                        pair = await white_cards_picker(Combination.PAIR, max_cards=1, min_rank=min_pair)
+                            min_pair = min_stake.pair_rank
+                            min_triple = min_stake.triple_rank
+                        three_of_a_kind: list[Card] = await white_cards_picker(
+                            Combination.THREE_OF_A_KIND, max_cards=1, min_rank=min_triple)
+                        pair: list[Card] = await white_cards_picker(
+                            Combination.PAIR, max_cards=1, min_rank=min_pair)
                         if three_of_a_kind and pair and check_cards_combination(pair + three_of_a_kind, combo):
-                            stake = Stake(
-                                combo, [card.rank for card in three_of_a_kind + pair])
+                            stake = Stake(combo)
+                            stake.triple_rank = three_of_a_kind[0].rank
+                            stake.pair_rank = pair[0].rank
                     case _:
                         cards: list[Card] = await white_cards_picker(combo, max_cards=max_cards, min_rank=min_rank)
                         if check_cards_combination(cards, combo):

@@ -11,38 +11,73 @@ from .combination import Combination
 
 @dataclass
 class Stake:
-    ranks: list[Rank]
-    suits: set[Suit]
     combo: Combination
+    ranks: list[Rank]
+    suits: list[Suit]
     
-    def __init__(self, combo: Combination, ranks: list[Rank] = [], suits = None):
+    def __init__(self, combo: Combination, ranks: list[Rank] = [], suits: list[Suit] = []):
         """
         Models the stake that a player calls when playing.
         Args:
             combo (Combination): the combination of the stake
-            ranks (list[Rank], optional): the ranks of the cards in the stake. Defaults to None.
-            suits (Suit or set[Suit], optional): the suit or suits of the stake. Defaults to None.
+            ranks (list[Rank], optional): the ranks of the cards in the stake. Defaults to empty.
+            suits (list[Suit], optional): the suits of teh cards in the stake. Defaults to empty.
         """
         self.combo = combo
         self.ranks = ranks
-        if suits is None:
-            self.suits = set()
-        elif isinstance(suits, Suit):
-            self.suits = {suits}
-        else:
-            self.suits = set(suits)
+        self.suits = suits
     
     def __post_init__(self):
         if not self.combo:
             raise ValueError("Combination is required")
         
     @property
+    def single_rank(self) -> Rank:
+        if len(self.ranks) == 0:
+            raise ValueError("No rank has been set")
+        return self.ranks[0]
+    
+    @single_rank.setter
+    def single_rank(self, rank: Rank):
+        self.ranks = [rank]
+    
+    @property
+    def pair_rank(self) -> Rank:
+        if len(self.ranks) == 0:
+            raise ValueError("No rank has been set")
+        if len(self.ranks) == 1:
+            return self.ranks[0]
+        return self.ranks[1]
+    
+    @pair_rank.setter
+    def pair_rank(self, rank: Rank):
+        if len(self.ranks) >= 1:
+            self.ranks = [self.ranks[0], rank]
+        else:
+            self.ranks = [rank]
+    
+    @property
+    def triple_rank(self) -> Rank:
+        if len(self.ranks) == 0:
+            raise ValueError("No rank has been set")
+        return self.ranks[0]
+    
+    @triple_rank.setter
+    def triple_rank(self, rank: Rank):
+        if len(self.ranks) >= 1:
+            self.ranks = [rank, self.ranks[0]]
+        else:
+            self.ranks = [rank]
+        
+    @property
     def suit(self) -> Suit:
-        return self.suits.pop()
+        if len(self.suits) == 0:
+            raise ValueError("No suit has been set")
+        return self.suits[0]
     
     @suit.setter
     def suit(self, suit: Suit):
-        self.suits = {suit}
+        self.suits = [suit]
     
 class LowestStake(Enum):
     """
@@ -80,7 +115,7 @@ class StakeHandler(Protocol):
         """
         ...
         
-    def get_lowest_next_stake(self) -> Stake:
+    def get_lowest_next_stake(self) -> Stake | None:
         """
         Returns the lowest possible stake that can be called.
         If the stake can't be raised higher than None is returned.
