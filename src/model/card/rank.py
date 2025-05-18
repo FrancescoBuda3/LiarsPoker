@@ -21,15 +21,17 @@ class Rank(Enum):
     KING = 13
     ACE = 14
     
-    def next(self):
+    def next(self, steps = 1):
         """
         Get the next rank in the sequence
+        Args:
+            steps (int): number of steps to move forward in the sequence
         Returns:
             Rank: the next rank in the sequence, None if it's the highest
         """
         ranks = list(self.__class__)
         idx = ranks.index(self)
-        return ranks[idx + 1] if idx + 1 < len(ranks) else None
+        return ranks[idx + steps] if idx + steps < len(ranks) else None
     
     def previous(self):
         """

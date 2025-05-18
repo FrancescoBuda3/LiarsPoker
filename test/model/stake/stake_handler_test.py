@@ -10,52 +10,26 @@ from src.model.stake.impl import StakeHandlerImpl
 class TestStakeHandlerImpl(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.TEST_STAKE = Stake(Combination.HIGH_CARD, [Rank.ONE])
-        cls.TEST_NEXT_STAKE = Stake(Combination.HIGH_CARD, [Rank.TWO])
-        cls.TEST_TWO_PAIR = Stake(Combination.TWO_PAIR, [Rank.FIVE, Rank.TWO])
-        cls.TEST_NEXT_TWO_PAIR = Stake(Combination.TWO_PAIR, [Rank.FIVE, Rank.THREE])
-        cls.TEST_TWO_PAIR_CARDS = [
-            Card(Suit.SPADES, Rank.TWO), 
-            Card(Suit.HEARTS, Rank.TWO), 
-            Card(Suit.SPADES, Rank.FIVE), 
-            Card(Suit.HEARTS, Rank.FIVE)]
-        cls.TEST_INVALID_TWO_PAIR_CARDS = [
-            Card(Suit.SPADES, Rank.TWO), 
-            Card(Suit.HEARTS, Rank.FIVE), 
-            Card(Suit.SPADES, Rank.FIVE)]
-        cls.TEST_ROYAL_FLUSH = Stake(Combination.ROYAL_FLUSH, suits=Suit.SPADES)
-        cls.TEST_ROYAL_FLUSH_CARDS = [
-            Card(Suit.SPADES, Rank.TEN), 
-            Card(Suit.SPADES, Rank.JACK), 
-            Card(Suit.SPADES, Rank.QUEEN), 
-            Card(Suit.SPADES, Rank.KING), 
-            Card(Suit.SPADES, Rank.ACE)]
-        cls.TEST_INVALID_ROYAL_FLUSH_CARDS = [
-            Card(Suit.SPADES, Rank.TEN), 
-            Card(Suit.SPADES, Rank.JACK), 
-            Card(Suit.SPADES, Rank.QUEEN), 
-            Card(Suit.SPADES, Rank.KING), 
-            Card(Suit.SPADES, Rank.TWO)]
-        cls.TEST_STRAIGHT_FLUSH_SPADES = Stake(
-            Combination.STRAIGHT_FLUSH, 
-            [Rank.ONE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE], 
-            Suit.SPADES)
-        cls.TEST_STRAIGHT_FLUSH_HEARTS = Stake(
-            Combination.STRAIGHT_FLUSH, 
-            [Rank.ONE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE], 
-            Suit.HEARTS)
-        cls.TEST_HIGHEST_CARD = Stake(Combination.HIGH_CARD, [Rank.ACE])
-        cls.TEST_LOWEST_PAIR = Stake(Combination.PAIR, [Rank.ONE])
+        cls.TEST_SUIT = Suit.SPADES
+        cls.TEST_ONE_STAKE = Stake(Combination.HIGH_CARD, [Rank.ONE])
+        cls.TEST_FULL_HOUSE = Stake(Combination.FULL_HOUSE)
+        cls.TEST_FULL_HOUSE.triple_rank = Rank.TWO
+        cls.TEST_FULL_HOUSE.pair_rank = Rank.THREE
+        cls.TEST_STRAIGHT_FLUSH = Stake(Combination.STRAIGHT_FLUSH)
+        cls.TEST_STRAIGHT_FLUSH.ranks = [Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE, Rank.SIX]
+        cls.TEST_STRAIGHT_FLUSH.suit = Suit.SPADES
+        cls.TEST_ROYAL_FLUSH = Stake(Combination.ROYAL_FLUSH)
+        cls.TEST_ROYAL_FLUSH.suit = Suit.SPADES
 
     def setUp(self):
         self.stakeHandler = StakeHandlerImpl()
 
     def test_stake(self):
-        self.stakeHandler.stake = self.TEST_STAKE
-        self.assertEqual(self.stakeHandler.stake, self.TEST_STAKE)
+        self.stakeHandler.stake = self.TEST_ONE_STAKE
+        self.assertEqual(self.stakeHandler.stake, self.TEST_ONE_STAKE)
 
     def test_reset_stake(self):
-        self.stakeHandler.stake = self.TEST_STAKE
+        self.stakeHandler.stake = self.TEST_ONE_STAKE
         self.stakeHandler.reset_stake()
         with self.assertRaises(ValueError):
             self.stakeHandler.stake
@@ -68,61 +42,70 @@ class TestStakeHandlerImpl(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.stakeHandler.check_cards([])
 
-    def test_check_cards_two_pair(self):
-        self.stakeHandler.stake = self.TEST_TWO_PAIR
-        self.assertTrue(self.stakeHandler.check_cards(
-            self.TEST_TWO_PAIR_CARDS))
+    def test_check_full_house(self):
+        self.stakeHandler.stake = self.TEST_FULL_HOUSE
+        full_house_cards = []
+        for i in range(3):
+            full_house_cards.append(
+                Card(self.TEST_SUIT, self.TEST_FULL_HOUSE.triple_rank))
+        for i in range(2):
+            full_house_cards.append(
+                Card(self.TEST_SUIT, self.TEST_FULL_HOUSE.pair_rank))
+        self.assertTrue(self.stakeHandler.check_cards(full_house_cards))
 
-    def test_check_invalid_cards_two_pair(self):
-        self.stakeHandler.stake = self.TEST_TWO_PAIR
-        self.assertFalse(self.stakeHandler.check_cards(
-            self.TEST_INVALID_TWO_PAIR_CARDS))
+    def test_check_wrong_full_house(self):
+        self.stakeHandler.stake = self.TEST_FULL_HOUSE
+        wrong_full_house_cards = []
+        for i in range(3):
+            wrong_full_house_cards.append(
+                Card(self.TEST_SUIT, self.TEST_FULL_HOUSE.pair_rank))
+        for i in range(2):
+            wrong_full_house_cards.append(
+                Card(self.TEST_SUIT, self.TEST_FULL_HOUSE.triple_rank))
+        self.assertFalse(self.stakeHandler.check_cards(wrong_full_house_cards))
 
-    def test_check_cards_royal_flush(self):
-        self.stakeHandler.stake = self.TEST_ROYAL_FLUSH
-        self.assertTrue(self.stakeHandler.check_cards(
-            self.TEST_ROYAL_FLUSH_CARDS))
+    def test_check_straight_flush(self):
+        self.stakeHandler.stake = self.TEST_STRAIGHT_FLUSH
+        straight_flush_cards = []
+        for i in range(5):
+            straight_flush_cards.append(
+                Card(self.TEST_STRAIGHT_FLUSH.suit, self.TEST_STRAIGHT_FLUSH.ranks[i]))
+        self.assertTrue(self.stakeHandler.check_cards(straight_flush_cards))
 
-    def test_check__invalid_cards_royal_flush(self):
-        self.stakeHandler.stake = self.TEST_ROYAL_FLUSH
-        self.assertFalse(self.stakeHandler.check_cards(
-            self.TEST_INVALID_ROYAL_FLUSH_CARDS))
+    def test_check_wrong_straight_flush(self):
+        self.stakeHandler.stake = self.TEST_STRAIGHT_FLUSH
+        straight_flush_cards = []
+        for i in range(4):
+            straight_flush_cards.append(
+                Card(self.TEST_STRAIGHT_FLUSH.suit, self.TEST_STRAIGHT_FLUSH.ranks[i]))
+        self.assertFalse(self.stakeHandler.check_cards(straight_flush_cards))
 
     def test_get_lowest_next_stake(self):
-        self.stakeHandler.stake = self.TEST_STAKE
+        self.stakeHandler.stake = self.TEST_ONE_STAKE
+        next_stake = Stake(self.TEST_ONE_STAKE.combo)
+        next_stake.ranks = [Rank.TWO]
         self.assertEqual(
-            self.stakeHandler.get_lowest_next_stake(), self.TEST_NEXT_STAKE)
+            self.stakeHandler.get_lowest_next_stake(), next_stake)
 
-    def test_get_lowest_next_stake_two_pair(self):
-        self.stakeHandler.stake = self.TEST_TWO_PAIR
+    def test_get_lowest_next_stake_full_house(self):
+        self.stakeHandler.stake = self.TEST_FULL_HOUSE
+        next_stake = Stake(self.TEST_FULL_HOUSE.combo)
+        next_stake.ranks = [Rank.FOUR, Rank.THREE]
         self.assertEqual(
-            self.stakeHandler.get_lowest_next_stake(), self.TEST_NEXT_TWO_PAIR)
+            self.stakeHandler.get_lowest_next_stake(), next_stake)
 
     def test_get_lowest_next_stake_royal_flush(self):
         self.stakeHandler.stake = self.TEST_ROYAL_FLUSH
-        self.assertNotEqual(
-            self.stakeHandler.get_lowest_next_stake().suit, self.TEST_ROYAL_FLUSH.suit)
-
-    def test_different_suit_straight_flush(self):
-        self.stakeHandler.stake = self.TEST_STRAIGHT_FLUSH_SPADES
-        self.stakeHandler.stake = self.stakeHandler.get_lowest_next_stake()
-        self.assertTrue(
-            self.TEST_STRAIGHT_FLUSH_HEARTS.suit in self.stakeHandler.stake.suits and
-            self.TEST_STRAIGHT_FLUSH_SPADES.ranks == self.stakeHandler.stake.ranks
-        )
-
-    def test_multiple_suits_royal_flush(self):
-        self.stakeHandler.stake = self.TEST_ROYAL_FLUSH
-        self.stakeHandler.stake = self.stakeHandler.get_lowest_next_stake()
-        self.stakeHandler.stake = self.stakeHandler.get_lowest_next_stake()
-        self.stakeHandler.stake = self.stakeHandler.get_lowest_next_stake()
+        next_stake = Stake(self.TEST_ROYAL_FLUSH.combo)
+        next_stake.suits = [Suit.HEARTS, Suit.DIAMONDS, Suit.CLUBS]
         self.assertEqual(
-            self.stakeHandler.get_lowest_next_stake(), None)
+            self.stakeHandler.get_lowest_next_stake(), next_stake)
         
     def test_highest_card(self):
-        self.stakeHandler.stake = self.TEST_HIGHEST_CARD
+        self.stakeHandler.stake = Stake(Combination.HIGH_CARD, [Rank.ACE])
+        next_stake = Stake(Combination.PAIR, [Rank.ONE])
         self.assertEqual(
-            self.stakeHandler.get_lowest_next_stake(), self.TEST_LOWEST_PAIR)
+            self.stakeHandler.get_lowest_next_stake(), next_stake)
 
 
 if __name__ == "__main__":

@@ -75,19 +75,22 @@ def white_cards_picker(combo: Combination,
     return cards_dialog
 
 
-def suit_picker(combo: Combination, suits: set[Suit] = {Suit.CLUBS,Suit.DIAMONDS, Suit.HEARTS, Suit.SPADES}) -> ui.dialog:
-    selected_suit: Suit = None
+def suit_picker(
+        combo: Combination, 
+        suits: list[Suit] = [Suit.CLUBS,Suit.DIAMONDS, Suit.HEARTS, Suit.SPADES]
+    ) -> ui.dialog:
+    selected_suit: Suit | None = None
     suit_to_box: dict[Suit, ui.checkbox] = {}
     
     def __handle_suit_change(suit_value):
         nonlocal selected_suit
-        selected_suit = suit_value
+        selected_suit = Suit(suit_value)
         for suit, box in suit_to_box.items():
             box.value = suit == suit_value
             
-    def __on_suit_submit(dialog) -> Suit:
+    def __on_suit_submit(dialog) -> Suit | None:
         nonlocal selected_suit
-        ret = Suit(selected_suit.value)
+        ret = selected_suit
         selected_suit = None
         for box in suit_to_box.values():
             box.clear()
@@ -114,8 +117,8 @@ def suit_picker(combo: Combination, suits: set[Suit] = {Suit.CLUBS,Suit.DIAMONDS
 
 def cards_picker(combo: Combination,
                  max_cards: int = 5,
-                 suits: set[Suit] = {Suit.CLUBS,
-                                     Suit.DIAMONDS, Suit.HEARTS, Suit.SPADES},
+                 suits: list[Suit] = [Suit.CLUBS,
+                                     Suit.DIAMONDS, Suit.HEARTS, Suit.SPADES],
                  min_rank: Rank = Rank.ONE
                  ) -> ui.dialog:
 

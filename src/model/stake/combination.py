@@ -24,8 +24,8 @@ class Combination(Enum):
         """
         Get the next combination in the sequence
         Returns:
-            Combination: the next combination in the sequence, None if it's the highest
+            Combination: the next combination in the sequence, itself if it's the highest
         """
         ranks = list(self.__class__)
         idx = ranks.index(self)
-        return ranks[idx + 1] if idx + 1 < len(ranks) else None
+        return ranks[idx + 1] if idx + 1 < len(ranks) else self
