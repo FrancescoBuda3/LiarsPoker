@@ -33,11 +33,7 @@ def stake_display(stake: Stake | None):
                 move += ", "
             move += f"{r.to_symbol()}"
         if stake.suits:
-            move += " of "
-        for i, s in enumerate(stake.suits):
-            if i != 0:
-                move += " and "
-            move += f"{s}"
+            move += f" of {stake.suits[0]}"
         with ui.element('div').classes('stake-card') as stake_container:
                 ui.label(move)\
                     .classes('text-4xl font-bold text-gray-800')
