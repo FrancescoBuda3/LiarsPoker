@@ -207,14 +207,16 @@ class Server(Debuggable):
                     lobby_id = msg.body["lobby_id"]
                     lobby = self._lobbies.get_lobby(lobby_id)
                     response: bool = True
+                    players_in_lobby = []
                     if lobby and lobby.add_player(player):
+                        players_in_lobby = lobby.players
                         self._log(f"{player} joined lobby {lobby}.")
                     else:
                         response = False
                         self._log(f"{player} couldn't join lobby {lobby}.")
                     self._connection.send_message(
                         self._message_factory.create_join_lobby_message(
-                            player.id, lobby_id, lobby.players, response),
+                            player.id, lobby_id, players_in_lobby, response),
                         Topic.JOIN_LOBBY)
                     
                 case Topic.LEAVE_LOBBY:
