@@ -16,21 +16,24 @@ class Topic(str, Enum):
     GAME_OVER = "game_over"
     RAISE_STAKE = "raise_stake"
     CHECK_LIAR = "check_liar"
-    
+    HEARTBEAT = "heartbeat"
+    SERVER_ERROR = "server_error"
+
     def __add__(self, other: str) -> str:
         """
         Returns:
             str: "topic/other"
         """
         return f"{self.value}/{other}"
-    
+
     def __radd__(self, other: str) -> str:
         """
         Returns:
             str: "other/topic"
         """
         return f"{other}/{self.value}"
-    
+
+
 game_topics = [
     Topic.START_TURN,
     Topic.START_ROUND,
@@ -38,5 +41,6 @@ game_topics = [
     Topic.RAISE_STAKE,
     Topic.CHECK_LIAR,
     Topic.GAME_OVER,
-    Topic.REMOVE_PLAYER
+    Topic.REMOVE_PLAYER,
+    Topic.SERVER_ERROR
 ]

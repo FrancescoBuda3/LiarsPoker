@@ -81,7 +81,7 @@ class MessageFactoryInterface(Protocol):
             Message: the constructed message
         """
         ...
-        
+
     def create_new_player_message(self, username: str, id: UUID, response: bool) -> Message:
         """
         Create a message to create a new player.
@@ -95,7 +95,7 @@ class MessageFactoryInterface(Protocol):
             Message: the constructed message
         """
         ...
-        
+
     def create_new_lobby_message(self, player_id: UUID, lobby_id: int, response: bool) -> Message:
         """
         Create a message to create a new lobby.
@@ -109,13 +109,13 @@ class MessageFactoryInterface(Protocol):
             Message: the constructed message
         """
         ...
-        
-    def create_ready_to_play_message(self, 
-            player_id: UUID, 
-            lobby_id: int, 
-            ready: bool, 
-            players_in_lobby: list[Player]
-        ) -> Message:
+
+    def create_ready_to_play_message(self,
+                                     player_id: UUID,
+                                     lobby_id: int,
+                                     ready: bool,
+                                     players_in_lobby: list[Player]
+                                     ) -> Message:
         """
         Create a message to indicate that a player is ready to play.
 
@@ -129,7 +129,7 @@ class MessageFactoryInterface(Protocol):
             Message: the constructed message
         """
         ...
-        
+
     def create_start_game_message(self, lobby_id: int) -> Message:
         """
         Create a message to start a game.
@@ -141,7 +141,7 @@ class MessageFactoryInterface(Protocol):
             Message: the constructed message
         """
         ...
-        
+
     def create_join_lobby_message(self, player_id: UUID, lobby_id: int, players_in_lobby: list[Player], response: bool) -> Message:
         """
         Create a message to join a lobby.
@@ -156,7 +156,7 @@ class MessageFactoryInterface(Protocol):
             Message: the constructed message
         """
         ...
-        
+
     def create_leave_lobby_message(self, player_id: UUID, lobby_id: int) -> Message:
         """
         Create a message to leave a lobby.
@@ -169,12 +169,29 @@ class MessageFactoryInterface(Protocol):
             Message: the constructed message
         """
         ...
-        
+
     def create_remove_player_message(self, player_id: UUID) -> Message:
         """
         Create a message to remove a player.
         Args:
             player_id (UUID): ID of the player to remove
+        Returns:
+            Message: the constructed message
+        """
+        ...
+
+    def create_heartbeat_message(self) -> Message:
+        """
+        Create a message to check if the server connection is alive.
+
+        Returns:
+            Message: the constructed message
+        """
+
+    def create_server_error_message(self) -> Message:
+        """
+        Create a message to indicate a server error.
+
         Returns:
             Message: the constructed message
         """

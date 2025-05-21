@@ -46,7 +46,7 @@ def setup():
                     return
                 min_rank: Rank = Rank.ONE
                 suits: list[Suit] = [Suit.HEARTS,
-                                    Suit.DIAMONDS, Suit.CLUBS, Suit.SPADES]
+                                     Suit.DIAMONDS, Suit.CLUBS, Suit.SPADES]
                 if min_stake.ranks and combo == min_stake.combo:
                     min_rank = min_stake.single_rank
                 if len(min_stake.suits) > 0 and combo == min_stake.combo:
@@ -127,13 +127,23 @@ def setup():
                             ui.notify('You were eliminated!')
                             local_player.cards = []
 
+            def wait_server_error():
+                message = connection_handler.no_wait_message(
+                    Topic.SERVER_ERROR)
+                if message:
+                    error: str = message.body["error"]
+                    ui.notify(
+                        "Server error, you will be redirected to lobby")
+                    ui.timer(5, lambda: ui.navigate.to('/lobby'), once=True)
+
             ui.timer(1, wait_start_turn)
             ui.timer(1, wait_player_move)
             ui.timer(1, wait_round_loser)
+            ui.timer(1, wait_server_error)
 
             def __is_player_turn(player: Player) -> bool:
                 return player_turn != None and player_turn.id == player.id
-            
+
             def leave_game():
                 connection_handler.send_message(
                     message_factory.create_remove_player_message(
@@ -200,7 +210,8 @@ def setup():
         content()
 
         def wait_start_game():
-            message = connection_handler.no_wait_message(__to_game_topic(Topic.START_ROUND))
+            message = connection_handler.no_wait_message(
+                __to_game_topic(Topic.START_ROUND))
             if message:
                 players_msg: list[Player] = message.body["players"]
                 players.clear()

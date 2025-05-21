@@ -1,6 +1,8 @@
 from random import Random
+import sys
 from threading import Thread
 import threading
+import time
 from typing import Dict
 
 from src.controller.game_agent import game_loop
@@ -13,6 +15,7 @@ from src.services.connection.topic import Topic
 _LOBBY_SIZE = 10
 _MAX_LOBBIES = 1000
 _MAX_PLAYERS = _MAX_LOBBIES * _LOBBY_SIZE
+_HEARTBEAT_INTERVAL = 2 
 
 class _Lobby:
     _id: int
@@ -127,16 +130,32 @@ class Server(Debuggable):
     _lobbies: _Lobbies_Handler
     _shutdown_event: threading.Event 
 
-    def __init__(self, debug=True):
+    def __init__(self, debug=True, is_primary=True):
         Debuggable.__init__(self, debug)
         self._lobbies = _Lobbies_Handler()
         self._connection = ConnectionHandler(
             "Server", [t for t in Topic], debug=debug)
         self._message_factory = MessageFactory()
         self._shutdown_event = threading.Event()
+        self._is_primary = is_primary
+        self._last_heartbeat = time.time()
 
     def run(self):
+        if self._is_primary:
+            now = time.time()
+            if now - self._last_heartbeat > _HEARTBEAT_INTERVAL:
+                self._connection.send_message(
+                    self._message_factory.create_heartbeat_message(), Topic.HEARTBEAT)
+                self._last_heartbeat = now
         (topic, msg) = self._connection.try_get_any_message()
+        if not self._is_primary:
+            if topic == Topic.HEARTBEAT:
+                self._last_heartbeat = time.time()
+            elif time.time() - self._last_heartbeat > (_HEARTBEAT_INTERVAL + 1):
+                self._log("No heartbeat from primary. Promoting to primary.")
+                self._is_primary = True 
+                self._connection.send_message(
+                    self._message_factory.create_server_error_message(), Topic.SERVER_ERROR)
         if topic is None or msg is None:
             return
         try:
@@ -157,10 +176,11 @@ class Server(Debuggable):
                         lobby_id = 0
                         response = False
                         self._log("Lobby limit reached. Cannot create new lobby.")
-                    self._connection.send_message(
-                        self._message_factory.create_new_lobby_message(
-                            player.id, lobby_id=lobby_id, response=response), 
-                        Topic.NEW_LOBBY)
+                    if self._is_primary:
+                        self._connection.send_message(
+                            self._message_factory.create_new_lobby_message(
+                                player.id, lobby_id=lobby_id, response=response), 
+                            Topic.NEW_LOBBY)
                 
                 case Topic.NEW_PLAYER:
                     p: Player = Player(msg.body["username"], msg.body["player_id"])
@@ -171,10 +191,11 @@ class Server(Debuggable):
                     else:
                         response = False
                         self._log("Player limit reached. Cannot create new player.")
-                    self._connection.send_message(
-                        self._message_factory.create_new_player_message(
-                            p.username, p.id, response), 
-                        Topic.NEW_PLAYER)
+                    if self._is_primary:
+                        self._connection.send_message(
+                            self._message_factory.create_new_player_message(
+                                p.username, p.id, response), 
+                            Topic.NEW_PLAYER)
                     
                 case Topic.READY_TO_PLAY:
                     player = self.__get_player_by_id(msg.body["player_id"])
@@ -185,19 +206,20 @@ class Server(Debuggable):
                         self._log(self._lobbies.ids())
                         return
                     lobby.set_player_status(player, player_ready)
-                    self._connection.send_message(
-                        self._message_factory.create_ready_to_play_message(
-                            player.id, lobby.id, player_ready, lobby.players), 
-                        Topic.READY_TO_PLAY)
-                    if lobby.is_ready():
-                        lobby.start_game()
-                        lobby.unready()
+                    if self._is_primary:
                         self._connection.send_message(
-                            self._message_factory.create_start_game_message(lobby.id), 
-                            Topic.START_GAME)
-                        self._log(f"New game started for {lobby} with {len(lobby.players)} players.")
-                    else:
-                        self._log(f"{player} is {"not" if player_ready == False else ""} ready to play in lobby {lobby}.")
+                            self._message_factory.create_ready_to_play_message(
+                                player.id, lobby.id, player_ready, lobby.players), 
+                            Topic.READY_TO_PLAY)
+                        if lobby.is_ready():
+                            lobby.start_game()
+                            lobby.unready()
+                            self._connection.send_message(
+                                self._message_factory.create_start_game_message(lobby.id), 
+                                Topic.START_GAME)
+                            self._log(f"New game started for {lobby} with {len(lobby.players)} players.")
+                        else:
+                            self._log(f"{player} is {"not" if player_ready == False else ""} ready to play in lobby {lobby}.")
                     
                 case Topic.JOIN_LOBBY:
                     player = self.__get_player_by_id(msg.body["player_id"])
@@ -212,10 +234,11 @@ class Server(Debuggable):
                     else:
                         response = False
                         self._log(f"{player} couldn't join lobby {lobby}.")
-                    self._connection.send_message(
-                        self._message_factory.create_join_lobby_message(
-                            player.id, lobby_id, lobby.players, response),
-                        Topic.JOIN_LOBBY)
+                    if self._is_primary:
+                        self._connection.send_message(
+                            self._message_factory.create_join_lobby_message(
+                                player.id, lobby_id, lobby.players, response),
+                            Topic.JOIN_LOBBY)
                     
                 case Topic.LEAVE_LOBBY:
                     lobby = self._lobbies.get_lobby(msg.body["lobby_id"])
@@ -236,7 +259,10 @@ class Server(Debuggable):
                         self._log(f"{player} deleted")
                     else:
                         self._log(f"{player} not found")
-                        
+                
+                case Topic.HEARTBEAT:
+                    pass
+                
                 case _:
                     self._log("Unknown topic")
                     
@@ -278,7 +304,8 @@ class Server(Debuggable):
 
 
 if __name__ == "__main__":
-    server = Server(debug=True)
+    is_primary = True if sys.argv[1] == "primary" else False 
+    server = Server(debug=True, is_primary=is_primary)
     try:
         while not server._shutdown_event.is_set():
             server.run()
