@@ -26,7 +26,8 @@ if (-not $mosquitto2) {
 
 Write-Host "Starting $clients_number client(s)..."
 
-$server = Start-Process -PassThru -NoNewWindow -FilePath "poetry" -ArgumentList "run", "python", "src/controller/server/__init__.py"
+$server1 = Start-Process -PassThru -NoNewWindow -FilePath "poetry" -ArgumentList "run", "python", "src/controller/server/__init__.py", "primary"
+$server2 = Start-Process -PassThru -NoNewWindow -FilePath "poetry" -ArgumentList "run", "python", "src/controller/server/__init__.py", "secondary"
 
 $clients = @()
 
@@ -47,8 +48,12 @@ $cleanup = {
         $mosquitto2.Kill()
     }
 
-    if ($server -and !$server.HasExited) {
-        $server.Kill()
+    if ($server1 -and !$server1.HasExited) {
+        $server1.Kill()
+    }
+
+    if ($server2 -and !$server2.HasExited) {
+        $server2.Kill()
     }
 
     foreach ($proc in $clients) {
