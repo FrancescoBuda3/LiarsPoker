@@ -22,5 +22,9 @@ class __UserState:
     def reset_lobby(self):
         self.selected_lobby = 0
         self.lobby_players = []
+        
+    def reset_ready(self):
+        for player in self.lobby_players:
+            player.ready= False
 
 user_state = __UserState()

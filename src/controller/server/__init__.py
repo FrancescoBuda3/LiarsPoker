@@ -212,7 +212,7 @@ class Server(Debuggable):
                                 player.id, lobby.id, player_ready, lobby.players), 
                             Topic.READY_TO_PLAY)
                         if lobby.is_ready():
-                            lobby.start_game()
+                            lobby.start_game(self._shutdown_event)
                             lobby.unready()
                             self._connection.send_message(
                                 self._message_factory.create_start_game_message(lobby.id), 
@@ -220,6 +220,10 @@ class Server(Debuggable):
                             self._log(f"New game started for {lobby} with {len(lobby.players)} players.")
                         else:
                             self._log(f"{player} is {"not" if player_ready == False else ""} ready to play in lobby {lobby}.")
+                    else:
+                        if lobby.is_ready():
+                            lobby.unready()
+                    
                     
                 case Topic.JOIN_LOBBY:
                     player = self.__get_player_by_id(msg.body["player_id"])

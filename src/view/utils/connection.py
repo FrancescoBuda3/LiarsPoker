@@ -11,6 +11,7 @@ connection_handler = ConnectionHandler(
         Topic.JOIN_LOBBY,
         Topic.LEAVE_LOBBY,
         Topic.REMOVE_PLAYER,
+        Topic.SERVER_ERROR
     ]
 )
 

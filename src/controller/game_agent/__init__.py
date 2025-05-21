@@ -69,7 +69,7 @@ def game_loop(players: list[Player], id: str, shutdown_event: Event):
                             message_factory.create_round_loser_message(player, [], True),
                             lobby_topic + Topic.ROUND_LOSER
                         )
-                
-    connection_handler.send_message(
-        message_factory.create_game_over_message(game.get_players()[0]),
-        lobby_topic + Topic.GAME_OVER)
+    if not shutdown_event.is_set():
+        connection_handler.send_message(
+            message_factory.create_game_over_message(game.get_players()[0]),
+            lobby_topic + Topic.GAME_OVER)

@@ -41,6 +41,5 @@ game_topics = [
     Topic.RAISE_STAKE,
     Topic.CHECK_LIAR,
     Topic.GAME_OVER,
-    Topic.REMOVE_PLAYER,
-    Topic.SERVER_ERROR
+    Topic.REMOVE_PLAYER
 ]

@@ -134,6 +134,7 @@ def setup():
                     error: str = message.body["error"]
                     ui.notify(
                         "Server error, you will be redirected to lobby")
+                    user_state.reset_ready()
                     ui.timer(5, lambda: ui.navigate.to('/lobby'), once=True)
 
             ui.timer(1, wait_start_turn)
@@ -235,6 +236,7 @@ def setup():
                     ui.label(
                         f'Congratulations {winner.username} won the game!')
                 game_over_dialog.open()
+                user_state.reset_ready()
                 ui.timer(5, lambda: ui.navigate.to('/lobby'), once=True)
 
         ui.timer(1, wait_game_over)
