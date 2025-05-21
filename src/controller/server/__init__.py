@@ -61,9 +61,9 @@ class _Lobby:
         for p in self._players:
             p.ready = False
     
-    def start_game(self):
+    def start_game(self, shutdown_event: threading.Event):
         if self.is_ready():
-            self.agent = Thread(target=game_loop, args=(self._players, self._id))
+            self.agent = Thread(target=game_loop, args=(self._players, self._id, shutdown_event))
             self.agent.start()
         
     def stop_game(self):
@@ -190,7 +190,7 @@ class Server(Debuggable):
                             player.id, lobby.id, player_ready, lobby.players), 
                         Topic.READY_TO_PLAY)
                     if lobby.is_ready():
-                        lobby.start_game()
+                        lobby.start_game(self._shutdown_event)
                         lobby.unready()
                         self._connection.send_message(
                             self._message_factory.create_start_game_message(lobby.id), 
