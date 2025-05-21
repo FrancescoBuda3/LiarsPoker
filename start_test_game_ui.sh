@@ -5,44 +5,55 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-if command -v pgrep >/dev/null; then
-    pgrep mosquitto > /dev/null
-    mosquitto_running=$?
-else
-    tasklist | grep -i mosquitto.exe > /dev/null
-    mosquitto_running=$?
-fi
-
-if [ $mosquitto_running -ne 0 ]; then
-    echo "Mosquitto is not running. Starting it..."
-    mosquitto &
-    mosquitto_pid=$!
-else
-    echo "Mosquitto is already running."
-    mosquitto_pid=""
-fi
-
 n_clients=$1
+pids=()
+
+if ! pgrep -f "mosquitto.*mosquitto1.conf" > /dev/null; then
+    echo "Starting primary Mosquitto (1883)..."
+    mosquitto -c mosquitto1.conf &
+    mosquitto1_pid=$!
+    pids+=($mosquitto1_pid)
+else
+    echo "Primary Mosquitto already running."
+fi
+
+if ! pgrep -f "mosquitto.*mosquitto2.conf" > /dev/null; then
+    echo "Starting backup Mosquitto (1884)..."
+    mosquitto -c mosquitto2.conf &
+    mosquitto2_pid=$!
+    pids+=($mosquitto2_pid)
+else
+    echo "Backup Mosquitto already running."
+fi
+
+echo "Starting primary server..."
+poetry run python src/controller/server/__init__.py primary &
+pids+=($!)
+
+echo "Starting secondary server..."
+poetry run python src/controller/server/__init__.py secondary &
+pids+=($!)
+
 echo "Starting $n_clients client(s)..."
-
-poetry run python src/controller/server/__init__.py &
-pids=($!)
-
 for ((i=0; i<n_clients; i++)); do
     port=$((8080 + i))
     poetry run python src/view/__init__.py $port &
     pids+=($!)
+    echo "Started client on port $port"
 done
 
 cleanup() {
-    echo "Terminating..."
-    kill "${pids[@]}"
-    if [ -n "$mosquitto_pid" ]; then
-        kill "$mosquitto_pid"
-    fi
+    echo -e "\nTerminating all processes..."
+    for pid in "${pids[@]}"; do
+        if kill -0 $pid 2>/dev/null; then
+            kill $pid
+        fi
+    done
+    echo "All processes terminated."
     exit
 }
 
 trap cleanup SIGINT
 
+echo "Press Ctrl+C to terminate."
 wait
