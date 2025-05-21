@@ -1,5 +1,5 @@
 from src.services.connection.impl import ConnectionHandler
-from src.services.connection.topic import Topic
+from src.services.connection.topic import Topic, game_topics
 
 connection_handler = ConnectionHandler(
     name="client", 
@@ -13,3 +13,13 @@ connection_handler = ConnectionHandler(
         Topic.REMOVE_PLAYER,
     ]
 )
+
+def subscribe_to_game_topics(lobby_id: int):
+            for topic in game_topics:
+                connection_handler.subscribe(
+                    "lobby/" + str(lobby_id) + topic)
+
+def unsubscribe_from_game_topics(lobby_id: int):
+    for topic in game_topics:
+        connection_handler.unsubscribe(
+            "lobby/" + str(lobby_id) + topic)

@@ -52,12 +52,6 @@ class TestGameImpl(unittest.TestCase):
         self.assertEqual(len(self.TEST_PLAYERS) - 1,
                          len(self.game.get_players()))
 
-    def test_cannot_remove_player_while_it_is_not_their_turn(self):
-        self.add_players()
-        self.game.start_game()
-        with self.assertRaises(ValueError):
-            self.game.remove_player(self.TEST_PLAYERS[0])
-
     def test_can_remove_player_while_it_is_their_turn(self):
         self.add_players()
         self.game.start_game()

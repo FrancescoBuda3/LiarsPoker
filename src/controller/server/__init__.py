@@ -214,7 +214,7 @@ class Server(Debuggable):
                         self._log(f"{player} couldn't join lobby {lobby}.")
                     self._connection.send_message(
                         self._message_factory.create_join_lobby_message(
-                            player.id, lobby_id, response),
+                            player.id, lobby_id, lobby.players, response),
                         Topic.JOIN_LOBBY)
                     
                 case Topic.LEAVE_LOBBY:

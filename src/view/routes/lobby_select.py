@@ -1,4 +1,5 @@
 from nicegui import ui
+from src.model.player import Player
 from utils.state import user_state
 from src.services.connection.topic import Topic
 from src.controller.message_factory.impl import MessageFactory
@@ -27,6 +28,7 @@ def setup():
                         response = connection_handler.wait_message(Topic.NEW_LOBBY)
                     if response.body["response"]:
                         user_state.selected_lobby = response.body["lobby_id"]
+                        user_state.lobby_players = [Player(user_state.username, user_state.id)]
                         ui.navigate.to('/lobby')
                     else:
                         ui.notify("Error creating lobby", color='red')
@@ -46,6 +48,7 @@ def setup():
                         response = connection_handler.wait_message(Topic.JOIN_LOBBY)
                     if response.body["response"]:
                         user_state.selected_lobby = lobby_id
+                        user_state.lobby_players = response.body["players_in_lobby"]
                         ui.navigate.to('/lobby')
                     else:
                         ui.notify("Error joining lobby", color='red')

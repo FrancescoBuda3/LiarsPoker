@@ -7,11 +7,11 @@ from src.model.stake import LowestStake, Stake
 from src.model.stake.combination import Combination
 from src.view.components.dialogs import suit_picker
 from src.view.components.game import opponent_component, stake_display
-from src.view.logic.game import check_cards_combination
+from src.view.logic.game import check_cards_combination, cards_permitted
 from utils.state import user_state
 from src.services.connection.topic import Topic
 from src.controller.message_factory.impl import MessageFactory
-from utils.connection import connection_handler
+from utils.connection import connection_handler, unsubscribe_from_game_topics
 
 
 def setup():
@@ -41,64 +41,54 @@ def setup():
             async def show_stake_dialog(min_stake: Stake):
                 stake: Stake | None = None
                 combo = await combination_picker(min_stake.combo)
-                if combo:
-                    min_rank: Rank = Rank.ONE
-                    suits: set[Suit] = {Suit.HEARTS,
-                                        Suit.DIAMONDS, Suit.CLUBS, Suit.SPADES}
-                    if min_stake.ranks and combo == min_stake.combo:
-                        min_rank = min_stake.ranks[0]
-                    if len(min_stake.suits) > 0 and combo == min_stake.combo:
-                        suits = min_stake.suits
-                    max_cards = 5
-                    match combo:
-                        case (
-                            Combination.HIGH_CARD
-                            | Combination.PAIR
-                            | Combination.THREE_OF_A_KIND
-                            | Combination.FOUR_OF_A_KIND
-                        ):
-                            max_cards = 1
-                        case (
-                            Combination.TWO_PAIR
-                            | Combination.FULL_HOUSE
-                        ):
-                            max_cards = 2
-                    match combo:
-                        case (
-                            Combination.FLUSH
-                            | Combination.ROYAL_FLUSH
-                        ):
-                            suit = await suit_picker(combo, suits)
-                            stake = Stake(combo, [], suit)
-                        case Combination.STRAIGHT_FLUSH:
-                            cards = await cards_picker(combo, max_cards=max_cards, suits=suits, min_rank=min_rank)
-                            if check_cards_combination(cards, combo):
-                                stake = Stake(combo, [card.rank for card in cards], [
-                                              card.suit for card in cards])
-                        case Combination.FULL_HOUSE:
-                            min_pair = min_rank
-                            min_three = min_rank
-                            if combo == min_stake.combo:
-                                min_pair = min_stake.ranks[1]
-                                min_three = min_stake.ranks[0]
-
-                            three_of_a_kind = await white_cards_picker(Combination.THREE_OF_A_KIND, max_cards=1, min_rank=min_three)
-                            pair = await white_cards_picker(Combination.PAIR, max_cards=1, min_rank=min_pair)
-                            if three_of_a_kind and pair and check_cards_combination(pair + three_of_a_kind, combo):
-                                stake = Stake(
-                                    combo, [card.rank for card in three_of_a_kind + pair])
-                        case _:
-                            cards = await white_cards_picker(combo, max_cards=max_cards, min_rank=min_rank)
-                            if check_cards_combination(cards, combo):
-                                stake = Stake(
-                                    combo, [card.rank for card in cards])
-                    if stake and (len(stake.ranks) > 0 or len(stake.suits) > 0):
-                        connection_handler.send_message(message_factory.create_raise_stake_message(
-                            local_player, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
-                    else:
-                        ui.notify('Choose valid cards!')
-                else:
+                if combo == None:
                     ui.notify('Choose valid combination!')
+                    return
+                min_rank: Rank = Rank.ONE
+                suits: list[Suit] = [Suit.HEARTS,
+                                    Suit.DIAMONDS, Suit.CLUBS, Suit.SPADES]
+                if min_stake.ranks and combo == min_stake.combo:
+                    min_rank = min_stake.single_rank
+                if len(min_stake.suits) > 0 and combo == min_stake.combo:
+                    suits = min_stake.suits
+                max_cards = cards_permitted(combo)
+                match combo:
+                    case (
+                        Combination.FLUSH
+                        | Combination.ROYAL_FLUSH
+                    ):
+                        suit = await suit_picker(combo, suits)
+                        stake = Stake(combo)
+                        stake.suit = suit
+                    case Combination.STRAIGHT_FLUSH:
+                        cards = await cards_picker(combo, max_cards, suits, min_rank)
+                        if check_cards_combination(cards, combo):
+                            stake = Stake(combo, [card.rank for card in cards], [
+                                          card.suit for card in cards])
+                    case Combination.FULL_HOUSE:
+                        min_pair = min_rank
+                        min_triple = min_rank
+                        if combo == min_stake.combo:
+                            min_pair = min_stake.pair_rank
+                            min_triple = min_stake.triple_rank
+                        three_of_a_kind: list[Card] = await white_cards_picker(
+                            Combination.THREE_OF_A_KIND, max_cards=1, min_rank=min_triple)
+                        pair: list[Card] = await white_cards_picker(
+                            Combination.PAIR, max_cards=1, min_rank=min_pair)
+                        if three_of_a_kind and pair and check_cards_combination(pair + three_of_a_kind, combo):
+                            stake = Stake(combo)
+                            stake.triple_rank = three_of_a_kind[0].rank
+                            stake.pair_rank = pair[0].rank
+                    case _:
+                        cards: list[Card] = await white_cards_picker(combo, max_cards=max_cards, min_rank=min_rank)
+                        if check_cards_combination(cards, combo):
+                            stake = Stake(combo, [card.rank for card in cards])
+                print(stake)
+                if stake and (len(stake.ranks) > 0 or len(stake.suits) > 0):
+                    connection_handler.send_message(message_factory.create_raise_stake_message(
+                        local_player, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
+                else:
+                    ui.notify('Choose valid cards!')
 
             def wait_start_turn():
                 nonlocal player_turn
@@ -143,11 +133,33 @@ def setup():
 
             def __is_player_turn(player: Player) -> bool:
                 return player_turn != None and player_turn.id == player.id
+            
+            def leave_game():
+                connection_handler.send_message(
+                    message_factory.create_remove_player_message(
+                        local_player.id),
+                    __to_game_topic(Topic.REMOVE_PLAYER)
+                )
+                connection_handler.send_message(
+                    message_factory.create_leave_lobby_message(
+                        user_state.id,
+                        user_state.selected_lobby),
+                    Topic.LEAVE_LOBBY
+                )
+                unsubscribe_from_game_topics(user_state.selected_lobby)
+                user_state.reset_lobby()
+                ui.navigate.to('/lobby_select')
 
             with ui.element('div')\
                     .classes('bg-gray-100 flex items-center justify-center basis-full h-full w-full'):
-                with ui.grid(rows='5% 25% 10% 5% 13% 37% 5%')\
+                with ui.grid(rows='7% 23% 10% 5% 13% 37% 5%')\
                        .classes('w-full h-full max-w-full max-h-full grid-rows-game border border-gray-300 gap-0 mx-[100px]'):
+                    with ui.row().classes('flex items-end justify-end p-2'):
+                        with ui.element('div').classes('top-4 right-4 z-50')\
+                                .style('padding: 5px;'):
+                            ui.button('Logout')\
+                                .on('click', leave_game)\
+                                .classes('bg-red-500 text-white px-4 py-2 rounded shadow-lg hover:bg-red-600 transition')
                     with ui.row().classes('flex items-center justify-center'):
                         for i in range(len(players)):
                             pl: Player = players[i]
@@ -159,14 +171,15 @@ def setup():
                             )
                     with ui.row().classes('flex items-center justify-center'):
                         stake_display(latest_move)
+                    ui.row().classes('flex items-center justify-center')
                     with ui.row().classes('flex items-center justify-center'):
                         rise_button = ui.button('RISE STAKE')\
-                            .classes('text-4xl font-bold')\
+                            .classes('text-4xl font-bold p-4')\
                             .style('background-color: #00999E !important;')\
                             .on('click', lambda: show_stake_dialog(min_stake))
                         rise_button.set_enabled(__is_player_turn(local_player))
                         bullshit_button = ui.button('BULLSHIT')\
-                            .classes('text-4xl font-bold')\
+                            .classes('text-4xl font-bold p-4')\
                             .style('background-color: #9E2500 !important;')\
                             .on('click', lambda: connection_handler.send_message(
                                 message_factory.create_check_liar_message(),
@@ -182,32 +195,12 @@ def setup():
                             ui.image(f"static/{str(c.rank)}_of_{str(c.suit)}.png")\
                                 .style('width: 10%;')\
                                 .classes('m-1')
+                    ui.row().classes('flex items-center justify-center')
 
         content()
 
-        def leave_game():
-            connection_handler.send_message(
-                message_factory.create_remove_player_message(
-                    local_player.id),
-                __to_game_topic(Topic.REMOVE_PLAYER)
-            )
-            connection_handler.send_message(
-                message_factory.create_leave_lobby_message(
-                    user_state.id,
-                    user_state.selected_lobby),
-                Topic.LEAVE_LOBBY
-            )
-            user_state.reset_lobby()
-            ui.navigate.to('/lobby_select')
-
-        with ui.element('div').classes('fixed top-4 right-4 z-50'):
-            ui.button('Logout')\
-                .on('click', leave_game)\
-                .classes('bg-red-500 text-white px-4 py-2 rounded shadow-lg hover:bg-red-600 transition')
-
         def wait_start_game():
-            message = connection_handler.no_wait_message(
-                "lobby/" + str(user_state.selected_lobby) + Topic.START_ROUND)
+            message = connection_handler.no_wait_message(__to_game_topic(Topic.START_ROUND))
             if message:
                 players_msg: list[Player] = message.body["players"]
                 players.clear()

@@ -16,9 +16,7 @@ class SerializeTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         test_player1 = Player("Player1", 1)
-        test_player1.cards = [
-            Card(Suit.SPADES, Rank.TWO),
-        ]
+        test_player1.cards = [Card(Suit.SPADES, Rank.TWO),]
         test_player2 = Player("Player2", 2)
         test_player2.cards_in_hand = 2
         cls.TEST_MESSAGE = Message(
@@ -27,7 +25,7 @@ class SerializeTest(unittest.TestCase):
                 "stake": Stake(
                     Combination.STRAIGHT_FLUSH,
                     [Rank.ONE, Rank.TWO, Rank.THREE, Rank.FOUR, Rank.FIVE],
-                    Suit.SPADES),
+                    [Suit.SPADES]),
             })
         cls.TEST_SERIALIZED_MESSAGE = """
         {
@@ -50,6 +48,7 @@ class SerializeTest(unittest.TestCase):
                     }
                     ],
                     "cards_in_hand": 0,
+                    "ready": false,
                     "$type": "Player"
                 },
                 {
@@ -57,6 +56,7 @@ class SerializeTest(unittest.TestCase):
                     "id": 2,
                     "cards": [],
                     "cards_in_hand": 2,
+                    "ready": false,
                     "$type": "Player"
                 }
                 ],

@@ -35,7 +35,7 @@ if __name__ == "__main__":
             font-weight: 700 !important;
             border-radius: 1rem !important; 
             color: white !important;
-            padding: 1rem !important; 
+            padding: 1rem; 
             min-height: 0 !important;
         }
     ''', shared=True)

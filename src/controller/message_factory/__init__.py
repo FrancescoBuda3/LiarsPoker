@@ -142,13 +142,14 @@ class MessageFactoryInterface(Protocol):
         """
         ...
         
-    def create_join_lobby_message(self, player_id: UUID, lobby_id: int, response: bool) -> Message:
+    def create_join_lobby_message(self, player_id: UUID, lobby_id: int, players_in_lobby: list[Player], response: bool) -> Message:
         """
         Create a message to join a lobby.
 
         Args:
             player_id (UUID): ID of the player
             lobby_id (int): ID of the lobby
+            players_in_lobby (list[Player]): list of players in the lobby
             response (bool): true if the player joined successfully, false otherwise
 
         Returns:

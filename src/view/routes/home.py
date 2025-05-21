@@ -8,6 +8,6 @@ def setup():
     def home():
         def content():
             ui.label('LIARS POKER!').style('font-size: 3em; font-weight: bold;')
-            ui.button('Start', on_click=lambda: ui.navigate.to('/login'))
+            ui.button('Start', on_click=lambda: ui.navigate.to('/login')).classes('p-4 text-xl')
             
         centered_layout(content)

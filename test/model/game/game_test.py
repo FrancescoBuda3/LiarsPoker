@@ -73,15 +73,18 @@ class TestGameCore(unittest.TestCase):
 
     def test_loser_is_the_first_in_next_turn(self):
         p1 = Player("Pippo", 7)
-        p1.cards = [Card(Suit.HEARTS, Rank.ONE), Card(Suit.SPADES, Rank.ONE), Card(Suit.HEARTS, Rank.FIVE)]
+        p1.cards = [Card(Suit.HEARTS, Rank.ONE), 
+                    Card(Suit.SPADES, Rank.ONE), 
+                    Card(Suit.HEARTS, Rank.FIVE)]
         p1.cards_in_hand = 3
         p2 = Player("Laura", 8)
-        p2.cards = [Card(Suit.CLUBS, Rank.SIX), Card(Suit.DIAMONDS, Rank.ONE)]
+        p2.cards = [Card(Suit.CLUBS, Rank.SIX), 
+                    Card(Suit.DIAMONDS, Rank.ONE)]
         p2.cards_in_hand = 2
         self.game.add_player(p1)
         self.game.add_player(p2)
         self.game.raise_stake(Stake(Combination.HIGH_CARD, [Rank.ONE]))
-        self.game.raise_stake(Stake(Combination.FLUSH))
+        self.game.raise_stake(Stake(Combination.THREE_OF_A_KIND, [Rank.THREE]))
         self.game.check_liar()
         self.assertEqual(p2, self.game.get_current_player())
 
