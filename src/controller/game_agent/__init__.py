@@ -1,3 +1,4 @@
+from threading import Event
 from src.controller.message_factory.impl import MessageFactory
 from src.model.card import Card
 from src.model.game.GImpl import GameImpl, GamePhase
@@ -8,7 +9,7 @@ from src.services.connection.topic import Topic
 from src.services.connection.topic import game_topics
 
 
-def game_loop(players: list[Player], id: str):
+def game_loop(players: list[Player], id: str, shutdown_event: Event):
     game = GameImpl()
     lobby_topic = Topic.LOBBY + id
     connection_handler = ConnectionHandler(
@@ -18,7 +19,7 @@ def game_loop(players: list[Player], id: str):
     for p in players:
         game.add_player(p)
     game.start_game()
-    while game.get_phase() != GamePhase.GAME_OVER:
+    while not shutdown_event.is_set() and game.get_phase() != GamePhase.GAME_OVER:
         if (game.get_phase() == GamePhase.PLAYING):
             game.start_round()
             connection_handler.send_message(
@@ -35,10 +36,11 @@ def game_loop(players: list[Player], id: str):
             match topic:
                 case Topic.RAISE_STAKE:
                     next_min_stake = game.raise_stake(msg.body['stake'])
-                    connection_handler.send_message(
-                        message_factory.create_start_turn_message(
-                            game.get_current_player(), next_min_stake),
-                        lobby_topic + Topic.START_TURN)
+                    if next_min_stake:
+                        connection_handler.send_message(
+                            message_factory.create_start_turn_message(
+                                game.get_current_player(), next_min_stake),
+                            lobby_topic + Topic.START_TURN)
 
                 case Topic.CHECK_LIAR:
                     loser_player: Player = game.check_liar()

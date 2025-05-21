@@ -64,9 +64,9 @@ class _Lobby:
         for p in self._players:
             p.ready = False
     
-    def start_game(self):
+    def start_game(self, shutdown_event: threading.Event):
         if self.is_ready():
-            self.agent = Thread(target=game_loop, args=(self._players, self._id))
+            self.agent = Thread(target=game_loop, args=(self._players, self._id, shutdown_event))
             self.agent.start()
         
     def stop_game(self):
@@ -229,7 +229,9 @@ class Server(Debuggable):
                     lobby_id = msg.body["lobby_id"]
                     lobby = self._lobbies.get_lobby(lobby_id)
                     response: bool = True
+                    players_in_lobby = []
                     if lobby and lobby.add_player(player):
+                        players_in_lobby = lobby.players
                         self._log(f"{player} joined lobby {lobby}.")
                     else:
                         response = False
