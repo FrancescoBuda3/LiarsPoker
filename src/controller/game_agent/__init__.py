@@ -7,11 +7,14 @@ from src.model.stake import LowestStake
 from src.services.connection.impl import ConnectionHandler
 from src.services.connection.topic import Topic
 from src.services.connection.topic import game_topics
+import time
 
 
 def game_loop(players: list[Player], id: str, shutdown_event: Event):
+    turn_time_in_sec = 60
     game = GameImpl()
     lobby_topic = Topic.LOBBY + id
+    start_time = time.time()
     connection_handler = ConnectionHandler(
         id, [lobby_topic + t for t in game_topics]
     )
@@ -20,6 +23,16 @@ def game_loop(players: list[Player], id: str, shutdown_event: Event):
         game.add_player(p)
     game.start_game()
     while not shutdown_event.is_set() and game.get_phase() != GamePhase.GAME_OVER:
+        if (game.get_phase() == GamePhase.PLAYERS_TURN):
+            if time.time() - start_time > turn_time_in_sec:
+                player = game.get_current_player()
+                game.remove_player(player)
+                connection_handler.send_message(
+                    message_factory.create_round_loser_message(player, [], True),
+                    lobby_topic + Topic.ROUND_LOSER
+                )
+                start_time = time.time()
+            
         if (game.get_phase() == GamePhase.PLAYING):
             game.start_round()
             connection_handler.send_message(
@@ -41,6 +54,7 @@ def game_loop(players: list[Player], id: str, shutdown_event: Event):
                             message_factory.create_start_turn_message(
                                 game.get_current_player(), next_min_stake),
                             lobby_topic + Topic.START_TURN)
+                    start_time = time.time()
 
                 case Topic.CHECK_LIAR:
                     loser_player: Player = game.check_liar()
@@ -56,6 +70,7 @@ def game_loop(players: list[Player], id: str, shutdown_event: Event):
                             elimination
                         ),
                         lobby_topic + Topic.ROUND_LOSER)
+                    start_time = time.time()
 
                 case Topic.REMOVE_PLAYER:
                     player_id = msg.body['player_id']
@@ -69,6 +84,7 @@ def game_loop(players: list[Player], id: str, shutdown_event: Event):
                             message_factory.create_round_loser_message(player, [], True),
                             lobby_topic + Topic.ROUND_LOSER
                         )
+                    start_time = time.time()
     if not shutdown_event.is_set():
         connection_handler.send_message(
             message_factory.create_game_over_message(game.get_players()[0]),
