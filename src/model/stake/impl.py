@@ -50,14 +50,12 @@ class StakeHandlerImpl(StakeHandler):
         self.__suits_handler = _SuitsHandler()
 
     @property
-    def stake(self) -> Stake:
+    def stake(self) -> Stake | None:
         """
-        Returns the current stake, if not set raises an error.
+        Returns the current stake or None.
         Returns:
             Stake: the current stake
         """
-        if (self._stake == None):
-            raise ValueError("No stake has been set")
         return self._stake
 
     @stake.setter

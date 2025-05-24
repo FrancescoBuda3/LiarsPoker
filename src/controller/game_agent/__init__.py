@@ -15,6 +15,7 @@ def game_loop(players: list[Player], id: str, shutdown_event: Event):
     game = GameImpl()
     lobby_topic = Topic.LOBBY + id
     start_time = time.time()
+    next_min_stake = LowestStake.HIGH_CARD.value
     connection_handler = ConnectionHandler(
         id, [lobby_topic + t for t in game_topics]
     )
@@ -58,6 +59,7 @@ def game_loop(players: list[Player], id: str, shutdown_event: Event):
 
                 case Topic.CHECK_LIAR:
                     loser_player: Player = game.check_liar()
+                    next_min_stake = LowestStake.HIGH_CARD.value
                     cards_in_game: list[Card] = []
                     for p in game.get_players():
                         for c in p.cards:
@@ -85,6 +87,25 @@ def game_loop(players: list[Player], id: str, shutdown_event: Event):
                             lobby_topic + Topic.ROUND_LOSER
                         )
                     start_time = time.time()
+                
+                case Topic.GAME_INFO:
+                    # print(game.get_players())
+                    # print(game.get_current_player())
+                    # print(game.get_latest_stake())
+                    # print(next_min_stake)
+                    interested_player = msg.body['interested_player']
+                    connection_handler.send_message(
+                        message_factory.create_game_info_message(
+                            interested_player,
+                            game.get_players(),
+                            game.get_current_player(),
+                            game.get_latest_stake(),
+                            next_min_stake
+                        ),
+                        lobby_topic + Topic.GAME_INFO
+                    )
+                    start_time = time.time()
+                    
     if not shutdown_event.is_set():
         connection_handler.send_message(
             message_factory.create_game_over_message(game.get_players()[0]),

@@ -33,6 +33,22 @@ class MessageFactoryInterface(Protocol):
             Message: the constructed message
         """
         ...
+    
+    def create_game_info_message(self, interested_player: Player, players: list[Player], turn_player: Player, latest_stake: Stake, min_next_stake: Stake) -> Message:
+        """
+        Create a message with game info.
+
+        Args:
+            interested_player (Player): player who is interested in the game info
+            players (list[Player]): list of players in the round
+            turn_player (Player): player whose turn it is
+            latest_stake (Stake): latest stake raised
+            min_next_stake (Stake): minimum stake for the next player
+
+        Returns:
+            Message: the constructed message
+        """
+        ...
 
     def create_round_loser_message(self, player: Player, cards: list[Card], elimination: bool) -> Message:
         """

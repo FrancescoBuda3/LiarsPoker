@@ -1,4 +1,5 @@
-from nicegui import ui
+import asyncio
+from nicegui import app, ui
 from src.model.card import Card
 from src.model.card.rank import Rank
 from src.model.card.suit import Suit
@@ -26,12 +27,31 @@ def setup():
     ]
 
     @ui.page('/game')
-    def game_page():
+    async def game_page():
         players: list[Player] = []
         local_player: Player = Player(user_state.username, user_state.id)
         min_stake: Stake = LowestStake.HIGH_CARD.value
         latest_move: Stake | None = None
         player_turn: Player | None = None
+        data_cached = False
+        wait_game_info_timer = None
+        wait_start_game_timer = None
+        
+
+        await ui.context.client.connected()
+        if app.storage.tab.get('id') is None:
+            print('no data saved')
+            app.storage.tab['username'] = user_state.username
+            app.storage.tab['selected_lobby'] = user_state.selected_lobby
+            app.storage.tab['id'] = user_state.id
+        else:
+            print('data saved')
+            data_cached = True
+            user_state.username = app.storage.tab['username']
+            user_state.selected_lobby = app.storage.tab['selected_lobby']
+            user_state.id = app.storage.tab['id']
+            local_player.username = user_state.username
+            local_player.id = user_state.id
 
         def __to_game_topic(topic: Topic) -> str:
             return "lobby/" + str(user_state.selected_lobby) + topic
@@ -225,7 +245,46 @@ def setup():
                     local_player.cards = local_player_data_list[0].cards
                     content.refresh()
 
-        ui.timer(1, wait_start_game)
+        
+
+        def wait_game_info():
+            nonlocal player_turn
+            nonlocal latest_move
+            nonlocal min_stake
+            nonlocal players
+            nonlocal local_player
+            nonlocal wait_game_info_timer
+
+            message = connection_handler.no_wait_message(
+                __to_game_topic(Topic.GAME_INFO))
+            if message and message.body["interested_player"].id == user_state.id and message.body["turn_player"] is not None:
+                wait_game_info_timer.deactivate()
+                players_msg: list[Player] = message.body["players"]
+                turn_player_msg: Player = message.body["turn_player"]
+                latest_stake_msg: Stake = message.body["latest_stake"]
+                min_next_stake_msg: Stake = message.body["min_next_stake"]
+                for p in players_msg:
+                    if p.id != local_player.id:
+                        players.append(p)
+                for p in players_msg:
+                    if p.id == local_player.id:
+                        local_player.cards = p.cards
+                        local_player.cards_in_hand = p.cards_in_hand
+                player_turn = turn_player_msg
+                latest_move = latest_stake_msg
+                min_stake = min_next_stake_msg
+                content.refresh()
+                
+        wait_game_info_timer = ui.timer(1, wait_game_info)
+        wait_start_game_timer = ui.timer(1, wait_start_game)
+        
+
+        if data_cached:
+            connection_handler.send_message(
+                message_factory.create_game_info_message(interested_player=local_player), __to_game_topic(Topic.GAME_INFO))
+            wait_game_info_timer.activate()
+        else:
+            wait_start_game_timer.activate()
 
         def wait_game_over():
             message = connection_handler.no_wait_message(
@@ -237,6 +296,7 @@ def setup():
                         f'Congratulations {winner.username} won the game!')
                 game_over_dialog.open()
                 user_state.reset_ready()
+                # app.storage.clear()
                 ui.timer(5, lambda: ui.navigate.to('/lobby'), once=True)
 
         ui.timer(1, wait_game_over)

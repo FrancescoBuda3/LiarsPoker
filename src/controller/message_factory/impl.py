@@ -18,6 +18,15 @@ class MessageFactory(MessageFactoryInterface):
         return Message({
             "players": players
         })
+    
+    def create_game_info_message(self, interested_player:Player, players: list[Player] = [], turn_player: Player = None, latest_stake: Stake = None, min_next_stake: Stake = None) -> Message:
+        return Message({
+            "interested_player": interested_player,
+            "players": players,
+            "turn_player": turn_player,
+            "latest_stake": latest_stake,
+            "min_next_stake": min_next_stake
+        })
 
     def create_round_loser_message(self, player: Player, cards: list[Card], elimination: bool) -> Message:
         return Message({

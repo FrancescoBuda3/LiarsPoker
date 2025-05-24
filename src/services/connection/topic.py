@@ -18,6 +18,7 @@ class Topic(str, Enum):
     CHECK_LIAR = "check_liar"
     HEARTBEAT = "heartbeat"
     SERVER_ERROR = "server_error"
+    GAME_INFO = "game_info"
 
     def __add__(self, other: str) -> str:
         """
@@ -41,5 +42,6 @@ game_topics = [
     Topic.RAISE_STAKE,
     Topic.CHECK_LIAR,
     Topic.GAME_OVER,
-    Topic.REMOVE_PLAYER
+    Topic.REMOVE_PLAYER,
+    Topic.GAME_INFO
 ]
