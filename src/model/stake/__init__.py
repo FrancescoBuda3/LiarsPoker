@@ -96,7 +96,7 @@ class LowestStake(Enum):
     ROYAL_FLUSH = Stake(Combination.ROYAL_FLUSH, [Rank.TEN, Rank.JACK, Rank.QUEEN, Rank.KING, Rank.ACE])
 
 
-class StakeHandler(Protocol):
+class StakeHandlerInterface(Protocol):
         
     def reset_stake(self) -> None:
         """

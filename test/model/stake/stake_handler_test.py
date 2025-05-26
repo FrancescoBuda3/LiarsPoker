@@ -4,10 +4,10 @@ from src.model.card.rank import Rank
 from src.model.card.suit import Suit
 from src.model.stake import Stake
 from src.model.stake.combination import Combination
-from src.model.stake.impl import StakeHandlerImpl
+from src.model.stake.impl import StakeHandler
 
 
-class TestStakeHandlerImpl(unittest.TestCase):
+class TestStakeHandler(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.TEST_SUIT = Suit.SPADES
@@ -22,7 +22,7 @@ class TestStakeHandlerImpl(unittest.TestCase):
         cls.TEST_ROYAL_FLUSH.suit = Suit.SPADES
 
     def setUp(self):
-        self.stakeHandler = StakeHandlerImpl()
+        self.stakeHandler = StakeHandler()
 
     def test_stake(self):
         self.stakeHandler.stake = self.TEST_ONE_STAKE

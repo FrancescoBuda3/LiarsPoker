@@ -37,7 +37,7 @@ class _SuitsHandler:
         self._combo = None
 
 
-class StakeHandlerImpl(StakeHandler):
+class StakeHandler(StakeHandlerInterface):
     """
     The implementation of a simple helper class that models an object that
     keeps a called stake and checks if a given set of cards is valid for the stake.
