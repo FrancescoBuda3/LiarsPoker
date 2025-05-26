@@ -1,5 +1,5 @@
 from ..game import *
-from src.model.deck.impl import DeckImpl
+from src.model.deck.impl import Deck
 from src.model.player import Player
 from src.model.stake.impl import StakeHandlerImpl
 
@@ -14,7 +14,7 @@ class GameCore(Game):
 
     def __init__(self):
         self.__players = []
-        self.__deck = DeckImpl()
+        self.__deck = Deck()
         self.__current_player_index = self.STARTING_PLAYER_INDEX
         self.__stake_handler = StakeHandlerImpl()
 

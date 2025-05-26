@@ -1,10 +1,10 @@
 import unittest
-from src.model.deck.impl import DeckImpl
+from src.model.deck.impl import Deck
 
 
 class TestDeckImpl(unittest.TestCase):
     def setUp(self):
-        self.deck = DeckImpl()
+        self.deck = Deck()
     
     def test_initial_state(self):
         self.assertEqual(len(self.deck.cards), 52)

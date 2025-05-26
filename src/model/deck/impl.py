@@ -1,12 +1,12 @@
 import random
 
 from src.model.card.rank import Rank
-from src.model.deck import Deck
+from src.model.deck import DeckInterface
 from src.model.card import Card
 from src.model.card.suit import Suit
 
 
-class DeckImpl(Deck):
+class Deck(DeckInterface):
     
     cards: list[Card]
     

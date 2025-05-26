@@ -1,4 +1,7 @@
-class Deck():
+from typing import Protocol
+
+
+class DeckInterface(Protocol):
     
     def shuffle(self, hands: list[int]):
         """
