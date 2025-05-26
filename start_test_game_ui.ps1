@@ -12,14 +12,14 @@ $mosquitto2 = Get-Process -Name "mosquitto2" -ErrorAction SilentlyContinue
 
 if (-not $mosquitto1) {
     Write-Host "Starting primary Mosquitto (1883)..."
-    $mosquitto1 = Start-Process -PassThru -WindowStyle Hidden -FilePath "mosquitto" -ArgumentList "-c", "mosquitto1.conf"
+    $mosquitto1 = Start-Process -PassThru -WindowStyle Hidden -FilePath "mosquitto" -ArgumentList "-c", "src/config/mosquitto1.conf"
 } else {
     Write-Host "Primary Mosquitto already running."
 }
 
 if (-not $mosquitto2) {
     Write-Host "Starting backup Mosquitto (1884)..."
-    $mosquitto2 = Start-Process -PassThru -WindowStyle Hidden -FilePath "mosquitto" -ArgumentList "-c", "mosquitto2.conf"
+    $mosquitto2 = Start-Process -PassThru -WindowStyle Hidden -FilePath "mosquitto" -ArgumentList "-c", "src/config/mosquitto2.conf"
 } else {
     Write-Host "Backup Mosquitto already running."
 }

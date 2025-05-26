@@ -10,7 +10,7 @@ pids=()
 
 if ! pgrep -f "mosquitto.*mosquitto1.conf" > /dev/null; then
     echo "Starting primary Mosquitto (1883)..."
-    mosquitto -c mosquitto1.conf &
+    mosquitto -c src/config/mosquitto1.conf &
     mosquitto1_pid=$!
     pids+=($mosquitto1_pid)
 else
@@ -19,7 +19,7 @@ fi
 
 if ! pgrep -f "mosquitto.*mosquitto2.conf" > /dev/null; then
     echo "Starting backup Mosquitto (1884)..."
-    mosquitto -c mosquitto2.conf &
+    mosquitto -c src/config/mosquitto2.conf &
     mosquitto2_pid=$!
     pids+=($mosquitto2_pid)
 else
