@@ -1,7 +1,7 @@
 from threading import Event
 from src.controller.message_factory.impl import MessageFactory
 from src.model.card import Card
-from src.model.game.GImpl import GameImpl, GamePhase
+from src.model.game.game import Game, GamePhase
 from src.model.player import Player
 from src.model.stake import LowestStake
 from src.services.connection.impl import ConnectionHandler
@@ -12,7 +12,7 @@ import time
 
 def game_loop(players: list[Player], id: str, shutdown_event: Event):
     turn_time_in_sec = 60
-    game = GameImpl()
+    game = Game()
     lobby_topic = Topic.LOBBY + id
     start_time = time.time()
     next_min_stake = LowestStake.HIGH_CARD.value

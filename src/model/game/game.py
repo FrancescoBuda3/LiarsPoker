@@ -1,5 +1,5 @@
 from enum import Enum
-from src.model.game import Game
+from src.model.game import GameInterface
 from src.model.game.impl import GameCore
 
 
@@ -10,7 +10,7 @@ class GamePhase(Enum):
     GAME_OVER = 4
 
 
-class GameImpl(Game):
+class Game(GameInterface):
 
     def __init__(self):
         self.__phase = GamePhase.WAITING_FOR_PLAYERS

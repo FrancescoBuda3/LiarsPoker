@@ -3,7 +3,7 @@ from src.model.player import Player
 from src.model.stake import Stake
 
 
-class Game(Protocol):
+class GameInterface(Protocol):
     def add_player(self, player:Player) -> None:
         """
         Adds a player to the game. to be called before the game starts.

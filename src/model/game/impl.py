@@ -6,7 +6,7 @@ from src.model.stake.impl import StakeHandlerImpl
 
 
 
-class GameCore(Game):
+class GameCore(GameInterface):
     STARTING_PLAYER_INDEX = 0
     STARTING_CARDS = 1
     MINIMUM_PLAYERS = 2

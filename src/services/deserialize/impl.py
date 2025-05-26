@@ -6,9 +6,10 @@ from src.model.card.suit import Suit
 from src.model.player import Player
 from src.model.stake import Stake
 from src.model.stake.combination import Combination
+from src.services.deserialize import DeserializerInterface
 from src.services.message import Message
 
-class Deserializer:
+class Deserializer(DeserializerInterface):
     def deserialize(self, string):
         return self._ast_to_obj(self._string_to_ast(string))
         
