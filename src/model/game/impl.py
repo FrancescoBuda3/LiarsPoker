@@ -1,7 +1,7 @@
 from ..game import *
 from src.model.deck.impl import Deck
 from src.model.player import Player
-from src.model.stake.impl import StakeHandlerImpl
+from src.model.stake.impl import StakeHandler
 
 
 
@@ -16,7 +16,7 @@ class GameCore(GameInterface):
         self.__players = []
         self.__deck = Deck()
         self.__current_player_index = self.STARTING_PLAYER_INDEX
-        self.__stake_handler = StakeHandlerImpl()
+        self.__stake_handler = StakeHandler()
 
     def start_game(self):
         if len(self.__players) < self.MINIMUM_PLAYERS:
