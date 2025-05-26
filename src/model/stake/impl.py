@@ -73,6 +73,8 @@ class StakeHandlerImpl(StakeHandler):
         self.__suits_handler = _SuitsHandler()
 
     def check_cards(self, cards: list[Card]) -> bool:
+        if self.stake is None:
+            raise ValueError("Stake is not set. Cannot check cards.")
         cards = self.__double_ones_and_aces(cards)
         card_ranks: list[Rank] = [card.rank for card in cards]
         card_suits: list[Suit] = [card.suit for card in cards]

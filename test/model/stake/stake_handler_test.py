@@ -31,12 +31,10 @@ class TestStakeHandlerImpl(unittest.TestCase):
     def test_reset_stake(self):
         self.stakeHandler.stake = self.TEST_ONE_STAKE
         self.stakeHandler.reset_stake()
-        with self.assertRaises(ValueError):
-            self.stakeHandler.stake
+        self.assertIsNone(self.stakeHandler.stake)
 
     def test_stake_not_set(self):
-        with self.assertRaises(ValueError):
-            self.stakeHandler.stake
+        self.assertIsNone(self.stakeHandler.stake)
 
     def test_check_state_not_set(self):
         with self.assertRaises(ValueError):
