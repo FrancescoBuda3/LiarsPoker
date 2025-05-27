@@ -14,7 +14,7 @@
 \newcommand{\emailaddr}[1]{\href{mailto:#1}{\texttt{#1}}}
 
 \title{\LARGE
-    Liar's Poker 
+    Liar's Poker
 }
 
 \author{
@@ -94,12 +94,12 @@
 This project aims to develop a web-based game application for playing Liar's Poker, a fun and engaging card game centered around deception and bluffing. Inspired by traditional poker, Liar's Poker is played with a standard deck of cards and is suitable for two or more players. Our application will provide an online platform where users can enjoy the game with others in real-time, no matter where they are.
 
 \subsection{Game Rules}\label{game-rules}
-Liar's Poker is a game of deception and bluffing that is played with a standard deck of cards without any joker. Each player starts with one card. A round starts with someone naming a poker combination. With the turn rotating clockwise, each next player has a choice:
+Liar's Poker is played with a standard deck of cards without any joker. Each player starts with one card. A round starts with someone naming a poker combination. With the turn rotating clockwise, each next player has a choice:
 \begin{itemize}
   \item \textbf{Rise the stakes}\par
   name a higher poker combination than the one named by the previous player that they belive is present in the combined cards of all players.
   \item \textbf{Call bullsh*t} \par
-  the player calls bullsh*t on the previous player's combination if the player think the previous player is bluffing or mistaken.
+  call bullsh*t on the previous player's combination if the player think the previous player is bluffing or mistaken.
 \end{itemize}
 When someone calls bullsh*t, all players reveal their cards and the presence of the contested poker hand is verified. If the hand is present, the player who called bullsh*t loses the round; else, the player who named this poker hand loses the round.\par\noindent
 The loser starts all subsequent rounds with one extra card, and names the first combination in the next round.\par\noindent
@@ -113,7 +113,7 @@ The last person remaining in the game is the winner.
   \item \textbf{Question:} \emph{What happens if one player disconnect during the game?}\par
         \textbf{Answer:} The game will pause until the player reconnects. If the player does not reconnect within a certain time frame, they will be kicked from the game.
   \item \textbf{Question:} \emph{What happens if the server dies during the game?}\par
-        \textbf{Answer:} The game goes on
+        \textbf{Answer:} The application goes on, but the game is lost. The players will be redirected to the lobby screen and can choose to play another game or leave the lobby.
   \item \textbf{Question:} \emph{Does the system need to store player's data?}\par
         \textbf{Answer:} The system doesn't need to store data, as the player does not need to create an account.
 \end{itemize}
@@ -121,27 +121,27 @@ The last person remaining in the game is the winner.
 This section describes the typical usage scenario of a group of friends playing Liar's Poker on our platform.
 \begin{enumerate}
   \item \textbf{Name choice}\par
-  The player chooses a unique nickname to use during the game.
+  The player chooses a nickname to use during the game.
   \item \textbf{Lobby creation}\par
-  One user creates a new lobby and can decide to share the access code with friends or make the lobby public. 
+  One user creates a new lobby and share the access code with friends. 
   \item \textbf{Joining the lobby}\par
-  Other users join the lobby by entering the code or choosing from the public lobbys.
+  Other users join the lobby by entering the code.
   \item \textbf{Gameplay}\par
-  Each player receive one card and than the game starts (The first player is chosen randomically). The game proceeds as described in the rules. when the player want to rise the stakes, he can choose from the possible combinations (non valid combinations will be disabled), if the combination needs some specific card to be declared, the player will be provided with a list of possible cards to choose from.
+  Each player receive one card and than the game starts. The game proceeds as described in the rules. when the player want to rise the stakes, he can choose from the possible combinations (non valid combinations will be disabled), if the combination needs some specific rank or suit to be declared, the player will be provided with a list of possible ones to choose from.
   \item \textbf{Elimination}\par
-  When a player loses, they are eliminated from the game and they can chose to spectate the game or leave the lobby.
+  When a player loses, they are eliminated from the game.
   \item \textbf{End of the game}\par
-  When the game ends the winner is declared and players who are still in the lobby will be asked wether they want to play another game or leave the lobby.
+  When the game ends the winner is declared and players will be redirected to the lobby page where they can choose to play another game or leave the lobby.
 \end{enumerate}
 
 % create a figure with 3 images
 \begin{figure}[H]
   \centering
-  \subfloat[Home Screen]{\includegraphics[width=0.5\textwidth]{figures/useCase1.png}}
+  \subfloat[Home and Lobby Selection]{\includegraphics[width=0.5\textwidth]{figures/homeLobbyUseCase.png}}
   \hfill
-  \subfloat[Match Ended Screen]{\includegraphics[width=0.4\textwidth]{figures/useCase3.png}}
+  \subfloat[Lobby]{\includegraphics[width=0.5\textwidth]{figures/lobbyUseCase.png}}
   \hfill
-  \subfloat[Match]{\includegraphics[width=1\textwidth]{figures/useCase2.png}}
+  \subfloat[Match]{\includegraphics[width=1\textwidth]{figures/gameUseCase.png}}
   \caption{Use Case Diagrams}
 \end{figure}
 
@@ -179,7 +179,7 @@ Starting from the concept, we can identify the following requirements for the ap
 \begin{enumerate}
   \item \textbf{Lobby Creation}\par
   The application must allow users to create a new lobby and share the access code with friends.
-  \item \textbf{Joining the Lobby}\par
+  \item \textbf{Lobby Joining}\par
   The application must allow users to join a lobby by entering the access code.
   \item \textbf{Gameplay}\par
   The application must allow users to play Liar's Poker following the game rules.
@@ -192,9 +192,8 @@ Starting from the concept, we can identify the following requirements for the ap
   \begin{itemize}
     \item \textbf{Acceptance Criteria:} The system must be able to handle at least 5 concurrent games.
   \end{itemize}
-  
   \item \textbf{Fault Tollerance}\par
-  The application must be able to handle disconnections and server failures without losing game data. 
+  The application must be able to handle user disconnections without losing a running game and should recover from server failures. 
   \begin{itemize}
     \item \textbf{Acceptance Criteria:} The system must be able to recover from server failures within 1 minute.
   \end{itemize}
@@ -216,25 +215,25 @@ Starting from the concept, we can identify the following requirements for the ap
 in this section we list all the possible cards combinations, that can be declared during the game, ordered by increasing value:
 \begin{enumerate}
   \item \textbf{High Card}\par
-  the player has the highest card in the game
+  in the combined cards of all players there is a card with the rank declared by the player.
   \item \textbf{Pair}\par
-  in the combined cards of all players there are two cards with the same value
+  in the combined cards of all players there are two cards with the same rank declared by the player.
   \item \textbf{Two Pair}\par
-  in the combined cards of all players there are two pairs of cards with the same value
+  in the combined cards of all players there are two pairs of cards with the same ranks declared by the player.
   \item \textbf{Three of a Kind}\par
-  in the combined cards of all players there are three cards with the same value
-  \item \textbf{Flush}\par
-  in the combined cards of all players there are five cards with the same suit
+  in the combined cards of all players there are three cards with the same rank declared by the player.
   \item \textbf{Straight}\par
-  in the combined cards of all players there are five cards with consecutive values
+  in the combined cards of all players there are five cards with consecutive values declared by the player.
+  \item \textbf{Flush}\par
+  in the combined cards of all players there are five cards with the same suit declared by the player.
   \item \textbf{Full House}\par
-  in the combined cards of all players there are three cards with the same value and two cards with the same value
+  in the combined cards of all players there is a \emph{pair} and a \emph{three of a kind} with the respective ranks declared by the player. 
   \item \textbf{Four of a Kind}\par
-  in the combined cards of all players there are four cards with the same value and one card with a different value
-  \item \textbf{Poker}\par
-  in the combined cards of all players there are four cards with the same value
+  in the combined cards of all players there are four cards with the same value declared by the player.
   \item \textbf{Straight Flush}\par
-  in the combined cards of all players there are five cards with consecutive values and the same suit
+  in the combined cards of all players there are five cards with consecutive values and the same suit declared by the player.
+  \item \textbf{Royal Flush}\par
+  in the combined cards of all players there are five cards with the same suit declared by the player and the ranks \emph{10}, \emph{J}, \emph{Q}, \emph{K} and \emph{Ace}.
 \end{enumerate}
 
 \begin{comment}
