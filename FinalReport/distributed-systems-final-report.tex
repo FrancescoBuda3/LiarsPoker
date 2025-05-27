@@ -551,12 +551,22 @@ The mechanics differ in their scope and purpose:
   \item
   \textbf{Server-Side} \par
   The server and the broker are at the core of the game, if they fail the game is lost. \newline
-  To prevent this from happening, they are costantly monitored (about once per minute) by a backup
-  server. The whole porpouse of the backup is to keep a copy of the game state and to be able to
-  resume the game where it left off, in case of failure it launches a new istance of 
-  whichever failed, setting it up with the saved data.
-  \item
-  \textbf{Network-Side} \par
+  To prevent this from happening, they are costantly monitored.
+  There are two different implementations of fault tolerance:
+  \begin{itemize}
+    \item \textbf{Backup Server} \par
+    The server is backed up by a second server that runs as a server but is not active; so it only listens to the messages sent by the clients and the broker and keeps a copy of the game state. \newline
+    If the main server fails, the backup server can take its place and resume the communication between the clients and the broker. With this mechanism, if the main server fails, the backup server can take its place and resume the system but not the game, so the game is lost.
+    This happens because the \texttt{game\_loop} runs as a thread launched by the main server, so if the main server fails during a game, the game loop is lost too; so in that case, all the players receive a message that the game is over and they are redirected to the lobby screen. \newline
+    This is implemented using a heartbeat mechanism, where the server sends a heartbeat message to backup server every 2 seconds. If the backup does not receive the heartbeat message within a certain time frame, it assumes that the main server has failed and takes his place elevating itself to the main server. \newline
+    \item \textbf{Broker Backup} \par
+    The broker is backed up by a second broker that keeps a copy of the messages sent by the clients and the server. 
+    If the main broker fails, the backup broker can take its place and resume the communication between the clients and the server.
+    This is implemented using the mosquitto configuration file, where the main server is configured to send a copy of every message to the backup broker with a bridge connection. \newline
+    The backup broker is configured to listen to the same topics as the main broker, so it can receive the messages sent by the clients and the server. \newline
+    When the main broker fails, the \texttt{ConnectionHandler} class in the client tries to reconnect to the backup broker, and if it succeeds, it can resume the communication with the server and the game. \newline
+  \end{itemize}
+  \textbf{Client-Side} \par
   To make sure that no accidental disconnection can ruin the game, the game agent checks the connection
   of each player every time it's their turn. If a player is disconnected, the game agent will wait for
   them to reconnect, if they don't in a certain time frame they will be kicked from the game. \newline
