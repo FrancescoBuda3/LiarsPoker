@@ -595,32 +595,48 @@ There aren't any security mechanisms in our project. \newline
 
 \section{Implementation}\label{implementation}
 
+The implementation phase is the one where the design is put into practice.
+\subsection{Network Protocols}\label{network-protocols}
+The main network protocol used is MQTT for the communication between the components. 
+To implement the MQTT protocol we used the Paho library for Python, which is a client library for the MQTT protocol. \newline
+Thanks to MQTT protocol and its path-like structure, we can easily create topics for each lobby and each player, allowing them to communicate with the server and with each other. \newline
+An example of a topic structure is:
 \begin{itemize}
-  \item which \textbf{network protocols} to use?
+  \item \texttt{create\_lobby} for the create lobby messages
+  \item \texttt{join\_lobby/} for the join lobby messages
+  \item \texttt{lobby/}\textless LOBBY\_ID\textgreater\texttt{/raise\_stake} for the raise stake messages
+  \item \texttt{lobby/}\textless LOBBY\_ID\textgreater\texttt{/check\_liar} for the liar detection messages
+\end{itemize}
 
-  \begin{itemize}
-    \item e.g.~UDP, TCP, HTTP, WebSockets, gRPC, XMPP, AMQP, MQTT, etc.
-  \end{itemize}
-  \item how should \emph{in-transit data} be \textbf{represented}?
+As we can see, the topics are structured in a way that allows us to easily identify the lobby and the type of message being sent. This is not always true, beacuse all the messages sent before the lobby joining are sent to the general topic, so every player can see them, but after the lobby joining, the messages are sent to the specific lobby topic. \newline
+To recognize the messages in the general topic, we use a specific format for the messages, where the body contains the serialized player object. This part will be explained in more detail in the next sections. \newline
 
-  \begin{itemize}
-    \item e.g.~JSON, XML, YAML, Protocol Buffers, etc.
-  \end{itemize}
-  \item how should \emph{databases} be \textbf{queried}?
+The communication is done using a class called \texttt{ConnectionHandler}, which is responsible for managing the connection to the broker and the communication with the server. That class provides methods to subscribe to topics, publish messages, and handle incoming messages. \newline
+The clients are automatically subscribed to the game topics when they join a lobby, so they can receive the messages from the server. On the other hand, the server is subscribed to all the topics, so it can receive the messages from the clients and publish the game status. \newline
+This is the list of all the topics used in the system: (as said before, some topics are used directly in this way while others are used with a specific lobby ID and pattern): 
+\begin{itemize}
+    \item \texttt{lobby}
+    \item \texttt{new\_lobby}
+    \item \texttt{new\_player}
+    \item \texttt{ready\_to\_play}
+    \item \texttt{start\_game}
+    \item \texttt{join\_lobby}
+    \item \texttt{leave\_lobby}
+    \item \texttt{remove\_player}
+    \item \texttt{start\_turn}
+    \item \texttt{start\_round}
+    \item \texttt{round\_loser}
+    \item \texttt{game\_over}
+    \item \texttt{raise\_stake}
+    \item \texttt{check\_liar}
+    \item \texttt{heartbeat}
+    \item \texttt{server\_error}
+    \item \texttt{game\_info}
+\end{itemize}
+\subsection{Data Formats and representations}\label{data-formats}
 
-  \begin{itemize}
-    \item e.g.~SQL, NoSQL, etc.
-  \end{itemize}
-  \item how should components be \emph{authenticated}?
-
-  \begin{itemize}
-    \item e.g.~OAuth, JWT, etc.
-  \end{itemize}
-  \item how should components be \emph{authorized}?
-
-  \begin{itemize}
-    \item e.g.~RBAC, ABAC, etc.
-  \end{itemize}
+\begin{itemize}
+  \item e.g.~JSON, XML, YAML, Protocol Buffers, etc.
 \end{itemize}
 
 \subsection{Technological details}\label{technological-details}
