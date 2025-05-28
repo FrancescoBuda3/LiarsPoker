@@ -612,7 +612,7 @@ Thanks to MQTT protocol and its path-like structure, we can easily create topics
 An example of a topic structure is:
 \begin{itemize}
   \item \texttt{create\_lobby} for the create lobby messages
-  \item \texttt{join\_lobby/} for the join lobby messages
+  \item \texttt{join\_lobby} for the join lobby messages
   \item \texttt{lobby/}\textless LOBBY\_ID\textgreater\texttt{/raise\_stake} for the raise stake messages
   \item \texttt{lobby/}\textless LOBBY\_ID\textgreater\texttt{/check\_liar} for the liar detection messages
 \end{itemize}
@@ -658,6 +658,12 @@ This is the list of all the topics used in the system: (as said before, some top
 \section{Validation}\label{validation}
 
 \subsection{Automatic Testing}\label{automatic-testing}
+For the automatic testing we used the \texttt{unittest} framework, which is a built-in Python module for testing code. Every component of the system is tested with a set of unit tests that check the functionality of the methods and the correctness of the data. \newline
+The tests are organized in a way that allows us to test each component individually, and then test the interaction between the components. \newline
+Every model class has its own test file, where the methods are tested with different inputs and expected outputs. Also the class to serialize and deserialize messages is tested, to ensure that the messages are correctly serialized and deserialized. \newline
+We don't have any automated tests for the integration between the components, or interaction tests by the network. To test the interaction between the components we used manual tests, for example, we created a lobby and joined it with multiple clients, then we tested the interaction between the clients and the server. \newline
+To run the tests, we used the \texttt{unittest} command line interface, which allows us to run all the tests in a specific directory. The tests are run in a separate process, so they don't interfere with the main application. \newline
+We develop the system in a TDD (Test Driven Development) way, so we write the tests before writing the code. This allows us to ensure that the code is correct and that the tests are passing. \newline
 
 \begin{itemize}
   \item how were individual components \textbf{\emph{unit}-test}ed?
