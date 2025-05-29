@@ -428,23 +428,28 @@ The following subsections will explain the interaction between the components in
 % - Which components are in charge of updating the state of the system? when? how?
 % State diagrams are welcome here
 
-Many actors are needed to keep the game going and to manage the communication between them. \newline
+Many actors are needed to keep the game going and to manage the communication between them.
+
 The following are all the components actually needed and their behaviours:
 \begin{itemize}
       \item
             \textbf{The client} \cref{fig:clientStates} \par
             The client starts by establishing a connection to the MQTT broker, since it's fundamental
-            for each part of the system. \newline
+            for each part of the system. 
+
             Right after it asks the player for their name and waits for the server approval.
-            If the request is successful, the client can now choose to join or create a lobby. \newline
+            If the request is successful, the client can now choose to join or create a lobby. 
+
             A player can set its status to ready when waiting for a game to start, only when everyone is ready
-            the server will send a message to start the game. \newline
+            the server will send a message to start the game. 
+
             When the game starts, the client waits for the server to publish the game status to
             show the interface to the player.
             The client can only send messages to the server when it is his turn, either rising the stakes
             or calling bullsh*t. If a player loses the match then he can only wait for it to finish.
             The player leaves the lobby only when a winner is found. When the game ends the
-            player is put back into the same lobby and can either wait for a new game to start or look for a new one. \newline
+            player is put back into the same lobby and can either wait for a new game to start or look for a new one.
+
             At any point during the process the player can leave or be disconnected.
             If the player attempts to reconnect during a game the system will try to resume the status of the match.
             \begin{figure}[H]
@@ -456,7 +461,8 @@ The following are all the components actually needed and their behaviours:
       \item
             \textbf{The server} \cref{fig:serverStates} \par
             The server is mainly in charge of connecting new players and creating lobbies,
-            delegating the game logic to different agents. \newline
+            delegating the game logic to different agents.
+
             At any point in time a new player can ask to connect or disconnect himself, causing the need to
             check whether the player was alone in a lobby, deleting it if left empty. The players connected
             can also ask to create or join a new lobby and, when everyone is ready,
@@ -480,7 +486,8 @@ The following are all the components actually needed and their behaviours:
       \item
             \textbf{The game agent} \cref{fig:gameAgentStates} \par
             The game agent is an instance of the server that takes on the role of managing the single matches.
-            It is in charge of managing the game state, the players' moves and the game logic. \newline
+            It is in charge of managing the game state, the players' moves and the game logic.
+            
             Every time a player rises the stake, it calculates and sends the next minimum stake that the
             next player can make.
             It only waits for a minute for each player to make a move, if the player does not make a move
