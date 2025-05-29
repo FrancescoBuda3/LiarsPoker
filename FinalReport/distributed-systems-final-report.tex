@@ -493,59 +493,81 @@ The following are all the components actually needed and their behaviours:
             \end{figure}
 \end{itemize}
 
-\subsection{Data and Consistency
-      Issues}\label{data-and-consistency-issues}
+\subsection{Data and Consistency Issues}\label{data-and-consistency-issues}
 
-Since we don't need to store data permanently because this is a card game, we don't deal with queries and databases. \newline
-Some datas are shared between components, for example the game status, the players' nicknames, and other crucial information to perform the game. \newline
+Since we don't need to store data permanently because this is a card game, we don't deal with queries 
+and databases.
+
+Some data is shared between components, for example the game status, the players' nicknames, and 
+other crucial information to perform the game.
 
 \subsection{Fault-Tolerance}\label{fault-tolerance}
-% \begin{itemize}
-%   \item Is there any form of data \textbf{replication} / federation / sharing?
+% - Is there any form of data replication / federation / sharing?
+%     why? how does it work?
+% - Is there any heart-beating, timeout, retry mechanism?
+%     why? among which components? how does it work?
+% - Is there any form of \textbf{error handling}?
+%     what happens when a component fails? why? how?
 
-%   \begin{itemize}
-%     \item \emph{why}? \emph{how} does it work?
-%   \end{itemize}
-%   \item Is there any \textbf{heart-beating}, \textbf{timeout}, \textbf{retry
-%   mechanism}?
-
-%   \begin{itemize}
-%     \item \emph{why}? \emph{among} which components? \emph{how} does it work?
-%   \end{itemize}
-%   \item Is there any form of \textbf{error handling}?
-
-%   \begin{itemize}
-%     \item \emph{what} happens when a component fails? \emph{why}? \emph{how}?
-%   \end{itemize}
-% \end{itemize}
 Different types of fault tolerance are implemented in the systems, everything is set up to keep
-the game running even if some components fail. \newline
+the game running even if some components fail.
+
 The mechanics differ in their scope and purpose:
 \begin{itemize}
       \item
             \textbf{Server-Side} \par
-            The server and the broker are at the core of the game, if they fail the game is lost. \newline
-            To prevent this from happening, they are costantly monitored.
-            There are two different implementations of fault tolerance:
+            The server and the broker are at the core of the game, if they fail the game is lost.
+            To prevent this from happening, they are constantly monitored.
+
+            These share the same mechanism of fault-tolerance, redundancy and backup,
+            but differ in implementation:
+
             \begin{itemize}
                   \item \textbf{Backup Server} \par
-                        The server is backed up by a second server that runs as a server but is not active; so it only listens to the messages sent by the clients and the broker and keeps a copy of the game state. \newline
-                        If the main server fails, the backup server can take its place and resume the communication between the clients and the broker. With this mechanism, if the main server fails, the backup server can take its place and resume the system but not the game, so the game is lost.
-                        This happens because the \texttt{game\_loop} runs as a thread launched by the main server, so if the main server fails during a game, the game loop is lost too; so in that case, all the players receive a message that the game is over and they are redirected to the lobby screen. \newline
-                        This is implemented using a heartbeat mechanism, where the server sends a heartbeat message to backup server every 2 seconds. If the backup does not receive the heartbeat message within a certain time frame, it assumes that the main server has failed and takes his place elevating itself to the main server. \newline
+                        The server is backed up by a second server that runs as a server but is
+                        not active; so it only listens to the messages sent by the clients and the broker 
+                        and keeps a copy of the game state.
+
+                        If the main server fails, the backup server can take its place and resume 
+                        the communication between the clients and the broker. This mechanism ha a limitation
+                        since doesn't keep a record of ongoing games, simply placing players back in lobbies.
+                        This happens because the game loop runs as a separate thread launched by 
+                        the main server, so if the main server fails during a game, the game loop 
+                        is lost too; in that case, all the players receive a message that the 
+                        game is over before being redirected to the lobby screen.
+
+                        All of this is implemented using a heartbeat mechanism, where the server sends a 
+                        heartbeat message to the backup every 2 seconds. If the backup does not 
+                        receive the heartbeat message within the fixed time, it assumes that 
+                        the main server has failed and takes his place elevating itself to the role of 
+                        main server.
                   \item \textbf{Broker Backup} \par
-                        The broker is backed up by a second broker that keeps a copy of the messages sent by the clients and the server.
-                        If the main broker fails, the backup broker can take its place and resume the communication between the clients and the server.
-                        This is implemented using the mosquitto configuration file, where the main server is configured to send a copy of every message to the backup broker with a bridge connection. \newline
-                        The backup broker is configured to listen to the same topics as the main broker, so it can receive the messages sent by the clients and the server. \newline
-                        When the main broker fails, the \texttt{ConnectionHandler} class in the client tries to reconnect to the backup broker, and if it succeeds, it can resume the communication with the server and the game. \newline
+                        The broker is backed up by a second broker that keeps a copy of the messages 
+                        sent by the clients and the server.
+                        If the main broker fails, the backup broker can take its place and resume 
+                        the communication between the clients and the server.
+                        This is implemented using the mosquitto configuration file, where the main 
+                        server is configured to send a copy of every message to the backup broker 
+                        with a bridge connection.
+
+                        The backup broker is configured to listen to the same topics as the 
+                        main broker, so it can receive the messages sent by the clients and the server.
+                         
+                        When the main broker fails, the \texttt{ConnectionHandler} class both used 
+                        by the client and server tries to connect to the backup broker, 
+                        and if it succeeds, it can resume all communications where they left off.
             \end{itemize}
+      \item
             \textbf{Client-Side} \par
-            To make sure that no accidental disconnection can ruin the game, the game agent checks the connection
-            of each player every time it's their turn. If a player is disconnected, the game agent will wait for
-            them to reconnect, if they don't in a certain time frame they will be kicked from the game. \newline
-            Furthermore, the client always has the opportunity to try to reconnect, picking where it left
-            off, if anything goes wrong.
+            To make sure that no accidental disconnection can ruin the game, the game agent gives to
+            each player a minute to make a move, if the player does not respond in time, it will be 
+            kicked from the game, continuing with the remaining players.
+
+            Nevertheless, if anything goes wrong the client always has the opportunity to try to 
+            reconnect, picking where it left off. While playing the web browser saves the user 
+            information in the local storage so that the client can retrieve when trying to reconnect.
+            If successful, the client will send a message to the server asking for the current game 
+            state, and the game agent will publish a message with the current game state.
 \end{itemize}
 
 \subsection{Availability}\label{availability}
