@@ -338,7 +338,8 @@ Dotted lines are for subscribe messages, while solid lines are for publish messa
 %   e.g. users' data, products' data, orders' data,
 % Class diagram are welcome here
 
-The system will be fundamentally composed by the classes shown in \cref{fig:classes}. \newline
+The system will be fundamentally composed by the classes shown in \cref{fig:classes}. 
+
 Each component models the real world entities that are needed to play the game in a non-distributed
 way, these are the classes that the controller will later use to make the game work.
 \begin{figure}[H]
@@ -350,7 +351,8 @@ way, these are the classes that the controller will later use to make the game w
 
 The game is the most important entity of the whole model. It has a deck of cards, that can be shuffled,
 and a set of players, each one with a nickname, his given cards and it's lobby ready state.
-To handle the game logic it keeps in memory the current player and the latest raise. \newline
+To handle the game logic it keeps in memory the current player and the latest raise.
+
 It can be asked to:
 \begin{itemize}
       \item Add or remove a player from the game
@@ -363,8 +365,10 @@ It can be asked to:
 
 At the core of the entire system are messages, these, given the simple nature of the game,
 are quite simple too: containing a single object that represents the move the player wants to make or
-the response of the server. \newline
-The real difference and context of the message is given by the topic to which it is published. \newline
+the response of the server. 
+
+The real difference and context of the message is given by the topic to which it is published. 
+
 All the topics used by the system can be view in it's associated enum but are not directly
 used when sending a message since most of them are different depending on the context in which they are used.
 For example the "remove player" topic is used as it is when logging out a player that is not
