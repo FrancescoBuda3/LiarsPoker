@@ -172,7 +172,7 @@ Here you should explain:
             \end{itemize}
 \end{itemize}
 \end{comment}
-
+\newpage
 \section{Requirements}\label{requirements}
 Starting from the concept, we can identify the following requirements for the application:
 \subsection{Functional Requirements}\label{functional-requirements}
@@ -273,7 +273,7 @@ in this section we list all the possible cards combinations, that can be declare
             \end{itemize}
 \end{itemize}
 \end{comment}
-
+\newpage
 \section{Design}\label{design}
 
 This chapter explains the strategies used to meet the requirements
@@ -663,6 +663,7 @@ This is the list of all the topics used in the system: (as said before, some top
             goes here
 \end{itemize}
 
+\newpage
 \section{Validation}\label{validation}
 
 \subsection{Automatic Testing}\label{automatic-testing}
@@ -716,6 +717,7 @@ To clients are started from 1270.0.01:8080 incrementing the port number for each
 All the acceptance criteria were tested manually with this scripts and they were successfully passed.\newline
 We decided to not automatize this type of test because it requires a lot of interaction with the UI and a lot of requirements.
 
+\newpage
 \section{Release}\label{release}
 
 The components are organized into a set of modules, each one with its own functionality.
@@ -738,19 +740,52 @@ Eventually, it is possible to add the utils module to use debug and log features
       \label{fig:dependencyGraph}
 \end{figure}
 
+\newpage
 \section{Deployment}\label{deployment}
 
-\begin{itemize}
-      \item should one install your software from scratch, how to do it?
+The software is deployed on github, where the source code is available. The repository is public, so anyone can access it. The repository is organized in a way that allows to easily navigate through the code and find the files needed to run the software. \newline
+To download the software, you can clone the repository using the following command:
+\begin{verbatim}
+git clone https://github.com/FrancescoBuda3/LiarsPoker
+\end{verbatim}
+or download the zip file from the repository page. \newline
 
-            \begin{itemize}
-                  \item provide instructions
-                  \item provide expected outcomes
-            \end{itemize}
-\end{itemize}
-
+\newpage
 \section{User Guide}\label{user-guide}
-
+\subsection{Requirements}\label{requirements}
+There are some requirements to run the software, they are listed below:
+\begin{itemize}
+      \item Mosquitto broker installed (version 1.6.9)
+      You can download it from the official website: \url{https://mosquitto.org/files/binary/} choosing the right version for your operating system.
+      \item Python 3.12 or higher installed
+      You can download it from the official website: \url{https://www.python.org/downloads/}
+      \item Poetry installed (version 2.1.3)
+      You can download it following the documentation from the official website: \url{https://python-poetry.org/docs/#installation}
+\end{itemize}
+\subsection{Installation}\label{installation}
+Since the project is developed using Python, there are no particular installation steps, but you have to install the dependencies using Poetry. \newline
+To install the dependencies, you have to run the following command in the project root directory:
+\begin{verbatim}
+poetry install
+\end{verbatim}
+\subsection{Running the software}\label{running-the-software}
+To run the software, you have to run the following command in the project root directory (each command must be run in a different terminal):
+\begin{itemize}
+      \item Broker
+            \begin{verbatim}
+mosquitto -c ./config/mosquitto1.conf
+mosquitto -c ./config/mosquitto2.conf
+            \end{verbatim}
+      \item Server
+            \begin{verbatim}
+poetry run python src/controller/server/__init__.py primary
+poetry run python src/controller/server/__init__.py second
+            \end{verbatim}
+      \item Client
+            \begin{verbatim}
+poetry run python src/view/__init__.py [port]
+            \end{verbatim}
+\end{itemize}
 \begin{itemize}
       \item how to use your software?
 
@@ -761,6 +796,7 @@ Eventually, it is possible to add the utils module to use debug and log features
             \end{itemize}
 \end{itemize}
 
+\newpage
 \section{Self-evaluation}\label{self-evaluation}
 
 \begin{itemize}
