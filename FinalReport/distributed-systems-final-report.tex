@@ -608,7 +608,7 @@ and the backup server that keeps a copy of the game state in case of failure.
 There aren't any security mechanisms in our project. \newline
 
 
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\newpage
 
 \section{Implementation}\label{implementation}
 
@@ -666,51 +666,59 @@ This is the list of all the topics used in the system: (as said before, some top
 \section{Validation}\label{validation}
 
 \subsection{Automatic Testing}\label{automatic-testing}
-For the automatic testing we used the \texttt{unittest} framework, which is a built-in Python module for testing code. Every component of the system is tested with a set of unit tests that check the functionality of the methods and the correctness of the data. \newline
-The tests are organized in a way that allows us to test each component individually, and then test the interaction between the components. \newline
-Every model class has its own test file, where the methods are tested with different inputs and expected outputs. Also the class to serialize and deserialize messages is tested, to ensure that the messages are correctly serialized and deserialized. \newline
-We don't have any automated tests for the integration between the components, or interaction tests by the network. To test the interaction between the components we used manual tests, for example, we created a lobby and joined it with multiple clients, then we tested the interaction between the clients and the server. \newline
-To run the tests, we used the \texttt{unittest} command line interface, which allows us to run all the tests in a specific directory. The tests are run in a separate process, so they don't interfere with the main application. \newline
-We develop the system in a TDD (Test Driven Development) way, so we write the tests before writing the code. This allows us to ensure that the code is correct and that the tests are passing. \newline
+% For the automatic testing we used the \texttt{unittest} framework, which is a built-in Python module for testing code. Every component of the system is tested with a set of unit tests that check the functionality of the methods and the correctness of the data. \newline
+% The tests are organized in a way that allows us to test each component individually, and then test the interaction between the components. \newline
+% Every model class has its own test file, where the methods are tested with different inputs and expected outputs. Also the class to serialize and deserialize messages is tested, to ensure that the messages are correctly serialized and deserialized. \newline
+% We don't have any automated tests for the integration between the components, or interaction tests by the network. To test the interaction between the components we used manual tests, for example, we created a lobby and joined it with multiple clients, then we tested the interaction between the clients and the server. \newline
+% To run the tests, we used the \texttt{unittest} command line interface, which allows us to run all the tests in a specific directory. The tests are run in a separate process, so they don't interfere with the main application. \newline
+% We develop the system in a TDD (Test Driven Development) way, so we write the tests before writing the code. This allows us to ensure that the code is correct and that the tests are passing. \newline
+
+For the automatic testing we used the \texttt{unittest} framework, which is a built-in Python module for testing code. Every component of the system is tested with a set of unit tests that check the functionality of the methods and the correctness of the data.
+The command to run the tests is:
+\begin{verbatim}
+python -m unittest discover -s test -p '*_test.py'
+\end{verbatim}
 
 \begin{itemize}
-      \item how were individual components \textbf{\emph{unit}-test}ed?
-      \item how was communication, interaction, and/or integration among
-            components tested?
-      \item how to \textbf{\emph{end-to-end}-test} the system?
+      \item \textbf{Game}\par
+            The game class is tested with different inputs and expected outputs, to ensure that the game logic is correct. The tests check if the game can be started, if the players can be added and removed, if the game can be played, and if the game can be ended. The tests also check if the game state is correctly updated after each move.
+      \item \textbf{Deck}\par
+            The deck class is tested to ensure that the deck is correctly shuffled and that the cards are correctly dealt to the players. 
+      \item \textbf{Stake}\par
+            The stake class is tested to ensure that the stake is correctly raised and that the minimum stake is correctly updated. The most complicated combination of cards is tested to ensure that the stake is correctly checked when raised and the next minimum stake is correctly calculated.
+      \item \textbf{Service}\par
+            The service class is tested to ensure that the service can correctly serialize and deserialize messages. 
+      \item \textbf{Connection}\par
+            The connection class is tested to ensure that the connection to the broker is correctly established and that the messages are correctly sent and received. The tests check if the client can connect to the broker, if the client can subscribe to topics, if the client can publish messages, and if the client can receive messages.
+            Mosquitto is required to run the tests, so the command to run the tests is:
+            \begin{verbatim}
+mosquitto
+python -m unittest test.connection.connection_handler_test
+            \end{verbatim}
 
-            \begin{itemize}
-                  \item e.g.~production vs.~test environment
-            \end{itemize}
-      \item for each test specify:
-
-            \begin{itemize}
-                  \item rationale of individual tests
-                  \item how were the test automated
-                  \item how to run them
-                  \item which requirement they are testing, if any
-            \end{itemize}
 \end{itemize}
-
-\begin{quote}
-      recall that \emph{deployment} \textbf{automation} is commonly used to
-      \emph{test} the system in \emph{production-like} environment
-\end{quote}
-
-\begin{quote}
-      recall to test corner cases (crashes, errors, etc.)
-\end{quote}
 
 \subsection{Acceptance test}\label{acceptance-test}
-
+To test the interaction between the components we used manual tests, for example, we created a lobby and joined it with multiple clients, then we tested the interaction between the clients and the server.
+To run this type of test use the command:
 \begin{itemize}
-      \item did you perform any \emph{manual} testing?
-
-            \begin{itemize}
-                  \item what did you test?
-                  \item why wasn't it automatic?
-            \end{itemize}
+      \item Windows
+      \begin{verbatim}
+      .\start_test_game_ui.ps1 [number_of_clients]
+      \end{verbatim}
+      \item Linux
+      \begin{verbatim}
+      ./start_test_game_ui.sh [number_of_clients]
+      \end{verbatim}
 \end{itemize}
+This will start the game with the specified number of clients, two mosquitto intances and two servers.
+To clients are started from 1270.0.01:8080 incrementing the port number for each client, so you can open multiple clients in different browser tabs.
+
+
+All the acceptance criteria were tested manually with this scripts and they were successfully passed.
+
+
+We decided to not automatize this type of test because it requires a lot of interaction with the UI and a lot of requirements.
 
 \section{Release}\label{release}
 
