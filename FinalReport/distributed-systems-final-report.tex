@@ -338,7 +338,7 @@ Dotted lines are for subscribe messages, while solid lines are for publish messa
 %   e.g. users' data, products' data, orders' data,
 % Class diagram are welcome here
 
-The system will be fundamentally composed by the classes shown in \cref{fig:classes}. 
+The system will be fundamentally composed by the classes shown in \cref{fig:classes}.
 
 Each component models the real world entities that are needed to play the game in a non-distributed
 way, these are the classes that the controller will later use to make the game work.
@@ -365,9 +365,9 @@ It can be asked to:
 
 At the core of the entire system are messages, these, given the simple nature of the game,
 are quite simple too: containing a single object that represents the move the player wants to make or
-the response of the server. 
+the response of the server.
 
-The real difference and context of the message is given by the topic to which it is published. 
+The real difference and context of the message is given by the topic to which it is published.
 
 All the topics used by the system can be view in it's associated enum but are not directly
 used when sending a message since most of them are different depending on the context in which they are used.
@@ -439,13 +439,13 @@ The following are all the components actually needed and their behaviours:
       \item
             \textbf{The client} \cref{fig:clientStates} \par
             The client starts by establishing a connection to the MQTT broker, since it's fundamental
-            for each part of the system. 
+            for each part of the system.
 
             Right after it asks the player for their name and waits for the server approval.
-            If the request is successful, the client can now choose to join or create a lobby. 
+            If the request is successful, the client can now choose to join or create a lobby.
 
             A player can set its status to ready when waiting for a game to start, only when everyone is ready
-            the server will send a message to start the game. 
+            the server will send a message to start the game.
 
             When the game starts, the client waits for the server to publish the game status to
             show the interface to the player.
@@ -491,7 +491,7 @@ The following are all the components actually needed and their behaviours:
             \textbf{The game agent} \cref{fig:gameAgentStates} \par
             The game agent is an instance of the server that takes on the role of managing the single matches.
             It is in charge of managing the game state, the players' moves and the game logic.
-            
+
             Every time a player rises the stake, it calculates and sends the next minimum stake that the
             next player can make.
             It only waits for a minute for each player to make a move, if the player does not make a move
@@ -506,10 +506,10 @@ The following are all the components actually needed and their behaviours:
 
 \subsection{Data and Consistency Issues}\label{data-and-consistency-issues}
 
-Since we don't need to store data permanently because this is a card game, we don't deal with queries 
+Since we don't need to store data permanently because this is a card game, we don't deal with queries
 and databases.
 
-Some data is shared between components, for example the game status, the players' nicknames, and 
+Some data is shared between components, for example the game status, the players' nicknames, and
 other crucial information to perform the game.
 
 \subsection{Fault-Tolerance}\label{fault-tolerance}
@@ -536,48 +536,48 @@ The mechanics differ in their scope and purpose:
             \begin{itemize}
                   \item \textbf{Backup Server} \par
                         The server is backed up by a second server that runs as a server but is
-                        not active; so it only listens to the messages sent by the clients and the broker 
+                        not active; so it only listens to the messages sent by the clients and the broker
                         and keeps a copy of the game state.
 
-                        If the main server fails, the backup server can take its place and resume 
+                        If the main server fails, the backup server can take its place and resume
                         the communication between the clients and the broker. This mechanism ha a limitation
                         since doesn't keep a record of ongoing games, simply placing players back in lobbies.
-                        This happens because the game loop runs as a separate thread launched by 
-                        the main server, so if the main server fails during a game, the game loop 
-                        is lost too; in that case, all the players receive a message that the 
+                        This happens because the game loop runs as a separate thread launched by
+                        the main server, so if the main server fails during a game, the game loop
+                        is lost too; in that case, all the players receive a message that the
                         game is over before being redirected to the lobby screen.
 
-                        All of this is implemented using a heartbeat mechanism, where the server sends a 
-                        heartbeat message to the backup every 2 seconds. If the backup does not 
-                        receive the heartbeat message within the fixed time, it assumes that 
-                        the main server has failed and takes his place elevating itself to the role of 
+                        All of this is implemented using a heartbeat mechanism, where the server sends a
+                        heartbeat message to the backup every 2 seconds. If the backup does not
+                        receive the heartbeat message within the fixed time, it assumes that
+                        the main server has failed and takes his place elevating itself to the role of
                         main server.
                   \item \textbf{Broker Backup} \par
-                        The broker is backed up by a second broker that keeps a copy of the messages 
+                        The broker is backed up by a second broker that keeps a copy of the messages
                         sent by the clients and the server.
-                        If the main broker fails, the backup broker can take its place and resume 
+                        If the main broker fails, the backup broker can take its place and resume
                         the communication between the clients and the server.
-                        This is implemented using the mosquitto configuration file, where the main 
-                        server is configured to send a copy of every message to the backup broker 
+                        This is implemented using the mosquitto configuration file, where the main
+                        server is configured to send a copy of every message to the backup broker
                         with a bridge connection.
 
-                        The backup broker is configured to listen to the same topics as the 
+                        The backup broker is configured to listen to the same topics as the
                         main broker, so it can receive the messages sent by the clients and the server.
-                         
-                        When the main broker fails, the \texttt{ConnectionHandler} class both used 
-                        by the client and server tries to connect to the backup broker, 
+
+                        When the main broker fails, the \texttt{ConnectionHandler} class both used
+                        by the client and server tries to connect to the backup broker,
                         and if it succeeds, it can resume all communications where they left off.
             \end{itemize}
       \item
             \textbf{Client-Side} \par
             To make sure that no accidental disconnection can ruin the game, the game agent gives to
-            each player a minute to make a move, if the player does not respond in time, it will be 
+            each player a minute to make a move, if the player does not respond in time, it will be
             kicked from the game, continuing with the remaining players.
 
-            Nevertheless, if anything goes wrong the client always has the opportunity to try to 
-            reconnect, picking where it left off. While playing the web browser saves the user 
+            Nevertheless, if anything goes wrong the client always has the opportunity to try to
+            reconnect, picking where it left off. While playing the web browser saves the user
             information in the local storage so that the client can retrieve when trying to reconnect.
-            If successful, the client will send a message to the server asking for the current game 
+            If successful, the client will send a message to the server asking for the current game
             state, and the game agent will publish a message with the current game state.
 \end{itemize}
 
@@ -735,6 +735,13 @@ We develop the system in a TDD (Test Driven Development) way, so we write the te
                   \item how to \emph{install} them?
             \end{itemize}
 \end{itemize}
+
+\begin{figure}[H]
+      \centering
+      \includegraphics[width=0.49\textwidth]{figures/dependencyGraph.png}
+      \caption{Dependency graph of the system}
+      \label{fig:dependencyGraph}
+\end{figure}
 
 \section{Deployment}\label{deployment}
 
