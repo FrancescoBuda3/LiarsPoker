@@ -712,37 +712,24 @@ To run this type of test use the command:
       \end{verbatim}
 \end{itemize}
 This will start the game with the specified number of clients, two mosquitto intances and two servers.
-To clients are started from 1270.0.01:8080 incrementing the port number for each client, so you can open multiple clients in different browser tabs.
-
-
-All the acceptance criteria were tested manually with this scripts and they were successfully passed.
-
-
+To clients are started from 1270.0.01:8080 incrementing the port number for each client, so you can open multiple clients in different browser tabs.\newline
+All the acceptance criteria were tested manually with this scripts and they were successfully passed.\newline
 We decided to not automatize this type of test because it requires a lot of interaction with the UI and a lot of requirements.
 
 \section{Release}\label{release}
 
+The components are organized into a set of modules, each one with its own functionality.
+As shown in \cref{fig:dependencyGraph}, all the modules depends on models classes, but every other module is independent from the others, so they can be used separately; in fact it is possible run single components importing only the modules described below:
 \begin{itemize}
-      \item how where components organized into \emph{inter-dependant modules} or
-            just a single monolith?
-
-            \begin{itemize}
-                  \item provide a \emph{dependency graph} if possible
-            \end{itemize}
-      \item were modules distributed as a \emph{single archive} or \emph{multiple
-                  ones}?
-
-            \begin{itemize}
-                  \item why?
-            \end{itemize}
-      \item how were archive versioned?
-      \item were archive \emph{released} onto some archive repository (e.g.~Maven,
-            PyPI, npm, etc.)?
-
-            \begin{itemize}
-                  \item how to \emph{install} them?
-            \end{itemize}
+      \item \textbf{Client}\par
+            model, services and view
+      \item \textbf{Server}\par
+            model, controller
+      \item \textbf{Broker}\par
+            config
 \end{itemize}
+Eventually, it is possible to add the utils module to use debug and log features.
+
 
 \begin{figure}[H]
       \centering
