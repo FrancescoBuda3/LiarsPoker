@@ -23,10 +23,11 @@ class Game(GameInterface):
     
     def remove_player(self, player):
         self.__core.remove_player(player)
-        if len(self.__core.get_players()) == 1:
-            self.__phase = GamePhase.GAME_OVER
-        else:
-            self.__phase = GamePhase.PLAYING
+        if self.__phase != GamePhase.WAITING_FOR_PLAYERS and self.__phase != GamePhase.GAME_OVER: 
+            if len(self.__core.get_players()) == 1:
+                self.__phase = GamePhase.GAME_OVER
+            else:
+                self.__phase = GamePhase.PLAYING
 
     def start_game(self):
         if self.__phase != GamePhase.WAITING_FOR_PLAYERS:
