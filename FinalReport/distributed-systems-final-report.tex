@@ -14,7 +14,7 @@
 \newcommand{\emailaddr}[1]{\href{mailto:#1}{\texttt{#1}}}
 
 \title{\LARGE
-    Liar's Poker 
+    Liar's Poker
 }
 
 \author{
@@ -94,12 +94,12 @@
 This project aims to develop a web-based game application for playing Liar's Poker, a fun and engaging card game centered around deception and bluffing. Inspired by traditional poker, Liar's Poker is played with a standard deck of cards and is suitable for two or more players. Our application will provide an online platform where users can enjoy the game with others in real-time, no matter where they are.
 
 \subsection{Game Rules}\label{game-rules}
-Liar's Poker is a game of deception and bluffing that is played with a standard deck of cards without any joker. Each player starts with one card. A round starts with someone naming a poker combination. With the turn rotating clockwise, each next player has a choice:
+Liar's Poker is played with a standard deck of cards without any joker. Each player starts with one card. A round starts with someone naming a poker combination. With the turn rotating clockwise, each next player has a choice:
 \begin{itemize}
   \item \textbf{Rise the stakes}\par
   name a higher poker combination than the one named by the previous player that they belive is present in the combined cards of all players.
   \item \textbf{Call bullsh*t} \par
-  the player calls bullsh*t on the previous player's combination if the player think the previous player is bluffing or mistaken.
+  call bullsh*t on the previous player's combination if the player think the previous player is bluffing or mistaken.
 \end{itemize}
 When someone calls bullsh*t, all players reveal their cards and the presence of the contested poker hand is verified. If the hand is present, the player who called bullsh*t loses the round; else, the player who named this poker hand loses the round.\par\noindent
 The loser starts all subsequent rounds with one extra card, and names the first combination in the next round.\par\noindent
@@ -113,7 +113,7 @@ The last person remaining in the game is the winner.
   \item \textbf{Question:} \emph{What happens if one player disconnect during the game?}\par
         \textbf{Answer:} The game will pause until the player reconnects. If the player does not reconnect within a certain time frame, they will be kicked from the game.
   \item \textbf{Question:} \emph{What happens if the server dies during the game?}\par
-        \textbf{Answer:} The game goes on
+        \textbf{Answer:} The application goes on, but the game is lost. The players will be redirected to the lobby screen and can choose to play another game or leave the lobby.
   \item \textbf{Question:} \emph{Does the system need to store player's data?}\par
         \textbf{Answer:} The system doesn't need to store data, as the player does not need to create an account.
 \end{itemize}
@@ -121,27 +121,27 @@ The last person remaining in the game is the winner.
 This section describes the typical usage scenario of a group of friends playing Liar's Poker on our platform.
 \begin{enumerate}
   \item \textbf{Name choice}\par
-  The player chooses a unique nickname to use during the game.
+  The player chooses a nickname to use during the game.
   \item \textbf{Lobby creation}\par
-  One user creates a new lobby and can decide to share the access code with friends or make the lobby public. 
+  One user creates a new lobby and share the access code with friends. 
   \item \textbf{Joining the lobby}\par
-  Other users join the lobby by entering the code or choosing from the public lobbys.
+  Other users join the lobby by entering the code.
   \item \textbf{Gameplay}\par
-  Each player receive one card and than the game starts (The first player is chosen randomically). The game proceeds as described in the rules. when the player want to rise the stakes, he can choose from the possible combinations (non valid combinations will be disabled), if the combination needs some specific card to be declared, the player will be provided with a list of possible cards to choose from.
+  Each player receive one card and than the game starts. The game proceeds as described in the rules. when the player want to rise the stakes, he can choose from the possible combinations (non valid combinations will be disabled), if the combination needs some specific rank or suit to be declared, the player will be provided with a list of possible ones to choose from.
   \item \textbf{Elimination}\par
-  When a player loses, they are eliminated from the game and they can chose to spectate the game or leave the lobby.
+  When a player loses, they are eliminated from the game.
   \item \textbf{End of the game}\par
-  When the game ends the winner is declared and players who are still in the lobby will be asked wether they want to play another game or leave the lobby.
+  When the game ends the winner is declared and players will be redirected to the lobby page where they can choose to play another game or leave the lobby.
 \end{enumerate}
 
 % create a figure with 3 images
 \begin{figure}[H]
   \centering
-  \subfloat[Home Screen]{\includegraphics[width=0.5\textwidth]{figures/useCase1.png}}
+  \subfloat[Home and Lobby Selection]{\includegraphics[width=0.5\textwidth]{figures/homeLobbyUseCase.png}}
   \hfill
-  \subfloat[Match Ended Screen]{\includegraphics[width=0.4\textwidth]{figures/useCase3.png}}
+  \subfloat[Lobby]{\includegraphics[width=0.5\textwidth]{figures/lobbyUseCase.png}}
   \hfill
-  \subfloat[Match]{\includegraphics[width=1\textwidth]{figures/useCase2.png}}
+  \subfloat[Match]{\includegraphics[width=1\textwidth]{figures/gameUseCase.png}}
   \caption{Use Case Diagrams}
 \end{figure}
 
@@ -179,7 +179,7 @@ Starting from the concept, we can identify the following requirements for the ap
 \begin{enumerate}
   \item \textbf{Lobby Creation}\par
   The application must allow users to create a new lobby and share the access code with friends.
-  \item \textbf{Joining the Lobby}\par
+  \item \textbf{Lobby Joining}\par
   The application must allow users to join a lobby by entering the access code.
   \item \textbf{Gameplay}\par
   The application must allow users to play Liar's Poker following the game rules.
@@ -192,9 +192,8 @@ Starting from the concept, we can identify the following requirements for the ap
   \begin{itemize}
     \item \textbf{Acceptance Criteria:} The system must be able to handle at least 5 concurrent games.
   \end{itemize}
-  
   \item \textbf{Fault Tollerance}\par
-  The application must be able to handle disconnections and server failures without losing game data. 
+  The application must be able to handle user disconnections without losing a running game and should recover from server failures. 
   \begin{itemize}
     \item \textbf{Acceptance Criteria:} The system must be able to recover from server failures within 1 minute.
   \end{itemize}
@@ -216,25 +215,25 @@ Starting from the concept, we can identify the following requirements for the ap
 in this section we list all the possible cards combinations, that can be declared during the game, ordered by increasing value:
 \begin{enumerate}
   \item \textbf{High Card}\par
-  the player has the highest card in the game
+  in the combined cards of all players there is a card with the rank declared by the player.
   \item \textbf{Pair}\par
-  in the combined cards of all players there are two cards with the same value
+  in the combined cards of all players there are two cards with the same rank declared by the player.
   \item \textbf{Two Pair}\par
-  in the combined cards of all players there are two pairs of cards with the same value
+  in the combined cards of all players there are two pairs of cards with the same ranks declared by the player.
   \item \textbf{Three of a Kind}\par
-  in the combined cards of all players there are three cards with the same value
-  \item \textbf{Flush}\par
-  in the combined cards of all players there are five cards with the same suit
+  in the combined cards of all players there are three cards with the same rank declared by the player.
   \item \textbf{Straight}\par
-  in the combined cards of all players there are five cards with consecutive values
+  in the combined cards of all players there are five cards with consecutive values declared by the player.
+  \item \textbf{Flush}\par
+  in the combined cards of all players there are five cards with the same suit declared by the player.
   \item \textbf{Full House}\par
-  in the combined cards of all players there are three cards with the same value and two cards with the same value
+  in the combined cards of all players there is a \emph{pair} and a \emph{three of a kind} with the respective ranks declared by the player. 
   \item \textbf{Four of a Kind}\par
-  in the combined cards of all players there are four cards with the same value and one card with a different value
-  \item \textbf{Poker}\par
-  in the combined cards of all players there are four cards with the same value
+  in the combined cards of all players there are four cards with the same value declared by the player.
   \item \textbf{Straight Flush}\par
-  in the combined cards of all players there are five cards with consecutive values and the same suit
+  in the combined cards of all players there are five cards with consecutive values and the same suit declared by the player.
+  \item \textbf{Royal Flush}\par
+  in the combined cards of all players there are five cards with the same suit declared by the player and the ranks \emph{10}, \emph{J}, \emph{Q}, \emph{K} and \emph{Ace}.
 \end{enumerate}
 
 \begin{comment}
@@ -551,12 +550,22 @@ The mechanics differ in their scope and purpose:
   \item
   \textbf{Server-Side} \par
   The server and the broker are at the core of the game, if they fail the game is lost. \newline
-  To prevent this from happening, they are costantly monitored (about once per minute) by a backup
-  server. The whole porpouse of the backup is to keep a copy of the game state and to be able to
-  resume the game where it left off, in case of failure it launches a new istance of 
-  whichever failed, setting it up with the saved data.
-  \item
-  \textbf{Network-Side} \par
+  To prevent this from happening, they are costantly monitored.
+  There are two different implementations of fault tolerance:
+  \begin{itemize}
+    \item \textbf{Backup Server} \par
+    The server is backed up by a second server that runs as a server but is not active; so it only listens to the messages sent by the clients and the broker and keeps a copy of the game state. \newline
+    If the main server fails, the backup server can take its place and resume the communication between the clients and the broker. With this mechanism, if the main server fails, the backup server can take its place and resume the system but not the game, so the game is lost.
+    This happens because the \texttt{game\_loop} runs as a thread launched by the main server, so if the main server fails during a game, the game loop is lost too; so in that case, all the players receive a message that the game is over and they are redirected to the lobby screen. \newline
+    This is implemented using a heartbeat mechanism, where the server sends a heartbeat message to backup server every 2 seconds. If the backup does not receive the heartbeat message within a certain time frame, it assumes that the main server has failed and takes his place elevating itself to the main server. \newline
+    \item \textbf{Broker Backup} \par
+    The broker is backed up by a second broker that keeps a copy of the messages sent by the clients and the server. 
+    If the main broker fails, the backup broker can take its place and resume the communication between the clients and the server.
+    This is implemented using the mosquitto configuration file, where the main server is configured to send a copy of every message to the backup broker with a bridge connection. \newline
+    The backup broker is configured to listen to the same topics as the main broker, so it can receive the messages sent by the clients and the server. \newline
+    When the main broker fails, the \texttt{ConnectionHandler} class in the client tries to reconnect to the backup broker, and if it succeeds, it can resume the communication with the server and the game. \newline
+  \end{itemize}
+  \textbf{Client-Side} \par
   To make sure that no accidental disconnection can ruin the game, the game agent checks the connection
   of each player every time it's their turn. If a player is disconnected, the game agent will wait for
   them to reconnect, if they don't in a certain time frame they will be kicked from the game. \newline
@@ -595,32 +604,48 @@ There aren't any security mechanisms in our project. \newline
 
 \section{Implementation}\label{implementation}
 
+The implementation phase is the one where the design is put into practice.
+\subsection{Network Protocols}\label{network-protocols}
+The main network protocol used is MQTT for the communication between the components. 
+To implement the MQTT protocol we used the Paho library for Python, which is a client library for the MQTT protocol. \newline
+Thanks to MQTT protocol and its path-like structure, we can easily create topics for each lobby and each player, allowing them to communicate with the server and with each other. \newline
+An example of a topic structure is:
 \begin{itemize}
-  \item which \textbf{network protocols} to use?
+  \item \texttt{create\_lobby} for the create lobby messages
+  \item \texttt{join\_lobby} for the join lobby messages
+  \item \texttt{lobby/}\textless LOBBY\_ID\textgreater\texttt{/raise\_stake} for the raise stake messages
+  \item \texttt{lobby/}\textless LOBBY\_ID\textgreater\texttt{/check\_liar} for the liar detection messages
+\end{itemize}
 
-  \begin{itemize}
-    \item e.g.~UDP, TCP, HTTP, WebSockets, gRPC, XMPP, AMQP, MQTT, etc.
-  \end{itemize}
-  \item how should \emph{in-transit data} be \textbf{represented}?
+As we can see, the topics are structured in a way that allows us to easily identify the lobby and the type of message being sent. This is not always true, beacuse all the messages sent before the lobby joining are sent to the general topic, so every player can see them, but after the lobby joining, the messages are sent to the specific lobby topic. \newline
+To recognize the messages in the general topic, we use a specific format for the messages, where the body contains the serialized player object. This part will be explained in more detail in the next sections. \newline
 
-  \begin{itemize}
-    \item e.g.~JSON, XML, YAML, Protocol Buffers, etc.
-  \end{itemize}
-  \item how should \emph{databases} be \textbf{queried}?
+The communication is done using a class called \texttt{ConnectionHandler}, which is responsible for managing the connection to the broker and the communication with the server. That class provides methods to subscribe to topics, publish messages, and handle incoming messages. \newline
+The clients are automatically subscribed to the game topics when they join a lobby, so they can receive the messages from the server. On the other hand, the server is subscribed to all the topics, so it can receive the messages from the clients and publish the game status. \newline
+This is the list of all the topics used in the system: (as said before, some topics are used directly in this way while others are used with a specific lobby ID and pattern): 
+\begin{itemize}
+    \item \texttt{lobby}
+    \item \texttt{new\_lobby}
+    \item \texttt{new\_player}
+    \item \texttt{ready\_to\_play}
+    \item \texttt{start\_game}
+    \item \texttt{join\_lobby}
+    \item \texttt{leave\_lobby}
+    \item \texttt{remove\_player}
+    \item \texttt{start\_turn}
+    \item \texttt{start\_round}
+    \item \texttt{round\_loser}
+    \item \texttt{game\_over}
+    \item \texttt{raise\_stake}
+    \item \texttt{check\_liar}
+    \item \texttt{heartbeat}
+    \item \texttt{server\_error}
+    \item \texttt{game\_info}
+\end{itemize}
+\subsection{Data Formats and representations}\label{data-formats}
 
-  \begin{itemize}
-    \item e.g.~SQL, NoSQL, etc.
-  \end{itemize}
-  \item how should components be \emph{authenticated}?
-
-  \begin{itemize}
-    \item e.g.~OAuth, JWT, etc.
-  \end{itemize}
-  \item how should components be \emph{authorized}?
-
-  \begin{itemize}
-    \item e.g.~RBAC, ABAC, etc.
-  \end{itemize}
+\begin{itemize}
+  \item e.g.~JSON, XML, YAML, Protocol Buffers, etc.
 \end{itemize}
 
 \subsection{Technological details}\label{technological-details}
@@ -633,6 +658,12 @@ There aren't any security mechanisms in our project. \newline
 \section{Validation}\label{validation}
 
 \subsection{Automatic Testing}\label{automatic-testing}
+For the automatic testing we used the \texttt{unittest} framework, which is a built-in Python module for testing code. Every component of the system is tested with a set of unit tests that check the functionality of the methods and the correctness of the data. \newline
+The tests are organized in a way that allows us to test each component individually, and then test the interaction between the components. \newline
+Every model class has its own test file, where the methods are tested with different inputs and expected outputs. Also the class to serialize and deserialize messages is tested, to ensure that the messages are correctly serialized and deserialized. \newline
+We don't have any automated tests for the integration between the components, or interaction tests by the network. To test the interaction between the components we used manual tests, for example, we created a lobby and joined it with multiple clients, then we tested the interaction between the clients and the server. \newline
+To run the tests, we used the \texttt{unittest} command line interface, which allows us to run all the tests in a specific directory. The tests are run in a separate process, so they don't interfere with the main application. \newline
+We develop the system in a TDD (Test Driven Development) way, so we write the tests before writing the code. This allows us to ensure that the code is correct and that the tests are passing. \newline
 
 \begin{itemize}
   \item how were individual components \textbf{\emph{unit}-test}ed?
