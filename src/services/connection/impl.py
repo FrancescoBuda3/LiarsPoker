@@ -29,8 +29,9 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
         self._topic_queues = {topic: queue.Queue() for topic in topics}
         self._serializer = Serializer()
         self._deserializer = Deserializer()
-        self._client = self.__connect_mqtt(self._client_id)
         self._topics = topics
+        self._client = self.__connect_mqtt(self._client_id)
+        
 
     def __connect_mqtt(self, client_id: str):
         client = mqtt.Client(client_id=client_id, protocol=mqtt.MQTTv5)
