@@ -7,6 +7,7 @@ from src.model.player import Player
 from src.model.stake import LowestStake, Stake
 from src.model.stake.combination import Combination
 from src.view.components.dialogs import suit_picker
+from src.view.components.drawer import hint_drawer
 from src.view.components.game import opponent_component, stake_display
 from src.view.logic.game import check_cards_combination, cards_permitted
 from utils.state import user_state
@@ -55,6 +56,9 @@ def setup():
 
         def __to_game_topic(topic: Topic) -> str:
             return "lobby/" + str(user_state.selected_lobby) + topic
+        
+        drawer = hint_drawer()
+        drawer.toggle()
 
         @ui.refreshable
         def content():
@@ -109,7 +113,7 @@ def setup():
                         local_player, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)
                 else:
                     ui.notify('Choose valid cards!')
-
+                
             def wait_start_turn():
                 nonlocal player_turn
                 nonlocal min_stake
@@ -188,9 +192,16 @@ def setup():
                     with ui.row().classes('flex items-end justify-end p-2'):
                         with ui.element('div').classes('top-4 right-4 z-50')\
                                 .style('padding: 5px;'):
+                            ui.button('Hint').on('click', lambda: drawer.toggle())\
+                                .classes('bg-red-500 text-white px-4 py-2 rounded shadow-lg hover:bg-red-600 transition')
+                        ui.element('div').classes('flex-grow')
+                        with ui.element('div').classes('top-4 right-4 z-50')\
+                                .style('padding: 5px;'):
                             ui.button('Logout')\
                                 .on('click', leave_game)\
                                 .classes('bg-red-500 text-white px-4 py-2 rounded shadow-lg hover:bg-red-600 transition')
+                        
+                        
                     with ui.row().classes('flex items-center justify-center'):
                         for i in range(len(players)):
                             pl: Player = players[i]
