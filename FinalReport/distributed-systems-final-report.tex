@@ -681,12 +681,37 @@ in this way while others are used with a specific lobby ID and pattern):
 \subsection{Data Formats and representations}\label{data-formats}
 % e.g.~JSON, XML, YAML, Protocol Buffers, etc.
 
-% TODO
+To make the communication between components through the MQTT protocol possible, a way to serialize
+and deserialize the information in the form of messages was needed.
+We decided to use JSON as the data format of choice, since it is lightweight and easy-to-use.
+Through the use of the \texttt{json} library in Python, it was possible to create two classes used
+by the connection handler to, respectively, serialize and deserialize the information:
+\begin{itemize}
+      \item \texttt{Serializer} is used to serialize the objects composing a Message dictionary into a 
+            JSON string.
+      \item \texttt{Deserializer} is used to deserialize the JSON string back into a Python
+            object, which can be used by the application.
+\end{itemize}
+In short the message sent start as a Python dictionary of objects, then it gets serialized into a 
+JSON string and sent to the broker, which then publishes it to the subscribed clients.
+When a client receives a message, it deserializes the JSON string back into a Python dictionary, 
+which can now be used to access the objects, provided that the keys are known.
 
 \subsection{Technological details}\label{technological-details}
 % any particular framework / technology being exploited goes here
 
-% TODO
+The project is completely implemented in Python, using the following external libraries to make everything
+possible:
+\begin{itemize}
+      \item \href{https://pypi.org/project/paho-mqtt/}{paho-mqtt} is used to implement the MQTT 
+            protocol and manage the communication between the components. This library provides a 
+            simple and easy-to-use interface to connect to the broker, subscribe to topics, publish 
+            messages, and handle incoming messages.
+      \item \href{https://nicegui.io/}{nicegui} is used to implement the user interface of the game, 
+            allowing players to interact with the game through a web browser. The strength of this 
+            library is the ability to create both the interface and logic of the client as a single 
+            Python script, which is then compiled into a single web application.
+\end{itemize}
 
 \newpage
 \section{Validation}\label{validation}
@@ -810,7 +835,7 @@ To download the software, you can clone the repository using the following comma
 \begin{verbatim}
 git clone https://github.com/FrancescoBuda3/LiarsPoker
 \end{verbatim}
-or download the zip file from the repository page. 
+or download the zip file from the \href{https://github.com/FrancescoBuda3/LiarsPoker}{repository page}. 
 
 \newpage
 \section{User Guide}\label{user-guide}
@@ -841,8 +866,6 @@ poetry install
 %     - provide instructions
 %     - provide expected outcomes
 %     - provide screenshots if possible
-
-% TODO
 
 To run the software, you have to run the following command in the project root directory 
 (each command must be run in a different terminal):
@@ -947,7 +970,11 @@ The other screenshots are related to the game:
 % Each member must describe their role within the group as objectively as possible.
 % It should be noted that each student is only responsible for their own section.
 
-% TODO
+\subsection{Francesco Buda}\label{francesco-buda}
+
+\subsection{Emanuele Sanchi}\label{emanuele-sanchi}
+
+\subsection{Tommaso Severi}\label{tommaso-severi}
 
 \bibliographystyle{plain}
 \bibliography{references}
