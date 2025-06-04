@@ -117,7 +117,7 @@ online platform where users can enjoy the game with others in real-time.
 
 \subsection{Game Rules}\label{game-rules}
 Liar's Poker is played with a standard deck of cards without any joker. Each player starts with one
-card. A round starts with someone naming a poker combination. the turn rotate clockwise and each
+card. A round starts with someone naming a poker combination. The turn rotate clockwise and each
 next player has a choice:
 \begin{itemize}
       \item \textbf{Rise the stakes}\par
@@ -980,11 +980,11 @@ The other screenshots are related to the game:
 
 \subsection{Francesco Buda}\label{francesco-buda}
 As a member of the group, my first role was to think about the requirements and use cases of the application,
-considering also what we wanted the behavior of the system to be in case of errors or unexpected situations.
+considering also what we wanted the behaviour of the system to be in case of errors or unexpected situations.
 I implemented the core game logic classes, in charge of managing the game state, and designed the related 
 message structures. I also implemented the deserializer class, the connection handler class, which is
 responsible for managing the message exchanging between the server and the clients, and the client-side fault
-tolerance mechanisms. I think the workflow of the project was well organized, also thanks to Tommaso Severi, who
+tolerance mechanisms. Furthermore, I think the workflow of the project was well organized, also thanks to Tommaso Severi, who
 was the one who kept the group together and made sure that everything was working as expected having a precise
 overall view on the project. On my side, I personally gave my best to be as good as possible in all the situations
 and I think the final product is a well-made project, with a good level of complexity and good code quality. 
@@ -992,7 +992,21 @@ As the design is, on my opinion, strong and well-thought-out, the weaknesses or 
 mainly related to the technical side in order to improve the reliability, security and availability of the system.
 
 \subsection{Emanuele Sanchi}\label{emanuele-sanchi}
-My role in the group was to design the architecture of the system and to implement the server-side logic designing also the interactions between the components. I implemented the server-side classes, which are responsible for managing the game state and the players' actions, and I also implemented the fault tolerance mechanisms on the server-side (both for python server and for the MQTT broker). I also implemented much of the MessageFactory class methods; this class is responsible for creating the messages with a certain structure. In addition, I helped to create a base version of some client-side page like the game page or the lobby selection, to test my previous works like interaction with the server and with the other players. The final version of these pages were then implemented by Tommaso Severi and Francesco Buda. I think that the final product is a good proof of concept of a distributed system, with a good level of complexity and good code quality. The architecture is well-thought-out, allowing for easy maintenance and future extensions. The weaknesses or improvements that could have been made are mainly related to the user experience, the security of the system which could be improved in future versions and the fault tolerance mechanisms that could be more robust for example by adding a database to store the game state and the players' actions. Overall, I am satisfied with the result and I think that the project is a good example of a distributed system.
+My role in the group was to design the architecture of the system and to implement the server-side 
+logic designing also the interactions between the components. I implemented the server-side classes, 
+which are responsible for managing the game state and the players' actions, and I also implemented 
+the fault tolerance mechanisms on the server-side (both for python server and for the MQTT broker). 
+I also implemented much of the MessageFactory class methods; this class is responsible for creating 
+the messages with a certain structure. In addition, I helped to create a base version of some 
+client-side page like the game page or the lobby selection, to test my previous works like interaction 
+with the server and with the other players. The final version of these pages were then implemented by 
+Tommaso Severi and Francesco Buda. I think that the final product is a good proof of concept of a 
+distributed system, with a good level of complexity and good code quality. The architecture is 
+well-thought-out, allowing for easy maintenance and future extensions. The weaknesses or improvements 
+that could have been made are mainly related to the user experience, the security of the system which 
+could be improved in future versions and the fault tolerance mechanisms that could be more robust for 
+example by adding a database to store the game state and the players' actions. Overall, I am satisfied 
+with the result and I think that the project is a good example of a distributed system.
 
 \subsection{Tommaso Severi}\label{tommaso-severi}
 I was in charge of designing the class and state diagrams of the system in the design phase, always
