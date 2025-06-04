@@ -2,7 +2,9 @@
 
 ## How to install mosquitto
 
-Mosquitto version: 1.6.9 ([Download Here](https://mosquitto.org/files/binary))
+Mosquitto version: 1.6.9 
+* Windows x64 ([Executable](https://mosquitto.org/files/binary/win64/mosquitto-1.6.9-install-windows-x64.exe))
+* Linux ([Tar package](https://mosquitto.org/files/source/mosquitto-1.6.9.tar.gz))
 
 ## How to install the python dependecies
 
