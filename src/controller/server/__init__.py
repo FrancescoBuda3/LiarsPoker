@@ -65,7 +65,7 @@ class _Lobby:
         for p in self._players:
             p.ready = False
 
-    def start_game(self, shutdown_event: threading.Event):
+    def start_game(self, shutdown_event: threading.Event, debug: bool = False):
         if self.is_ready():
             self.agent = Thread(target=game_loop, args=(
                 self._players, self._id, shutdown_event))
@@ -139,9 +139,11 @@ class Server(Debuggable):
     _players: list[Player] = []
     _lobbies: _Lobbies_Handler
     _shutdown_event: threading.Event
+    _debug: bool
 
     def __init__(self, debug=True, is_primary=True):
         Debuggable.__init__(self, debug)
+        self._debug = debug
         self._lobbies = _Lobbies_Handler()
         self._connection = ConnectionHandler(
             "Server", [t for t in Topic], debug=debug)
@@ -233,7 +235,7 @@ class Server(Debuggable):
                                 player.id, lobby.id, player_ready, lobby.players),
                             Topic.READY_TO_PLAY)
                         if lobby.is_ready():
-                            lobby.start_game(self._shutdown_event)
+                            lobby.start_game(self._shutdown_event, self._debug)
                             lobby.unready()
                             self._connection.send_message(
                                 self._message_factory.create_start_game_message(
@@ -267,7 +269,7 @@ class Server(Debuggable):
                     if self._is_primary:
                         self._connection.send_message(
                             self._message_factory.create_join_lobby_message(
-                                player.id, lobby_id, lobby.players, response),
+                                player.id, lobby_id, players_in_lobby, response),
                             Topic.JOIN_LOBBY)
 
                 case Topic.LEAVE_LOBBY:

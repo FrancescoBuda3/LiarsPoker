@@ -1,10 +1,10 @@
 param (
     [int]$clients_number,
-    [string]$debuggable = "a"
+    [string]$debuggable = "_"
 )
 
 if (-not $clients_number) {
-    Write-Host "Usage: .\start_clients.ps1 <clients_number>"
+    Write-Host "Usage: .\start_clients.ps1 <clients_number> <debug>"
     exit 1
 }
 
