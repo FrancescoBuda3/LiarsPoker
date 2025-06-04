@@ -6,10 +6,8 @@ from src.controller.message_factory.impl import MessageFactory
 from utils.connection import connection_handler
 
 
-def setup(debug: bool = False):
+def setup():
     from src.view.utils.layout import centered_layout
-    if debug:
-        connection_handler.set_debug(True)
 
     @ui.page('/lobby_select')
     def lobby_select_page():

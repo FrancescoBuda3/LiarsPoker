@@ -16,10 +16,8 @@ from src.controller.message_factory.impl import MessageFactory
 from utils.connection import connection_handler, unsubscribe_from_game_topics
 
 
-def setup(debug: bool = False):
+def setup():
     from src.view.components.dialogs import cards_picker, combination_picker, cards_display, white_cards_picker
-    if debug:
-        connection_handler.set_debug(True)
 
     message_factory = MessageFactory()
 
