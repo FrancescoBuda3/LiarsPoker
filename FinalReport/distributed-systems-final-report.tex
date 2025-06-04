@@ -788,16 +788,17 @@ To run this type of test use the command:
 \begin{itemize}
       \item Windows
             \begin{verbatim}
-      .\start_test_game_ui.ps1 [number_of_clients]
+      .\start_test_game_ui.ps1 [number_of_clients] [d]
             \end{verbatim}
       \item Linux
             \begin{verbatim}
-      ./start_test_game_ui.sh [number_of_clients]
+      ./start_test_game_ui.sh [number_of_clients] [d]
             \end{verbatim}
 \end{itemize}
 This will start the game with the specified number of clients, two mosquitto instances and two servers.
 The clients connections are established from 1270.0.01:8080 incrementing the port number for each 
-client, so you can  open multiple clients in different browser tabs.
+client, so you can  open multiple clients in different browser tabs. More over, the \texttt{d} flag
+is used to run the clients in debug mode, so you can see the logs in the console.
 
 All the acceptance criteria were tested manually with these scripts and successfully passed.
 
@@ -887,6 +888,7 @@ poetry run python src/controller/server/__init__.py second
 poetry run python src/view/__init__.py [port]
             \end{verbatim}
 \end{itemize}
+To run the system in debug mode, you just have to add the \texttt{d} flag at the end of each command.
 
 \subsection{Screenshots}\label{screenshots}
 Below are some screenshots of the software in action.
@@ -986,6 +988,7 @@ As the design is, on my opinion, strong and well-thought-out, the weaknesses or 
 mainly related to the technical side in order to improve the reliability, security and availability of the system.
 
 \subsection{Emanuele Sanchi}\label{emanuele-sanchi}
+My role in the group was to design the architecture of the system and to implement the server-side logic designing also the interactions between the components. I implemented the server-side classes, which are responsible for managing the game state and the players' actions, and I also implemented the fault tolerance mechanisms on the server-side (both for python server and for the MQTT broker). I also implemented much of the MessageFactory class methods; this class is responsible for creating the messages with a certain structure. In addition, I helped to create a base version of some client-side page like the game page or the lobby selection, to test my previous works like interaction with the server and with the other players. The final version of these pages were then implemented by Tommaso Severi and Francesco Buda. I think that the final product is a good proof of concept of a distributed system, with a good level of complexity and good code quality. The architecture is well-thought-out, allowing for easy maintenance and future extensions. The weaknesses or improvements that could have been made are mainly related to the user experience, the security of the system which could be improved in future versions and the fault tolerance mechanisms that could be more robust for example by adding a database to store the game state and the players' actions. Overall, I am satisfied with the result and I think that the project is a good example of a distributed system.
 
 \subsection{Tommaso Severi}\label{tommaso-severi}
 I was in charge of designing the class and state diagrams of the system in the design phase, always
