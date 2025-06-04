@@ -1,28 +1,43 @@
 # LiarsPoker
 
-## How to install and run mosquitto
+## How to install mosquitto
 
-Mosquitto version: 1.6.9 ([Download Here](https://mosquitto.org/files/binary/win64/mosquitto-1.6.9-install-windows-x64.exe))
+Mosquitto version: 1.6.9 
+* Windows x64 ([Executable](https://mosquitto.org/files/binary/win64/mosquitto-1.6.9-install-windows-x64.exe))
+* Linux ([Tar package](https://mosquitto.org/files/source/mosquitto-1.6.9.tar.gz))
 
-To run mosquitto with verbose option:
+## How to install the python dependecies
 
-`> mosquitto -v`
+Make sure to have Python 3.12 or higher installed ([Download Here](https://www.python.org/downloads/))
 
-## How to install dependecies and run the project
+Install poetry if you don't have it already:
 
-`> poetry install`
+`pip install poetry`
 
-`> poetry run python [file.py]`
+Then, navigate to the project root directory and run:
 
-### Files to run
+`poetry install`
 
-* Server: `src/controller/server/__init__.py`
-* GUI: `src/view/__init__.py [port]`
+### How to run the project
+
+* Mosquitto: 
+    1. `mosquitto -c src/config/mosquitto1.conf [-v]`
+    2. `mosquitto -c src/config/mosquitto2.conf [-v]`
+* Server: 
+    1. `src/controller/server/__init__.py primary [-d]`
+    2. `src/controller/server/__init__.py secondary [-d]`
+* GUI: 
+
+    `src/view/__init__.py [port] [-d]`
 
 ### Easy Testing
 
 Strictly for testing purposes in the same machine 
-to run the server, mosquitto and the GUI you can use either scripts depending on your OS:
-(**We strongly recommend to read the scripts before running them. Use at your own risk**)
-* Windows: `.\start_test_game_ui.ps1 [number_of_clients]`
-* Linux: `./start_test_game_ui.sh [number_of_clients]`
+to run the server, mosquitto and the GUI you can use either script depending on your OS:
+(**We strongly recommend reading the scripts before running them. Use at your own risk**)
+* Windows: 
+    
+    `.\start_test_game_ui.ps1 [number_of_clients] [d]`
+* Linux: 
+    
+    `./start_test_game_ui.sh [number_of_clients] [d]`
