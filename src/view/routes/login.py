@@ -4,8 +4,10 @@ from src.services.connection.topic import Topic
 from utils.state import user_state
 from utils.connection import connection_handler
 
-def setup():
+def setup(debug: bool = False):
     from src.view.utils.layout import centered_layout
+    if debug:
+        connection_handler.set_debug(True)
 
     @ui.page('/login')
     def login_page():

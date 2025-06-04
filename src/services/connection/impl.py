@@ -23,7 +23,7 @@ broker_index = 0
 
 
 class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
-    def __init__(self, name: str, topics: list[str], debug: bool = True):
+    def __init__(self, name: str, topics: list[str], debug: bool = False):
         Debuggable.__init__(self, debug)
         self._client_id = f'CONN_HANDLER_{name}_{uuid.uuid4()}'
         self._topic_queues = {topic: queue.Queue() for topic in topics}
@@ -31,6 +31,10 @@ class ConnectionHandler(ConnectionHandlerInterface, Debuggable):
         self._deserializer = Deserializer()
         self._topics = topics
         self._client = self.__connect_mqtt(self._client_id)
+        
+    def set_debug(self, debug: bool):
+        Debuggable.__init__(self, debug)
+        self._client.enable_logger() if debug else self._client.disable_logger()
         
 
     def __connect_mqtt(self, client_id: str):

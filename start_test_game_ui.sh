@@ -5,12 +5,21 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
+if [-z "$2" && "$2" == "d"]; then
+    echo "Debug mode enabled"
+    debug=-"$2"
+fi
+
 n_clients=$1
 pids=()
 
 if ! pgrep -f "mosquitto.*mosquitto1.conf" > /dev/null; then
     echo "Starting primary Mosquitto (1883)..."
-    mosquitto -c src/config/mosquitto1.conf &
+    if [ -z "$debug" ]; then
+        mosquitto -c src/config/mosquitto1.conf -v &
+    else
+        mosquitto -c src/config/mosquitto1.conf &
+    fi
     mosquitto1_pid=$!
     pids+=($mosquitto1_pid)
 else
@@ -19,7 +28,10 @@ fi
 
 if ! pgrep -f "mosquitto.*mosquitto2.conf" > /dev/null; then
     echo "Starting backup Mosquitto (1884)..."
-    mosquitto -c src/config/mosquitto2.conf &
+    if [ -z "$debug" ]; then
+        mosquitto -c src/config/mosquitto2.conf -v &
+    else
+        mosquitto -c src/config/mosquitto2.conf &
     mosquitto2_pid=$!
     pids+=($mosquitto2_pid)
 else
@@ -27,17 +39,17 @@ else
 fi
 
 echo "Starting primary server..."
-poetry run python src/controller/server/__init__.py primary &
+poetry run python src/controller/server/__init__.py primary $debug &
 pids+=($!)
 
 echo "Starting secondary server..."
-poetry run python src/controller/server/__init__.py secondary &
+poetry run python src/controller/server/__init__.py secondary $debug &
 pids+=($!)
 
 echo "Starting $n_clients client(s)..."
 for ((i=0; i<n_clients; i++)); do
     port=$((8080 + i))
-    poetry run python src/view/__init__.py $port &
+    poetry run python src/view/__init__.py $port $debug &
     pids+=($!)
     echo "Started client on port $port"
 done

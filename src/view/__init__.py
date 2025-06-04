@@ -4,11 +4,12 @@ from routes import home, lobby, login, lobby_select, game
 
 if __name__ == "__main__":
     PORT = sys.argv[1]
+    DEBUG = len(sys.argv) > 2 and sys.argv[2] == '-d'
     home.setup()
-    login.setup()
-    lobby.setup()
-    lobby_select.setup()
-    game.setup()
+    login.setup(DEBUG)
+    lobby.setup(DEBUG)
+    lobby_select.setup(DEBUG)
+    game.setup(DEBUG)
 
     ui.add_head_html('''
               <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">

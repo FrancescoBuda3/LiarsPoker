@@ -16,8 +16,10 @@ from src.controller.message_factory.impl import MessageFactory
 from utils.connection import connection_handler, unsubscribe_from_game_topics
 
 
-def setup():
+def setup(debug: bool = False):
     from src.view.components.dialogs import cards_picker, combination_picker, cards_display, white_cards_picker
+    if debug:
+        connection_handler.set_debug(True)
 
     message_factory = MessageFactory()
 
@@ -107,7 +109,6 @@ def setup():
                         cards: list[Card] = await white_cards_picker(combo, max_cards=max_cards, min_rank=min_rank)
                         if check_cards_combination(cards, combo):
                             stake = Stake(combo, [card.rank for card in cards])
-                print(stake)
                 if stake and (len(stake.ranks) > 0 or len(stake.suits) > 0):
                     connection_handler.send_message(message_factory.create_raise_stake_message(
                         local_player, stake), "lobby/" + str(user_state.selected_lobby) + Topic.RAISE_STAKE)

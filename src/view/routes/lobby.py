@@ -6,8 +6,10 @@ from src.controller.message_factory.impl import MessageFactory
 from utils.connection import connection_handler, subscribe_to_game_topics, unsubscribe_from_game_topics
 
 
-def setup():
+def setup(debug: bool = False):
     from src.view.utils.layout import centered_layout
+    if debug:
+        connection_handler.set_debug(True)
 
     @ui.page('/lobby')
     def lobby_page():

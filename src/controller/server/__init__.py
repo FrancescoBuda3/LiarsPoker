@@ -337,7 +337,8 @@ class Server(Debuggable):
 
 if __name__ == "__main__":
     is_primary = True if sys.argv[1] == "primary" else False
-    server = Server(debug=True, is_primary=is_primary)
+    debug = True if len(sys.argv) > 2 and sys.argv[2] == '-d' else False
+    server = Server(debug=debug, is_primary=is_primary)
     try:
         while not server._shutdown_event.is_set():
             server.run()
