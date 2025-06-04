@@ -32,8 +32,11 @@
 \maketitle
 
 \begin{abstract}
-      Up to $\sim$2000 characters briefly describing the project.
-      Game rules: \cite{gamerules}.
+This report presents the design and development of a distributed game application for playing Liar's Poker. It outlines all phases of the project, from the initial concept through to the final implementation, highlighting the evolution of the system as it was shaped to meet the specific demands of a distributed environment. The game logic adheres to the rules described in \cite{gamerules}, with adaptations made to support distributed execution.
+
+The system architecture follows a client-server model and relies on the MQTT protocol to facilitate communication between components. The report provides an in-depth discussion of the design decisions taken throughout the project, along with detailed insights into the implementation process. Testing strategies are also described, focusing on both functionality and system robustness.
+
+Particular attention is given to fault tolerance, demonstrating how the application manages client disconnections and server failures. The application is developed in Python, leveraging the Paho MQTT library to implement reliable and efficient messaging and the NiceGUI library to create a user-friendly web interface.
 \end{abstract}
 
 \clearpage
