@@ -41,12 +41,10 @@ def setup():
 
         await ui.context.client.connected()
         if app.storage.tab.get('id') is None:
-            print('no data saved')
             app.storage.tab['username'] = user_state.username
             app.storage.tab['selected_lobby'] = user_state.selected_lobby
             app.storage.tab['id'] = user_state.id
         else:
-            print('data saved')
             data_cached = True
             user_state.username = app.storage.tab['username']
             user_state.selected_lobby = app.storage.tab['selected_lobby']
@@ -82,11 +80,12 @@ def setup():
                         | Combination.ROYAL_FLUSH
                     ):
                         suit = await suit_picker(combo, suits)
-                        stake = Stake(combo)
-                        stake.suit = suit
+                        if suit is not None:
+                            stake = Stake(combo)
+                            stake.suit = suit
                     case Combination.STRAIGHT_FLUSH:
                         cards = await cards_picker(combo, max_cards, suits, min_rank)
-                        if check_cards_combination(cards, combo):
+                        if cards and check_cards_combination(cards, combo):
                             stake = Stake(combo, [card.rank for card in cards], [
                                           card.suit for card in cards])
                     case Combination.FULL_HOUSE:
@@ -105,7 +104,7 @@ def setup():
                             stake.pair_rank = pair[0].rank
                     case _:
                         cards: list[Card] = await white_cards_picker(combo, max_cards=max_cards, min_rank=min_rank)
-                        if check_cards_combination(cards, combo):
+                        if cards and check_cards_combination(cards, combo):
                             stake = Stake(combo, [card.rank for card in cards])
                 if stake and (len(stake.ranks) > 0 or len(stake.suits) > 0):
                     connection_handler.send_message(message_factory.create_raise_stake_message(
@@ -134,12 +133,14 @@ def setup():
                     content.refresh()
 
             def wait_round_loser():
+                nonlocal latest_move
                 message = connection_handler.no_wait_message(
                     __to_game_topic(Topic.ROUND_LOSER))
                 if message:
                     loser: Player = message.body["player"]
                     ui.notify(f'{loser.username} lost the round!')
                     cards_in_game: list[Card] = message.body["cards"]
+                    latest_move = None
                     if len(cards_in_game) > 0:
                         cards_display(
                             cards_in_game, lambda: content.refresh()).open()
@@ -227,7 +228,7 @@ def setup():
                                 __to_game_topic(Topic.CHECK_LIAR)
                             ))
                         bullshit_button.set_enabled(
-                            __is_player_turn(local_player))
+                            __is_player_turn(local_player) and latest_move is not None)
                     with ui.row().classes('flex items-center justify-center'):
                         for card in local_player.cards:
                             rank = card.rank
@@ -306,7 +307,6 @@ def setup():
                         f'Congratulations {winner.username} won the game!')
                 game_over_dialog.open()
                 user_state.reset_ready()
-                # app.storage.clear()
                 ui.timer(5, lambda: ui.navigate.to('/lobby'), once=True)
 
         ui.timer(1, wait_game_over)
