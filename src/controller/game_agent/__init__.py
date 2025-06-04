@@ -10,14 +10,14 @@ from src.services.connection.topic import game_topics
 import time
 
 
-def game_loop(players: list[Player], id: str, shutdown_event: Event):
+def game_loop(players: list[Player], id: str, shutdown_event: Event, debug: bool = False):
     turn_time_in_sec = 60
     game = Game()
     lobby_topic = Topic.LOBBY + id
     start_time = time.time()
     next_min_stake = LowestStake.HIGH_CARD.value
     connection_handler = ConnectionHandler(
-        id, [lobby_topic + t for t in game_topics]
+        id, [lobby_topic + t for t in game_topics], debug
     )
     message_factory = MessageFactory()
     for p in players:

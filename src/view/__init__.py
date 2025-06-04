@@ -1,15 +1,17 @@
 import sys
 from nicegui import ui
 from routes import home, lobby, login, lobby_select, game
+from utils.connection import connection_handler
 
 if __name__ == "__main__":
     PORT = sys.argv[1]
     DEBUG = len(sys.argv) > 2 and sys.argv[2] == '-d'
+    connection_handler.set_debug(DEBUG)
     home.setup()
-    login.setup(DEBUG)
-    lobby.setup(DEBUG)
-    lobby_select.setup(DEBUG)
-    game.setup(DEBUG)
+    login.setup()
+    lobby.setup()
+    lobby_select.setup()
+    game.setup()
 
     ui.add_head_html('''
               <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
