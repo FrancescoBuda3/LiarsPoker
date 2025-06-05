@@ -18,7 +18,7 @@ Then, navigate to the project root directory and run:
 
 `poetry install`
 
-### How to run the project
+## How to run the project
 
 * Mosquitto: 
     1. `mosquitto -c src/config/mosquitto1.conf [-v]`
@@ -30,7 +30,7 @@ Then, navigate to the project root directory and run:
 
     `src/view/__init__.py [port] [-d]`
 
-### Easy Testing
+## Easy Testing
 
 Strictly for testing purposes in the same machine 
 to run the server, mosquitto and the GUI you can use either script depending on your OS:
